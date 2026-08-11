@@ -1,4 +1,4 @@
-# Architektur
+# Capyt – Architektur
 
 ## 1. Komponenten
 

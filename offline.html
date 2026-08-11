@@ -1,1 +1,26 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#2457a7"><title>Finanzmonat · Offline</title><style>body{font:16px system-ui;margin:0;background:#f4f5f7;color:#1d232a;display:grid;min-height:100dvh;place-items:center;padding:1.5rem}.box{max-width:32rem;background:#fff;border:1px solid #d6d9de;border-radius:18px;padding:1.4rem}h1{font-size:1.2rem}button{font:inherit;padding:.65rem .9rem;border:1px solid #d6d9de;border-radius:10px;background:#2457a7;color:#fff}</style></head><body><main class="box"><h1>Finanzmonat ist offline</h1><p>Die App konnte diese Seite nicht aus dem lokalen Cache laden. Öffne die App einmal online über den bereitgestellten statischen Webserver und versuche es erneut.</p><button onclick="location.href='./index.html#/month'">Zur App</button></main></body></html>
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#F4F5FA">
+  <meta name="color-scheme" content="light dark">
+  <title>Capyt · Offline</title>
+  <link rel="icon" href="./assets/branding/capyt-32.png" type="image/png">
+  <script src="./js/theme.js"></script>
+  <link rel="stylesheet" href="./css/capyt-tokens.css">
+  <style>
+    *{box-sizing:border-box}body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:1.25rem;background:var(--bg);color:var(--text);font-family:var(--font-sans)}
+    main{width:min(100%,430px);padding:1.4rem;border:1px solid var(--line);border-radius:var(--radius-xl);background:var(--surface);box-shadow:var(--shadow-md)}
+    .brand{display:flex;align-items:center;gap:.65rem;font-weight:820}.brand img{width:36px;height:36px;object-fit:contain}h1{margin:1rem 0 .4rem;font-size:1.5rem}p{color:var(--muted);line-height:1.5}button{width:100%;min-height:46px;margin-top:.5rem;border:0;border-radius:var(--radius-md);background:var(--gradient-brand);color:var(--color-on-brand);font:inherit;font-weight:750;cursor:pointer}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="brand"><img src="./assets/branding/capyt-192.png" alt="Capyt"><span>Capyt · Mobile</span></div>
+    <h1>Du bist offline</h1>
+    <p>Bereits gespeicherte Capyt-Daten bleiben lokal verfügbar. Falls diese Seite erscheint, war die gewünschte Ansicht noch nicht im Offline-Cache.</p>
+    <button type="button" onclick="location.reload()">Erneut versuchen</button>
+  </main>
+</body>
+</html>

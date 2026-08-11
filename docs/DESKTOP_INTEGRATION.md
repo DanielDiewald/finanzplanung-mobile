@@ -1,4 +1,4 @@
-# Desktop-Integration fuer `Finanzplanung_v10.html`
+# Capyt · Planung – Desktop-Integration
 
 ## 1. Fertige Variante
 

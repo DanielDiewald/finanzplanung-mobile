@@ -1,4 +1,4 @@
-# Installation und Start
+# Capyt – Installation und Start
 
 ## 1. Voraussetzungen
 

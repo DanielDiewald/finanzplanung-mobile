@@ -1,86 +1,111 @@
-# Lieferumfang
+# Capyt 2.0 – Abschlussbericht
 
-## Mobile PWA
+## 1. Neues Capyt-Design
 
-- [x] Mobile-first UI ab 320 px
-- [x] Bottom Navigation: Monat / Buchungen / Sync / Einstellungen
-- [x] iOS Safe Areas und PWA Meta-Tags
-- [x] Dark Mode
-- [x] Offline App-Shell + Service Worker
-- [x] Manifest + Icons
-- [x] IndexedDB fuer Plan, Transaktionen, Sync-Historie, Einstellungen
-- [x] prominentes `Frei verfuegbar`
-- [x] Kontostand / Budgetvermoegen / Sparvermoegen / Gesamtvermoegen
-- [x] Desktop-Donut `Geplant`
-- [x] Desktop-Donut `Tatsaechlich`
-- [x] Mobile-Donut `Verfuegbar`
-- [x] Donut-Details inklusive mobiler Budgetbuchungen
-- [x] Budgetkarten
-- [x] Budgetausgabe erfassen
-- [x] sonstige Ausgabe erfassen
-- [x] zusaetzliche Einnahme erfassen
-- [x] Bearbeiten/Loeschen vor Bestaetigung
-- [x] lokale/prepared/confirmed Sync-Zustaende
-- [x] Transaktionsliste und Filter
+Mobile und Desktop verwenden jetzt eine gemeinsame Fintech-Markenidentitaet mit dem gelieferten Capyt-Icon, violett-blauen Akzenten, stark gerundeten Karten, kompakten Statusdarstellungen und einer gemeinsamen Diagramm-Palette. Mobile bleibt auf Monatskontrolle und schnelle Buchungen optimiert; Desktop wurde als dichtere Dashboard-/Planungsoberflaeche mit fester bzw. adaptiver Navigation, Topbar, KPIs, Tabellen und Analysebereichen umgesetzt.
 
-## FP1
+Die zentrale Stelle fuer Farben und Design-Tokens ist:
 
-- [x] `FP1-P` Desktop -> Mobile
-- [x] `FP1-T` Mobile -> Desktop
-- [x] versionierter Prefix
-- [x] UTF-8 JSON
-- [x] kanonische Serialisierung
-- [x] kompaktes `C`-Transportformat + DEFLATE wenn verfuegbar; `Z`/`N` bleiben rueckwaertskompatibel
-- [x] CRC32
-- [x] Base64URL
-- [x] Textcode
-- [x] lokale QR-Erzeugung
-- [x] manuelles Einfuegen
-- [x] native Kameraerkennung, wenn Browser sie anbietet
-- [x] Safari/iOS Kamera-Fallback ueber getUserMedia + jsQR
-- [x] QR-Foto-Import als weiterer Fallback
-- [x] GitHub-Pages-Build bindet jsQR lokal/offline ein
-- [x] stabile Transaktions-ID
-- [x] `recordRevision`
-- [x] Duplikatschutz
-- [x] Korrektur und Tombstone-Loeschung
-- [x] Plan-ID
-- [x] Sync-Revision
-- [x] Bestaetigung im naechsten PLAN-Code
-- [x] alte offene Buchungen bleiben auch nach Monatswechsel exportierbar
+- `css/capyt-tokens.css`
 
-## Desktop
+`css/app.css` und `css/desktop.css` enthalten keine eigenen Hex-/RGB-Farbwerte. Dadurch lassen sich Marken-, Oberflaechen-, Status- und Diagrammfarben zentral aendern.
 
-- [x] fertige `Finanzplanung_v10_mobile-sync.html`
-- [x] bestehende v10-Berechnung bleibt unveraendert
-- [x] bestehende Budget-IDs werden uebernommen
-- [x] bestehende Donut-Builder werden fuer PLAN-Code verwendet
-- [x] T-Code Vorschau
-- [x] Import Budgetverbrauch
-- [x] Import sonstige Ausgabe
-- [x] Import Einnahme
-- [x] Duplikat-/Revisionslogik
-- [x] gesperrte Monate werden abgewiesen
-- [x] unbekannte Budgets werden abgewiesen
+## 2. Geaenderte Dateien
 
-## Dokumentation
+### Neu
+- `css/capyt-tokens.css`
+- `css/desktop.css`
+- `js/theme.js`
+- `assets/branding/capyt-logo-master.png`
+- `assets/branding/capyt-32.png`
+- `assets/branding/capyt-48.png`
+- `assets/branding/capyt-180.png`
+- `assets/branding/capyt-192.png`
+- `assets/branding/capyt-512.png`
 
-- [x] Desktop-Analyse
-- [x] FP1-Spezifikation
-- [x] Architektur
-- [x] iPhone-Installation
-- [x] Android-Installation
-- [x] Windows-Start
-- [x] Desktop-Integrationsanleitung
-- [x] Testdokumentation
-- [x] bekannte Grenzen
+### Ueberarbeitet
+- `index.html`
+- `css/app.css`
+- `js/app.js`
+- `js/utils.js`
+- `js/services/sync.js`
+- `js/views/month.js`
+- `js/views/settings.js`
+- `js/views/sync-view.js`
+- `manifest.webmanifest`
+- `offline.html`
+- `sw.js`
+- `desktop-integration/Finanzplanung_v10_mobile-sync.html`
+- `desktop-integration/mobile-sync-addon.js`
+- `README.md`
+- `package.json`
+- `docs/ARCHITECTURE.md`
+- `docs/DESKTOP_ANALYSIS.md`
+- `docs/DESKTOP_INTEGRATION.md`
+- `docs/FP1_PROTOCOL.md`
+- `docs/INSTALLATION.md`
+- `docs/KNOWN_LIMITATIONS.md`
+- `docs/TESTING.md`
+- `TEST_RESULTS.txt`
+- `DELIVERY.md`
 
-## Tests
+## 3. Branding-Assets
 
-- [x] 32 automatisierte Tests gruen
-- [x] statische PWA-/Manifest-/Service-Worker-Pruefung gruen
-- [x] JavaScript-Syntaxpruefung gruen
-- [x] Cross-Kompatibilitaet Desktop `FP1-P` -> Mobile
-- [x] Cross-Kompatibilitaet Mobile `FP1-T` -> Desktop
+Als einzige Markenquelle wurde das bereitgestellte 1024x1024-PNG verwendet. Daraus wurden technisch notwendige, seitenverhaeltnistreue und transparente Groessenvarianten fuer Header, Favicon, Apple Touch Icon und PWA-Installation erzeugt. Das Icon bleibt auf Mobile und Desktop dauerhaft oben links sichtbar.
 
-Siehe `docs/KNOWN_LIMITATIONS.md` fuer Browser-/Deployment-Hinweise und den in dieser Umgebung nicht ausfuehrbaren Browser-E2E-Test.
+Ein `maskable`-Manifest-Icon wurde bewusst nicht deklariert: Das bereitgestellte Motiv nutzt einen grossen Teil der quadratischen Flaeche und es wurde kein offizieller Marken-Hintergrund bzw. keine maskable Variante geliefert. Eine kuenstlich veraenderte Schutzzone oder ein neuer Hintergrund waere eine eigenstaendige Markenveraenderung gewesen.
+
+## 4. UX-Verbesserungen
+
+### Mobile
+- kompakter Capyt-Header mit dauerhaftem Logo und Sync-Status
+- klarer 3-Schritt-First-Run-Prozess
+- Hero-Karte fuer „Frei verfuegbar“
+- Vermoegenskennzahlen, gemeinsame Donut-Farben, Budgetkarten und letzte Buchungen
+- direkte Hauptaktion „Buchung erfassen“
+- konsistente SVG-Funktionsicons statt uneinheitlicher Unicode-Symbole
+- bessere Sync-, Fehler-, Empty- und Statusdarstellungen
+- Safe-Area-, Touch- und Bildschirmtastatur-taugliche Abstaende
+
+### Desktop
+- Application Shell mit dauerhaftem Capyt-Logo, Sidebar/Navigation und kompakter Topbar
+- Dashboard-KPIs auf Basis vorhandener Berechnungsergebnisse
+- detaillierte Monatsuebersichtstabelle bleibt erhalten
+- Monatsansicht als zweispaltiger Planungs-Workspace auf grossen Displays
+- dichtere Tabellen mit Sticky Header/erster Spalte und lokalen Scrollcontainern
+- Statistik-/Diagrammfarben aus dem gemeinsamen Token-System
+- Theme-Auswahl direkt in der Topbar
+- FP1-Synchronisationsbereich sichtbar zu Capyt umbenannt, Protokollbezeichner bleiben kompatibel
+
+## 5. Responsive-Verbesserungen
+
+Gepruefte Breiten fuer Mobile und Desktop: 320, 360, 390, 430, 768, 1024, 1280 und 1440 px.
+
+Bei allen geprueften Breiten betrug der globale horizontale Overflow 0 px. Tabellen und KPI-Reihen scrollen bei Bedarf nur innerhalb ihres lokalen Containers. Die Mobile-Bottom-Navigation wird ab groesseren Breiten auf den App-Container begrenzt (bei 1024 px und groesser 720 px breit). Die Desktop-Sidebar wird bei mittleren Breiten kompakt und unter 900 px zu einer horizontalen App-Navigation.
+
+## 6. Light, Dark und System
+
+- gemeinsames `js/theme.js` fuer Mobile und Desktop
+- Modi: `system`, `light`, `dark`
+- Speicherung unter separatem LocalStorage-Key `capyt-theme`
+- Theme-Bootstrap synchron im `<head>` vor den Styles, um einen Theme-Blitz zu vermeiden
+- `prefers-color-scheme` fuer Systemmodus
+- `color-scheme` und `theme-color` werden passend gesetzt
+- Diagramme werden bei Theme-Wechsel neu gezeichnet
+- Finanzdaten, Storage Keys und FP1-Daten werden vom Theme nicht veraendert
+
+Gepruefte Token-Aufloesung: System-Dark und Dark verwenden `#05060B`, Light verwendet `#F4F5FA` als Hintergrundtoken.
+
+## 7. Tests
+
+- `npm test`: **32/32 Tests erfolgreich**
+- `npm run check`: **erfolgreich** – 31 Precache-Assets, 2 Manifest-Icons, Safari-QR-Fallback vorhanden
+- zusaetzliche Syntaxpruefung aller geaenderten JavaScript-Dateien: **erfolgreich**
+- Desktop-UI im Browser mit eingebetteten lokalen Assets: **keine Page-JavaScript-Fehler**
+- Responsive-DOM-Test Mobile/Desktop 320–1440 px: **kein globaler horizontaler Overflow**
+
+## 8. Bekannte Einschraenkungen
+
+- Kein `maskable`-Icon ohne offiziell geeignete Asset-Variante (siehe oben).
+- Safari/iOS kann weiterhin den bestehenden jsQR-Fallback benoetigen, wenn `BarcodeDetector` fehlt.
+- FP1 bleibt absichtlich `FP1`; bestehende IDs, Revisionen, Storage Keys und Protokollfelder wurden fuer Rueckwaertskompatibilitaet nicht umbenannt.

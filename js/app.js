@@ -1,4 +1,4 @@
-import { APP_VERSION, EXPENSE_CATEGORIES, INCOME_CATEGORIES, centsToInput, downloadText, escapeHtml, formatCents, parseEuroToCents, setHidden, todayLocal, uuid } from './utils.js';
+import { APP_VERSION, EXPENSE_CATEGORIES, INCOME_CATEGORIES, centsToInput, debounce, downloadText, escapeHtml, formatCents, parseEuroToCents, setHidden, todayLocal, uuid } from './utils.js';
 import { createRouter } from './router.js';
 import { addSyncHistory, deleteTransaction, exportAllData, getCurrentPlan, getSettings, getTransaction, listTransactions, markAcknowledged, putManyTransactions, resetAllData, savePlan, saveSettings, saveTransaction } from './services/storage.js';
 import { buildTransactionPayload, decodeFP1, encodeFP1 } from './services/sync.js';
@@ -13,7 +13,7 @@ const state={ plan:null,transactions:[],settings:null,display:null,pendingPlan:n
 let router;
 const $=id=>document.getElementById(id);
 
-function toast(message,{error=false,duration=3300}={}){ const el=document.createElement('div');el.className='toast';if(error)el.style.background='#8a2626';el.textContent=message;$('toastRegion').append(el);setTimeout(()=>el.remove(),duration); }
+function toast(message,{error=false,duration=3300}={}){ const el=document.createElement('div');el.className=`toast${error?' error':''}`;el.textContent=message;$('toastRegion').append(el);setTimeout(()=>el.remove(),duration); }
 function monthBounds(ym){ const [y,m]=ym.split('-').map(Number);const last=new Date(y,m,0).getDate();return {min:`${ym}-01`,max:`${ym}-${String(last).padStart(2,'0')}`}; }
 function activePlanRows(){ return state.plan?state.transactions.filter(t=>t.planId===state.plan.planId):[]; }
 function visibleRows(){ return activePlanRows().filter(t=>!t.deleted); }
@@ -21,11 +21,14 @@ function visibleRows(){ return activePlanRows().filter(t=>!t.deleted); }
 async function loadState(){ state.settings=await getSettings(); state.donutMode=state.settings.selectedDonutMode||'planned'; state.plan=await getCurrentPlan(); state.transactions=await listTransactions(); state.display=buildDisplayState(state.plan,state.transactions); }
 async function refresh(){ state.plan=await getCurrentPlan(); state.transactions=await listTransactions(); state.display=buildDisplayState(state.plan,state.transactions); renderAll(); }
 function renderAll(){
-  renderMonth({display:state.display,donutMode:state.donutMode,selectedSegment:state.selectedSegment,onSegment:key=>{state.selectedSegment=state.selectedSegment===key?'':key;renderAll();},onBudget:id=>openTransaction({kind:'budget_expense',budgetId:id})});
-  renderTransactions({plan:state.plan,transactions:visibleRows(),filter:state.transactionFilter,budgetFilter:state.transactionBudgetFilter,onEdit:id=>openTransaction({id})});
+  const rows=visibleRows();
+  renderMonth({display:state.display,donutMode:state.donutMode,selectedSegment:state.selectedSegment,recentTransactions:rows,onSegment:key=>{state.selectedSegment=state.selectedSegment===key?'':key;renderAll();},onBudget:id=>openTransaction({kind:'budget_expense',budgetId:id}),onTransaction:id=>openTransaction({id})});
+  renderTransactions({plan:state.plan,transactions:rows,filter:state.transactionFilter,budgetFilter:state.transactionBudgetFilter,onEdit:id=>openTransaction({id})});
   renderSync({plan:state.plan,transactions:state.transactions,pendingPlan:state.pendingPlan,onAcceptPlan:acceptPendingPlan});
   renderSettings(state.settings);
-  const pending=state.plan?pendingSummary(state.transactions,state.plan):{count:0}; const badge=$('syncNavBadge');badge.textContent=String(pending.count);setHidden(badge,!pending.count);
+  const pending=state.plan?pendingSummary(state.transactions,state.plan):{count:0};
+  const badge=$('syncNavBadge');badge.textContent=String(pending.count);setHidden(badge,!pending.count);
+  updateHeaderSyncStatus(pending.count);
   $('shareTransactionCode').classList.toggle('hidden',!navigator.share);
 }
 
@@ -87,14 +90,14 @@ async function generateTransactionCode(){
 
 function openCodeDialog(){ $('planCodeInput').value='';$('codeDialogError').textContent='';setHidden($('codeDialogError'),true);$('codeDialog').showModal();setTimeout(()=>$('planCodeInput').focus(),80); }
 async function copyTransactionCode(){ const code=$('transactionCodeText').value;if(!code)return;try{await navigator.clipboard.writeText(code);toast('Code kopiert.');}catch{ $('transactionCodeText').select();document.execCommand('copy');toast('Code kopiert.');} }
-async function shareTransactionCode(){ const code=$('transactionCodeText').value;if(!code||!navigator.share)return;try{await navigator.share({title:'Finanzplanung FP1-T',text:code});}catch(err){if(err.name!=='AbortError')toast('Teilen fehlgeschlagen.',{error:true});} }
+async function shareTransactionCode(){ const code=$('transactionCodeText').value;if(!code||!navigator.share)return;try{await navigator.share({title:'Capyt · Mobile · FP1-T',text:code});}catch(err){if(err.name!=='AbortError')toast('Teilen fehlgeschlagen.',{error:true});} }
 
 async function openScanner(){ $('scannerStatus').textContent='Kamera wird erst nach deiner Freigabe verwendet.';$('scannerDialog').showModal(); }
 function stopScanner(){stopQrScanner($('scannerVideo'));if($('scannerDialog').open)$('scannerDialog').close();}
 async function startScannerAction(){ try{await startQrScanner({video:$('scannerVideo'),canvas:$('scannerCanvas'),onStatus:s=>$('scannerStatus').textContent=s,onResult:async code=>{try{await previewPlanCode(code);}catch(err){toast(err.message,{error:true});}}});}catch(err){$('scannerStatus').textContent=`${err.message} Du kannst alternativ ein QR-Foto auswählen oder den Code manuell einfügen.`;toast('Kamera-QR-Scan konnte nicht gestartet werden.',{error:true});} }
 async function scanQrPhoto(file){ if(!file)return; try{const code=await decodeQrImageFile(file,{canvas:$('scannerCanvas'),onStatus:s=>$('scannerStatus').textContent=s});await previewPlanCode(code);}catch(err){$('scannerStatus').textContent=err.message;toast(err.message,{error:true});}finally{$('scannerPhotoInput').value='';} }
 
-async function exportLocalBackup(){const data=await exportAllData();downloadText(`finanzmonat-backup-${todayLocal()}.json`,JSON.stringify(data,null,2));toast('Lokales Backup erstellt.');}
+async function exportLocalBackup(){const data=await exportAllData();downloadText(`capyt-mobile-backup-${todayLocal()}.json`,JSON.stringify(data,null,2));toast('Lokales Backup erstellt.');}
 async function resetData(){if(!confirm('Alle lokalen Pläne, Buchungen und Sync-Stände auf diesem Gerät löschen?'))return;await resetAllData();state.pendingPlan=null;state.lastTransactionCode='';await loadState();renderAll();toast('Lokale Daten gelöscht.');}
 
 function setupEvents(){
@@ -102,15 +105,16 @@ function setupEvents(){
   document.querySelectorAll('[data-close-dialog]').forEach(b=>b.addEventListener('click',()=>$(b.dataset.closeDialog)?.close()));
   document.querySelectorAll('[data-donut-mode]').forEach(b=>b.addEventListener('click',async()=>{state.donutMode=b.dataset.donutMode;state.selectedSegment='';state.settings=await saveSettings({selectedDonutMode:state.donutMode});renderAll();}));
   document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{state.transactionFilter=b.dataset.filter;renderAll();})); $('transactionBudgetFilter').addEventListener('change',e=>{state.transactionBudgetFilter=e.target.value;renderAll();});
-  $('fabExpense').addEventListener('click',()=>openTransaction({kind:'budget_expense'}));$('addIncomeButton').addEventListener('click',()=>openTransaction({kind:'income'})); document.querySelectorAll('[data-expense-kind]').forEach(b=>b.addEventListener('click',()=>{setExpenseKind(b.dataset.expenseKind);fillTransactionSelectors();setExpenseKind(b.dataset.expenseKind);}));
+  $('fabExpense').addEventListener('click',()=>openTransaction({kind:'budget_expense'}));$('monthAddTransactionButton').addEventListener('click',()=>openTransaction({kind:'budget_expense'}));$('addIncomeButton').addEventListener('click',()=>openTransaction({kind:'income'})); document.querySelectorAll('[data-expense-kind]').forEach(b=>b.addEventListener('click',()=>{setExpenseKind(b.dataset.expenseKind);fillTransactionSelectors();setExpenseKind(b.dataset.expenseKind);}));
   $('transactionForm').addEventListener('submit',e=>{e.preventDefault();saveTransactionFromForm().catch(err=>toast(err.message,{error:true}));}); $('deleteTransactionButton').addEventListener('click',deleteCurrentTransaction);
   $('scanPlanButton').addEventListener('click',openScanner);$('pastePlanButton').addEventListener('click',openCodeDialog);$('scannerPasteFallback').addEventListener('click',()=>{stopScanner();openCodeDialog();});$('closeScanner').addEventListener('click',stopScanner);$('startScanner').addEventListener('click',startScannerAction);$('scannerPhotoButton').addEventListener('click',()=>{stopQrScanner($('scannerVideo'));$('scannerStatus').textContent='Kamera-Foto aufnehmen. QR-Code möglichst groß, scharf und vollständig fotografieren.';$('scannerPhotoInput').click();});$('scannerPhotoInput').addEventListener('change',e=>scanQrPhoto(e.target.files?.[0]));
   $('codeForm').addEventListener('submit',e=>{e.preventDefault();previewPlanCode($('planCodeInput').value).catch(err=>toast(err.message,{error:true}));});$('generateTransactionCode').addEventListener('click',generateTransactionCode);$('copyTransactionCode').addEventListener('click',copyTransactionCode);$('shareTransactionCode').addEventListener('click',shareTransactionCode);
   $('deviceName').addEventListener('change',async e=>{state.settings=await saveSettings({deviceName:e.target.value.trim()});toast('Gerätename gespeichert.');});$('themeSetting').addEventListener('change',async e=>{state.settings=await saveSettings({theme:e.target.value});applyTheme(e.target.value);});$('exportLocalData').addEventListener('click',exportLocalBackup);$('resetLocalData').addEventListener('click',resetData);
-  window.addEventListener('online',updateNetworkState);window.addEventListener('offline',updateNetworkState); document.addEventListener('visibilitychange',()=>{if(document.hidden)stopQrScanner($('scannerVideo'));});
+  window.addEventListener('online',updateNetworkState);window.addEventListener('offline',updateNetworkState);window.addEventListener('resize',debounce(()=>renderAll(),180));window.addEventListener('capyt-themechange',()=>renderAll());document.addEventListener('visibilitychange',()=>{if(document.hidden)stopQrScanner($('scannerVideo'));});
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();state.deferredInstall=e;setHidden($('installButton'),false);});$('installButton').addEventListener('click',async()=>{if(!state.deferredInstall)return;state.deferredInstall.prompt();await state.deferredInstall.userChoice;state.deferredInstall=null;setHidden($('installButton'),true);});
 }
-function updateNetworkState(){setHidden($('offlineBadge'),navigator.onLine);}
+function updateHeaderSyncStatus(pendingCount=state.plan?pendingSummary(state.transactions,state.plan).count:0){const el=$('headerSyncStatus');if(!el)return;const offline=!navigator.onLine;el.classList.toggle('offline',offline);el.classList.toggle('pending',!offline&&pendingCount>0);const text=el.querySelector('.status-text');if(text)text.textContent=offline?'Offline':!state.plan?'Plan fehlt':pendingCount?`${pendingCount} offen`:'Synchron';}
+function updateNetworkState(){setHidden($('offlineBadge'),navigator.onLine);updateHeaderSyncStatus();}
 async function updateScannerHint(){const capability=await qrScannerCapability();$('cameraSupportHint').textContent=capability.native?'Kamera-QR-Scan wird von diesem Browser nativ unterstützt.':capability.camera?(capability.javascript?'Kamera-QR-Scan nutzt hier den lokalen Safari-kompatiblen JS-Decoder.':'Kamera ist verfügbar; auf Safari wird der JS-QR-Decoder beim Scan geladen.'):'Kamerazugriff ist hier nicht verfügbar. QR-Foto und Textcode bleiben als Importwege verfügbar.';}
 async function registerServiceWorker(){if('serviceWorker'in navigator){try{await navigator.serviceWorker.register('./sw.js',{scope:'./'});}catch(err){console.warn('Service Worker konnte nicht registriert werden.',err);}}}
 

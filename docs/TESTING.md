@@ -1,4 +1,4 @@
-# Tests
+# Capyt – Tests
 
 ## Automatisierte Tests
 

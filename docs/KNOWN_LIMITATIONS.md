@@ -1,4 +1,4 @@
-# Bekannte Grenzen von Version 1
+# Bekannte Grenzen von Capyt 2.0
 
 ## 1. iOS/Safari Kamera-QR-Erkennung
 

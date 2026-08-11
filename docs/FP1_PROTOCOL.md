@@ -81,7 +81,7 @@ Eine externe Version `FP2` darf inkompatible Transport-/Payload-Aenderungen einf
 | `revision` | Integer >= 0 | ja | Desktop-Sync-Revision | `16` |
 | `month` | `YYYY-MM` | ja | uebertragener Monat | `"2026-08"` |
 | `createdAt` | ISO-Zeitpunkt | ja | Erstellungszeitpunkt des Codes | `"2026-08-11T16:42:00.000Z"` |
-| `source` | Objekt | optional | Quellen-/Versionsmetadaten | `{ "app":"Finanzplanung v10" }` |
+| `source` | Objekt | optional | Quellen-/Versionsmetadaten | `{ "app":"Capyt · Planung" }` |
 | `accountBalanceCents` | Integer/null | optional | physischer Ist-Kontostand, sofern bekannt | `450000` |
 | `normalBalanceCents` | Integer | ja | effektives normales Guthaben | `220000` |
 | `freeAvailableCents` | Integer | ja | vom Desktop berechnetes frei verfuegbares Guthaben | `170000` |

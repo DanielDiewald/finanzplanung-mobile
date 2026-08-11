@@ -1,0 +1,184 @@
+/*
+ * Capyt Design Tokens
+ * -------------------
+ * ZENTRALE FARBSTELLE FUER MOBILE + DESKTOP.
+ * Marken-, Status-, Diagramm- und Oberflaechenfarben werden ausschliesslich hier gepflegt.
+ * app.css und desktop.css verwenden nur diese Variablen.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Brand + core palette (Light) */
+  --color-bg: #F4F5FA;
+  --color-sidebar: #FFFFFF;
+  --color-surface: #FFFFFF;
+  --color-surface-secondary: #F8F8FC;
+  --color-surface-elevated: #FFFFFF;
+  --color-surface-hover: #EEF0F8;
+  --color-text: #171927;
+  --color-text-muted: #667085;
+  --color-border: rgba(24,29,51,0.10);
+  --color-border-strong: rgba(24,29,51,0.18);
+  --color-primary: #5851E8;
+  --color-violet: #7657E8;
+  --color-blue: #3154D8;
+  --color-teal: #009E83;
+  --color-positive: #138A61;
+  --color-warning: #B66B10;
+  --color-negative: #D83D5A;
+
+  /* Utility colors */
+  --color-on-brand: #FFFFFF;
+  --color-on-dark: #FFFFFF;
+  --color-qr-background: #FFFFFF;
+  --color-scanner-background: #05060B;
+  --color-toast-background: #171927;
+  --color-backdrop: rgba(5,6,11,0.62);
+  --color-header-glass: rgba(255,255,255,0.88);
+  --color-sidebar-glass: rgba(255,255,255,0.94);
+  --color-highlight-glass: rgba(255,255,255,0.15);
+  --color-focus-ring: rgba(88,81,232,0.34);
+
+  /* Semantic surfaces */
+  --color-primary-soft: #EFEEFF;
+  --color-teal-soft: #E7F8F4;
+  --color-positive-soft: #E9F7F1;
+  --color-warning-soft: #FFF4E4;
+  --color-negative-soft: #FFF0F3;
+  --color-disabled: #EEEFF4;
+  --color-disabled-text: #8B93A4;
+
+  /* Brand gradients */
+  --gradient-brand: linear-gradient(135deg, #7657E8 0%, #5851E8 45%, #3154D8 100%);
+  --gradient-brand-strong: linear-gradient(135deg, #8A63FF 0%, #625BFF 45%, #3455FF 100%);
+  --gradient-negative: linear-gradient(135deg, #E34C68 0%, #BF2F50 100%);
+  --gradient-surface-glow: radial-gradient(circle at 85% 10%, rgba(88,81,232,0.12), transparent 34%);
+
+  /* Diagram palette – shared by Mobile + Desktop */
+  --chart-fixed: #625BFF;
+  --chart-periodic: #16B8A0;
+  --chart-loans: #FF647C;
+  --chart-extra: #8A63FF;
+  --chart-overspend: #E34C68;
+  --chart-reserves: #E5A33F;
+  --chart-savings: #27B982;
+  --chart-goals: #A66BFF;
+  --chart-budget-spent: #F08A45;
+  --chart-goal-spent: #D864B4;
+  --chart-assets: #24304B;
+  --chart-available-1: #625BFF;
+  --chart-available-2: #16B8A0;
+  --chart-available-3: #27B982;
+  --chart-available-4: #E5A33F;
+  --chart-available-5: #A66BFF;
+  --chart-available-6: #F08A45;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(24,29,51,0.05);
+  --shadow-sm: 0 6px 18px rgba(24,29,51,0.07);
+  --shadow-md: 0 14px 38px rgba(24,29,51,0.10);
+  --shadow-lg: 0 22px 60px rgba(24,29,51,0.15);
+  --shadow-brand: 0 18px 42px rgba(88,81,232,0.28);
+
+  /* Spacing + shape */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+  --nav-height: 74px;
+  --sidebar-width: 248px;
+  --sidebar-compact-width: 92px;
+  --topbar-height: 68px;
+  --transition-fast: 170ms ease;
+  --transition-medium: 210ms ease;
+
+  /* Typography */
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono-numbers: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* Compatibility aliases used by existing components */
+  --bg: var(--color-bg);
+  --sidebar: var(--color-sidebar);
+  --surface: var(--color-surface);
+  --surface-2: var(--color-surface-secondary);
+  --elevated: var(--color-surface-elevated);
+  --text: var(--color-text);
+  --muted: var(--color-text-muted);
+  --line: var(--color-border);
+  --accent: var(--color-primary);
+  --accent-2: var(--color-primary-soft);
+  --danger: var(--color-negative);
+  --danger-soft: var(--color-negative-soft);
+  --ok: var(--color-positive);
+  --ok-soft: var(--color-positive-soft);
+  --warn: var(--color-warning);
+  --warn-soft: var(--color-warning-soft);
+  --shadow: var(--shadow-sm);
+  --radius: var(--radius-lg);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Brand + core palette (Dark) */
+  --color-bg: #05060B;
+  --color-sidebar: #090A11;
+  --color-surface: #0D0F17;
+  --color-surface-secondary: #131624;
+  --color-surface-elevated: #191D2D;
+  --color-surface-hover: #1B2030;
+  --color-text: #F7F8FC;
+  --color-text-muted: #9CA3B5;
+  --color-border: rgba(255,255,255,0.08);
+  --color-border-strong: rgba(255,255,255,0.15);
+  --color-primary: #625BFF;
+  --color-violet: #8A63FF;
+  --color-blue: #3455FF;
+  --color-teal: #16D6B0;
+  --color-positive: #27D795;
+  --color-warning: #F4B860;
+  --color-negative: #FF647C;
+
+  /* Utility colors */
+  --color-on-brand: #FFFFFF;
+  --color-on-dark: #FFFFFF;
+  --color-qr-background: #FFFFFF;
+  --color-scanner-background: #05060B;
+  --color-toast-background: #191D2D;
+  --color-backdrop: rgba(0,0,0,0.70);
+  --color-header-glass: rgba(9,10,17,0.88);
+  --color-sidebar-glass: rgba(9,10,17,0.95);
+  --color-highlight-glass: rgba(255,255,255,0.12);
+  --color-focus-ring: rgba(138,99,255,0.48);
+
+  /* Semantic surfaces */
+  --color-primary-soft: #1D1B45;
+  --color-teal-soft: #0D2C29;
+  --color-positive-soft: #102B24;
+  --color-warning-soft: #332713;
+  --color-negative-soft: #351720;
+  --color-disabled: #151824;
+  --color-disabled-text: #70788A;
+
+  /* Brand gradients */
+  --gradient-brand: linear-gradient(135deg, #8A63FF 0%, #625BFF 45%, #3455FF 100%);
+  --gradient-brand-strong: linear-gradient(135deg, #9B76FF 0%, #6C64FF 44%, #3E5EFF 100%);
+  --gradient-negative: linear-gradient(135deg, #FF647C 0%, #D83D5A 100%);
+  --gradient-surface-glow: radial-gradient(circle at 85% 10%, rgba(98,91,255,0.18), transparent 36%);
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.24);
+  --shadow-sm: 0 8px 24px rgba(0,0,0,0.25);
+  --shadow-md: 0 18px 44px rgba(0,0,0,0.34);
+  --shadow-lg: 0 28px 72px rgba(0,0,0,0.44);
+  --shadow-brand: 0 20px 50px rgba(52,85,255,0.28);
+}

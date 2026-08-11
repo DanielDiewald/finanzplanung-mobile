@@ -1,6 +1,6 @@
-# Analyse der Desktop-Anwendung `Finanzplanung_v10.html`
+# Analyse von Capyt · Planung (`Finanzplanung_v10_mobile-sync.html`)
 
-Diese Datei dokumentiert die fuer die mobile Begleit-App relevanten Strukturen der vorhandenen Desktop-Anwendung. Die Desktop-Anwendung bleibt fachliche Referenz und Berechnungsinstanz.
+Diese Datei dokumentiert die fuer Capyt · Mobile relevanten Strukturen von Capyt · Planung. Die Desktop-Anwendung bleibt fachliche Referenz und Berechnungsinstanz.
 
 ## 1. Datenmodell
 

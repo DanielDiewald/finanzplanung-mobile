@@ -3,41 +3,58 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#2457a7">
+  <meta name="theme-color" content="#F4F5FA">
   <meta name="color-scheme" content="light dark">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Finanzmonat">
-  <meta name="description" content="Offline-Begleit-App für Finanzplanung v10: Monatsstand, Budgets, Buchungen und FP1-Synchronisation.">
+  <meta name="apple-mobile-web-app-title" content="Capyt">
+  <meta name="description" content="Capyt · Mobile – Offline-Begleit-App für Monatsstand, Budgets, Buchungen und FP1-Synchronisation.">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="apple-touch-icon" href="./assets/icons/icon-180.png">
-  <link rel="icon" href="./assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./assets/branding/capyt-180.png">
+  <link rel="icon" href="./assets/branding/capyt-32.png" type="image/png" sizes="32x32">
+  <script src="./js/theme.js"></script>
+  <link rel="stylesheet" href="./css/capyt-tokens.css">
   <link rel="stylesheet" href="./css/app.css">
-  <title>Finanzmonat</title>
+  <title>Capyt · Mobile</title>
 </head>
 <body>
-  <noscript><div class="fatal">Diese App benötigt JavaScript.</div></noscript>
+  <noscript><div class="fatal">Capyt benötigt JavaScript.</div></noscript>
 
   <header class="app-header">
-    <div>
-      <p class="eyebrow">Finanzplanung · Mobile</p>
-      <h1 id="headerTitle">Monat</h1>
+    <div class="brand-lockup">
+      <img class="brand-logo" src="./assets/branding/capyt-192.png" alt="Capyt">
+      <div class="brand-copy">
+        <span class="brand-name">Capyt</span>
+        <span id="headerTitle" class="brand-context">Monat</span>
+      </div>
     </div>
     <div class="header-actions">
-      <span id="offlineBadge" class="status-pill hidden">Offline</span>
-      <button id="installButton" class="icon-button hidden" type="button" aria-label="App installieren" title="App installieren">↧</button>
+      <span id="headerSyncStatus" class="header-sync" aria-live="polite">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="status-text">Bereit</span>
+      </span>
+      <span id="offlineBadge" class="status-pill warn hidden">Offline</span>
+      <button id="installButton" class="icon-button hidden" type="button" aria-label="Capyt installieren" title="Capyt installieren">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 15v4h14v-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
     </div>
   </header>
 
   <main id="appMain" class="app-main" tabindex="-1">
     <section id="view-month" class="view active" data-view="month" aria-labelledby="monthHeading">
       <div id="noPlanState" class="empty-state hidden">
-        <div class="empty-icon" aria-hidden="true">↔</div>
+        <div class="empty-icon"><img src="./assets/branding/capyt-192.png" alt="" aria-hidden="true"></div>
+        <p class="eyebrow">Capyt · Mobile</p>
         <h2>Noch kein Finanzplan synchronisiert</h2>
-        <p>Importiere zuerst den aktuellen Monatsplan vom PC. Planwerte werden am Smartphone nicht bearbeitet.</p>
+        <p>Deine Planung bleibt am Desktop. Auf dem Smartphone kontrollierst du den Monatsstand und erfasst neue Buchungen.</p>
+        <div class="onboarding-steps" aria-label="Erste Schritte">
+          <div class="onboarding-step"><span class="onboarding-step-number">1</span><span><strong>Plan am Desktop erstellen</strong><span>Capyt · Planung berechnet Budgets, Sparziele und Monatswerte.</span></span></div>
+          <div class="onboarding-step"><span class="onboarding-step-number">2</span><span><strong>Plan importieren</strong><span>QR-Code scannen, QR-Foto auswählen oder FP1-P-Textcode einfügen.</span></span></div>
+          <div class="onboarding-step"><span class="onboarding-step-number">3</span><span><strong>Mobil buchen &amp; zurücksenden</strong><span>Neue Buchungen werden lokal gespeichert und später per FP1-T übertragen.</span></span></div>
+        </div>
         <div class="stack-actions">
           <button class="primary" type="button" data-go="sync" data-sync-action="scan">QR-Code scannen</button>
-          <button type="button" data-go="sync" data-sync-action="paste">Code eingeben</button>
+          <button type="button" data-go="sync" data-sync-action="paste">Textcode eingeben</button>
         </div>
       </div>
 
@@ -57,7 +74,7 @@
           <div class="hero-meta" id="freeAvailableMeta">nach Mindestpuffer</div>
         </section>
 
-        <section class="metrics-grid" aria-label="Monatswerte">
+        <section class="metrics-grid" aria-label="Vermögenskennzahlen">
           <article class="metric-card">
             <span class="metric-label">Kontostand</span>
             <strong id="accountBalanceValue">–</strong>
@@ -88,13 +105,13 @@
             </div>
           </div>
           <div class="segmented" role="tablist" aria-label="Donut-Ansicht">
-            <button type="button" class="active" data-donut-mode="planned" role="tab">Geplant</button>
-            <button type="button" data-donut-mode="actual" role="tab">Tatsächlich</button>
-            <button type="button" data-donut-mode="available" role="tab">Verfügbar</button>
+            <button type="button" class="active" data-donut-mode="planned" role="tab" aria-selected="true">Geplant</button>
+            <button type="button" data-donut-mode="actual" role="tab" aria-selected="false">Tatsächlich</button>
+            <button type="button" data-donut-mode="available" role="tab" aria-selected="false">Verfügbar</button>
           </div>
           <p id="donutHelp" class="help"></p>
           <div class="donut-wrap">
-            <canvas id="donutCanvas" width="320" height="320" aria-label="Donut-Diagramm"></canvas>
+            <canvas id="donutCanvas" width="320" height="320" role="img" aria-label="Geldverwendung als Donut-Diagramm" aria-describedby="donutHelp"></canvas>
             <div class="donut-center" aria-hidden="true">
               <span id="donutCenterLabel">Geplant</span>
               <strong id="donutCenterValue">0,00 €</strong>
@@ -114,6 +131,18 @@
           </div>
           <div id="budgetList" class="budget-list"></div>
         </section>
+
+        <section class="card" aria-labelledby="recentTransactionsHeading">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Zuletzt erfasst</p>
+              <h2 id="recentTransactionsHeading">Letzte Buchungen</h2>
+            </div>
+            <button type="button" data-go="transactions">Alle</button>
+          </div>
+          <div id="recentTransactionList" class="recent-transaction-list"></div>
+          <button id="monthAddTransactionButton" class="primary full month-quick-action" type="button">Buchung erfassen</button>
+        </section>
       </div>
     </section>
 
@@ -123,7 +152,7 @@
           <p class="eyebrow">Lokal erfasst</p>
           <h2 id="transactionsHeading">Buchungen</h2>
         </div>
-        <button id="addIncomeButton" type="button">+ Einnahme</button>
+        <button id="addIncomeButton" type="button">Einnahme</button>
       </div>
       <div class="filter-row" role="group" aria-label="Buchungen filtern">
         <button type="button" class="chip active" data-filter="all">Alle</button>
@@ -142,17 +171,18 @@
     <section id="view-sync" class="view" data-view="sync" aria-labelledby="syncHeading">
       <div class="section-head page-head">
         <div>
-          <p class="eyebrow">FP1 · Offline</p>
+          <p class="eyebrow">FP1 · lokal &amp; offlinefähig</p>
           <h2 id="syncHeading">Synchronisieren</h2>
         </div>
       </div>
 
       <section class="card">
-        <h3>Plan vom PC übernehmen</h3>
-        <p class="help">Der Desktop bleibt die maßgebliche Planungsquelle. Erst nach der Vorschau wird der lokale Plan ersetzt.</p>
+        <p class="eyebrow">Schritt 1</p>
+        <h3>Plan vom Desktop übernehmen</h3>
+        <p class="help">Capyt · Planung bleibt die maßgebliche Quelle. Du siehst immer zuerst eine Vorschau; bestehende lokale Daten werden nicht still überschrieben.</p>
         <div class="button-grid">
           <button id="scanPlanButton" class="primary" type="button">QR-Code scannen</button>
-          <button id="pastePlanButton" type="button">Code eingeben</button>
+          <button id="pastePlanButton" type="button">Textcode eingeben</button>
         </div>
         <div id="cameraSupportHint" class="small muted"></div>
         <div id="planImportPreview" class="sync-preview hidden"></div>
@@ -161,14 +191,15 @@
       <section class="card">
         <div class="section-head">
           <div>
-            <h3>Änderungen an PC übertragen</h3>
-            <p class="help">Code-Erzeugung markiert Buchungen nur als „vorbereitet“. Erst ein späterer Plan-Code kann sie bestätigen.</p>
+            <p class="eyebrow">Schritt 2</p>
+            <h3>Mobile Änderungen übertragen</h3>
+            <p class="help">Beim Export werden offene Buchungen als „vorbereitet“ markiert. Bestätigt sind sie erst, wenn ein neuer Planstand vom Desktop zurückkommt.</p>
           </div>
         </div>
         <div id="pendingSyncSummary" class="sync-stats"></div>
         <button id="generateTransactionCode" class="primary full" type="button">Synchronisationscode erzeugen</button>
         <div id="transactionExport" class="export-box hidden">
-          <div id="qrOutput" class="qr-output" aria-label="QR-Code"></div>
+          <div id="qrOutput" class="qr-output" aria-label="QR-Code für mobile Änderungen"></div>
           <div id="qrTooLarge" class="notice warn hidden"></div>
           <label class="field">
             <span>Textcode</span>
@@ -212,7 +243,7 @@
 
       <section class="card compact-card">
         <h3>Datenschutz &amp; Speicherung</h3>
-        <p class="help">Plan und Buchungen liegen in IndexedDB auf diesem Gerät. Die App enthält keine Analytics, kein Konto, keine Cloud-Synchronisierung und keine Bankanbindung.</p>
+        <p class="help">Plan und Buchungen liegen in IndexedDB auf diesem Gerät. Capyt enthält keine Analytics, kein Konto, keine Cloud-Synchronisierung und keine Bankanbindung.</p>
         <div class="button-grid">
           <button id="exportLocalData" type="button">Lokales Backup</button>
           <button id="resetLocalData" type="button" class="danger">Lokale Daten löschen</button>
@@ -220,9 +251,9 @@
       </section>
 
       <section class="card compact-card">
-        <h3>App</h3>
+        <h3>Capyt · Mobile</h3>
         <div class="key-values">
-          <div><span>Version</span><strong id="appVersion">1.0.0</strong></div>
+          <div><span>Version</span><strong id="appVersion">–</strong></div>
           <div><span>Protokoll</span><strong>FP1</strong></div>
           <div><span>Speicherung</span><strong>IndexedDB</strong></div>
         </div>
@@ -230,13 +261,24 @@
     </section>
   </main>
 
-  <button id="fabExpense" class="fab hidden" type="button" aria-label="Ausgabe erfassen">+ Ausgabe</button>
+  <button id="fabExpense" class="fab hidden" type="button" aria-label="Ausgabe erfassen">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <span>Ausgabe</span>
+  </button>
 
   <nav class="bottom-nav" aria-label="Hauptnavigation">
-    <button type="button" class="active" data-nav="month"><span aria-hidden="true">◉</span><span>Monat</span></button>
-    <button type="button" data-nav="transactions"><span aria-hidden="true">≡</span><span>Buchungen</span></button>
-    <button type="button" data-nav="sync"><span aria-hidden="true">↔</span><span>Sync</span><span id="syncNavBadge" class="nav-badge hidden">0</span></button>
-    <button type="button" data-nav="settings"><span aria-hidden="true">⚙</span><span>Einstellungen</span></button>
+    <button type="button" class="active" data-nav="month" aria-label="Monat">
+      <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 2v4M16 2v4M5 9h14M8 13h3M13 13h3M8 16h3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Monat</span>
+    </button>
+    <button type="button" data-nav="transactions" aria-label="Buchungen">
+      <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h12M6 10h12M6 15h7M6 20h9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Buchungen</span>
+    </button>
+    <button type="button" data-nav="sync" aria-label="Synchronisieren">
+      <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3M18 7l2 2-2 2M6 17l-2-2 2-2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sync</span><span id="syncNavBadge" class="nav-badge hidden">0</span>
+    </button>
+    <button type="button" data-nav="settings" aria-label="Einstellungen">
+      <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5A3.5 3.5 0 1 0 12 15.5 3.5 3.5 0 0 0 12 8.5Zm8 3.5-2.1-.8a6.5 6.5 0 0 0-.5-1.2l.9-2-2.3-2.3-2 .9a6.5 6.5 0 0 0-1.2-.5L12 4H8.8L8 6.1a6.5 6.5 0 0 0-1.2.5l-2-.9L2.5 8l.9 2a6.5 6.5 0 0 0-.5 1.2L.8 12v3.2l2.1.8c.1.4.3.8.5 1.2l-.9 2 2.3 2.3 2-.9c.4.2.8.4 1.2.5l.8 2.1H12l.8-2.1c.4-.1.8-.3 1.2-.5l2 .9 2.3-2.3-.9-2c.2-.4.4-.8.5-1.2l2.1-.8V12Z" transform="scale(.9) translate(1.4,-1.1)" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Einstellungen</span>
+    </button>
   </nav>
 
   <dialog id="transactionDialog" class="sheet-dialog">
@@ -247,7 +289,9 @@
           <p class="eyebrow" id="transactionDialogEyebrow">Neue Buchung</p>
           <h2 id="transactionDialogTitle">Ausgabe erfassen</h2>
         </div>
-        <button type="button" class="icon-button" data-close-dialog="transactionDialog" aria-label="Schließen">×</button>
+        <button type="button" class="icon-button" data-close-dialog="transactionDialog" aria-label="Schließen">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
       </div>
       <input id="transactionId" type="hidden">
       <input id="transactionKind" type="hidden" value="budget_expense">
@@ -262,34 +306,14 @@
         <button type="button" data-expense-kind="expense">Sonstige Ausgabe</button>
       </div>
 
-      <label id="budgetField" class="field">
-        <span>Budget</span>
-        <select id="transactionBudget"></select>
-      </label>
-
-      <label id="categoryField" class="field hidden">
-        <span>Kategorie</span>
-        <select id="transactionCategory"></select>
-      </label>
-
-      <label class="field">
-        <span>Datum</span>
-        <input id="transactionDate" type="date" required>
-      </label>
-      <label class="field">
-        <span>Beschreibung <small>optional</small></span>
-        <input id="transactionDescription" maxlength="100" autocomplete="off" placeholder="z. B. Billa">
-      </label>
-      <label class="field">
-        <span>Notiz <small>optional</small></span>
-        <textarea id="transactionNote" rows="2" maxlength="300" placeholder="Kurze Notiz"></textarea>
-      </label>
-      <div id="transactionLockNotice" class="notice warn hidden">Diese Buchung wurde bereits bestätigt und kann in Version 1 nicht mehr geändert werden.</div>
+      <label id="budgetField" class="field"><span>Budget</span><select id="transactionBudget"></select></label>
+      <label id="categoryField" class="field hidden"><span>Kategorie</span><select id="transactionCategory"></select></label>
+      <label class="field"><span>Datum</span><input id="transactionDate" type="date" required></label>
+      <label class="field"><span>Beschreibung <small>optional</small></span><input id="transactionDescription" maxlength="100" autocomplete="off" placeholder="z. B. Einkauf"></label>
+      <label class="field"><span>Notiz <small>optional</small></span><textarea id="transactionNote" rows="2" maxlength="300" placeholder="Kurze Notiz"></textarea></label>
+      <div id="transactionLockNotice" class="notice warn hidden">Diese Buchung wurde bereits bestätigt und kann nicht mehr geändert werden.</div>
       <div class="sheet-actions">
-        <button id="deleteTransactionButton" class="danger hidden" type="button">Löschen</button>
-        <span class="spacer"></span>
-        <button type="button" data-close-dialog="transactionDialog">Abbrechen</button>
-        <button id="saveTransactionButton" class="primary" value="default">Speichern</button>
+        <button id="deleteTransactionButton" class="danger hidden" type="button">Löschen</button><span class="spacer"></span><button type="button" data-close-dialog="transactionDialog">Abbrechen</button><button id="saveTransactionButton" class="primary" value="default">Speichern</button>
       </div>
     </form>
   </dialog>
@@ -299,12 +323,9 @@
       <div class="sheet-handle" aria-hidden="true"></div>
       <div class="section-head">
         <div><p class="eyebrow">FP1-P</p><h2>Plan-Code eingeben</h2></div>
-        <button type="button" class="icon-button" data-close-dialog="codeDialog" aria-label="Schließen">×</button>
+        <button type="button" class="icon-button" data-close-dialog="codeDialog" aria-label="Schließen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
       </div>
-      <label class="field">
-        <span>Synchronisationscode</span>
-        <textarea id="planCodeInput" rows="8" spellcheck="false" placeholder="FP1-P-C-…"></textarea>
-      </label>
+      <label class="field"><span>Synchronisationscode</span><textarea id="planCodeInput" rows="8" spellcheck="false" placeholder="FP1-P-C-…"></textarea></label>
       <div id="codeDialogError" class="notice error hidden"></div>
       <div class="sheet-actions"><span class="spacer"></span><button type="button" data-close-dialog="codeDialog">Abbrechen</button><button id="decodePlanCode" class="primary" value="default">Prüfen</button></div>
     </form>
@@ -314,8 +335,8 @@
     <div class="sheet scanner-sheet">
       <div class="sheet-handle" aria-hidden="true"></div>
       <div class="section-head">
-        <div><p class="eyebrow">Kamera</p><h2>Plan-QR scannen</h2></div>
-        <button type="button" class="icon-button" id="closeScanner" aria-label="Scanner schließen">×</button>
+        <div><p class="eyebrow">Kamera / Foto</p><h2>Plan-QR importieren</h2></div>
+        <button type="button" class="icon-button" id="closeScanner" aria-label="Scanner schließen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
       </div>
       <div class="scanner-frame">
         <video id="scannerVideo" playsinline muted></video>
@@ -325,8 +346,8 @@
       <div id="scannerStatus" class="notice">Kamera wird erst nach deiner Freigabe verwendet.</div>
       <div class="button-grid">
         <button id="startScanner" class="primary" type="button">Kamera starten</button>
-        <button id="scannerPhotoButton" type="button">QR fotografieren</button>
-        <button id="scannerPasteFallback" type="button">Stattdessen Code eingeben</button>
+        <button id="scannerPhotoButton" type="button">QR-Foto auswählen</button>
+        <button id="scannerPasteFallback" type="button">Textcode eingeben</button>
       </div>
       <input id="scannerPhotoInput" class="hidden" type="file" accept="image/*" capture="environment">
     </div>
