@@ -3,300 +3,363 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Finanzplanung – v10</title>
+<title>Benedikt · dein Finanzplaner</title>
 <style>
 :root {
-  color-scheme: light;
-  --bg: #f4f5f7;
-  --panel: #ffffff;
-  --line: #d6d9de;
-  --text: #1d232a;
-  --muted: #5f6b76;
-  --accent: #2457a7;
-  --danger: #a22b2b;
-  --ok: #286c3f;
-  --warn: #8a5a00;
+  color-scheme: light dark;
+  --primary: #4c86af;
+  --secondary: #af4c58;
+  --brand-accent: #DDE9E6;
+  --dark: #1D1D1D;
+  --positive: #21BA45;
+  --negative: #C10015;
+  --info: #31CCEC;
+  --warning-base: #71b4a8;
+
+  --color-bg: #f5f7f8;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #ffffff;
+  --color-surface-subtle: #f0f4f5;
+  --color-text: #17232c;
+  --color-text-secondary: #4f606b;
+  --color-text-muted: #6c7a84;
+  --color-border: #d7e0e4;
+  --color-border-strong: #bdcbd1;
+  --color-hover: #eef4f6;
+  --color-active: #e4eef1;
+  --color-focus: #326b95;
+  --color-disabled: #9aa7ae;
+  --color-input-bg: #ffffff;
+  --color-navigation: rgba(255,255,255,.96);
+  --color-overlay: rgba(17,24,32,.46);
+  --color-primary: var(--primary);
+  --color-primary-strong: #326b95;
+  --color-primary-soft: #e6f0f6;
+  --color-secondary: var(--secondary);
+  --color-secondary-soft: #f7e9eb;
+  --color-positive: #158a35;
+  --color-positive-soft: #e7f7ec;
+  --color-negative: var(--negative);
+  --color-negative-soft: #fdecef;
+  --color-warning: #397e72;
+  --color-warning-soft: #e8f4f1;
+  --color-info: #087a92;
+  --color-info-soft: #e2f6fa;
+  --color-chart-grid: #d5dfe3;
+
+  --bg: var(--color-bg);
+  --panel: var(--color-surface);
+  --line: var(--color-border);
+  --text: var(--color-text);
+  --muted: var(--color-text-muted);
+  --accent: var(--color-primary);
+  --danger: var(--color-negative);
+  --ok: var(--color-positive);
+  --warn: var(--color-warning);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --space-1: .25rem;
+  --space-2: .5rem;
+  --space-3: .75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --shadow-sm: 0 1px 2px rgba(23,35,44,.04),0 5px 16px rgba(23,35,44,.04);
+  --shadow-md: 0 12px 34px rgba(23,35,44,.08);
+  --shadow-lg: 0 24px 64px rgba(23,35,44,.16);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
 }
+
+:root[data-theme="dark"] {
+  --color-bg: #1D1D1D;
+  --color-surface: #25282a;
+  --color-surface-elevated: #2c3033;
+  --color-surface-subtle: #222527;
+  --color-text: #edf1f1;
+  --color-text-secondary: #c2cbcc;
+  --color-text-muted: #9aa7aa;
+  --color-border: #3b4245;
+  --color-border-strong: #515b5f;
+  --color-hover: #32383b;
+  --color-active: #384247;
+  --color-focus: #8bb8d6;
+  --color-disabled: #707a7d;
+  --color-input-bg: #222527;
+  --color-navigation: rgba(37,40,42,.96);
+  --color-overlay: rgba(0,0,0,.62);
+  --color-primary: #6fa3c7;
+  --color-primary-strong: #8ab6d2;
+  --color-primary-soft: #273b48;
+  --color-secondary: #d17b85;
+  --color-secondary-soft: #493035;
+  --color-positive: #65cf7e;
+  --color-positive-soft: #263b2d;
+  --color-negative: #ff7383;
+  --color-negative-soft: #47282e;
+  --color-warning: #83c9bd;
+  --color-warning-soft: #293d39;
+  --color-info: #76dced;
+  --color-info-soft: #243b40;
+  --color-chart-grid: #414a4e;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.16),0 7px 20px rgba(0,0,0,.12);
+  --shadow-md: 0 16px 40px rgba(0,0,0,.24);
+  --shadow-lg: 0 30px 72px rgba(0,0,0,.36);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #1D1D1D;
+    --color-surface: #25282a;
+    --color-surface-elevated: #2c3033;
+    --color-surface-subtle: #222527;
+    --color-text: #edf1f1;
+    --color-text-secondary: #c2cbcc;
+    --color-text-muted: #9aa7aa;
+    --color-border: #3b4245;
+    --color-border-strong: #515b5f;
+    --color-hover: #32383b;
+    --color-active: #384247;
+    --color-focus: #8bb8d6;
+    --color-disabled: #707a7d;
+    --color-input-bg: #222527;
+    --color-navigation: rgba(37,40,42,.96);
+    --color-overlay: rgba(0,0,0,.62);
+    --color-primary: #6fa3c7;
+    --color-primary-strong: #8ab6d2;
+    --color-primary-soft: #273b48;
+    --color-secondary: #d17b85;
+    --color-secondary-soft: #493035;
+    --color-positive: #65cf7e;
+    --color-positive-soft: #263b2d;
+    --color-negative: #ff7383;
+    --color-negative-soft: #47282e;
+    --color-warning: #83c9bd;
+    --color-warning-soft: #293d39;
+    --color-info: #76dced;
+    --color-info-soft: #243b40;
+    --color-chart-grid: #414a4e;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.16),0 7px 20px rgba(0,0,0,.12);
+    --shadow-md: 0 16px 40px rgba(0,0,0,.24);
+    --shadow-lg: 0 30px 72px rgba(0,0,0,.36);
+  }
+}
+
 * { box-sizing: border-box; }
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: var(--bg);
-  color: var(--text);
-}
-button, input, select { font: inherit; }
-button {
-  border: 1px solid var(--line);
-  background: #fff;
-  color: var(--text);
-  padding: .48rem .72rem;
-  border-radius: 5px;
-  cursor: pointer;
-}
-button:hover { border-color: #8d96a0; }
-button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-button.danger { color: var(--danger); }
-button:disabled { opacity: .5; cursor: not-allowed; }
-input, select {
-  width: 100%;
-  min-width: 7rem;
-  padding: .43rem .5rem;
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  background: #fff;
-  color: var(--text);
-}
-input[type="number"] { text-align: right; }
-input:disabled, select:disabled { background: #eef0f2; color: #6d747b; }
-header {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: var(--panel);
-  border-bottom: 1px solid var(--line);
-}
-.header-inner {
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: .8rem 1rem .45rem;
-}
-.header-row {
-  display: flex;
-  gap: .7rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-h1 { font-size: 1.25rem; margin: 0 auto 0 0; }
-.status { font-size: .85rem; color: var(--muted); }
-nav {
-  display: flex;
-  gap: .25rem;
-  margin-top: .65rem;
-  overflow-x: auto;
-}
-nav button {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-}
-nav button.active {
-  color: var(--accent);
-  border-color: var(--line);
-  border-bottom-color: #fff;
-  font-weight: 650;
-}
-main {
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 1rem;
-}
+html { min-width: 320px; min-height: 100%; background: var(--color-bg); }
+body { margin: 0; min-width: 320px; min-height: 100vh; overflow-x: hidden; background: var(--color-bg); color: var(--color-text); font-family: inherit; -webkit-text-size-adjust: 100%; }
+button,input,select,textarea { font: inherit; color: inherit; }
+button,input,select,textarea { min-height: 42px; }
+button { border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); padding: .58rem .8rem; border-radius: var(--radius-sm); font-weight: 650; cursor: pointer; transition: background-color .15s ease,border-color .15s ease,box-shadow .15s ease,transform .12s ease; }
+button:hover:not(:disabled) { background: var(--color-hover); border-color: var(--color-border-strong); }
+button:active:not(:disabled) { transform: translateY(1px); background: var(--color-active); }
+button.primary { background: var(--primary); border-color: var(--primary); color: #111820; box-shadow: 0 5px 16px color-mix(in srgb,var(--primary) 20%,transparent); }
+button.primary:hover:not(:disabled) { background: #427b9f; border-color: #427b9f; }
+button.danger { color: var(--color-negative); border-color: color-mix(in srgb,var(--color-negative) 38%,var(--color-border)); }
+button.danger:hover:not(:disabled) { background: var(--color-negative-soft); border-color: var(--color-negative); }
+button:disabled { opacity: .48; cursor: not-allowed; transform: none; box-shadow: none; }
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible { outline: 3px solid color-mix(in srgb,var(--color-focus) 42%,transparent); outline-offset: 2px; }
+input,select,textarea { width: 100%; min-width: 7rem; padding: .55rem .62rem; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-input-bg); transition: border-color .15s ease,box-shadow .15s ease; }
+textarea { resize: vertical; line-height: 1.45; }
+input:hover:not(:disabled),select:hover:not(:disabled),textarea:hover:not(:disabled) { border-color: var(--color-border-strong); }
+input[type="number"] { text-align: right; font-variant-numeric: tabular-nums; }
+input:disabled,select:disabled { background: var(--color-surface-subtle); color: var(--color-disabled); }
+input[type="checkbox"] { accent-color: var(--primary); }
+code { padding: .12rem .3rem; border-radius: 5px; background: var(--color-surface-subtle); color: var(--color-text-secondary); }
+
+header { position: sticky; top: 0; z-index: 30; background: var(--color-navigation); border-bottom: 1px solid var(--color-border); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+.header-inner { max-width: 1580px; margin: 0 auto; padding: .72rem 1rem .48rem; }
+.header-row { display: flex; gap: .8rem; align-items: center; min-width: 0; }
+.desktop-brand { display: flex; align-items: center; gap: .62rem; flex: 0 0 auto; }
+.desktop-brand-mark { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: var(--primary); color: #111820; font-weight: 850; letter-spacing: -.04em; box-shadow: var(--shadow-sm); }
+.desktop-brand-copy { display: grid; line-height: 1.05; }
+.desktop-brand-copy strong { font-size: 1.02rem; letter-spacing: -.025em; }
+.desktop-brand-copy small { margin-top: .18rem; color: var(--color-text-muted); font-size: .7rem; }
+.header-context { min-width: 0; display: grid; gap: .12rem; margin-right: auto; padding-left: .8rem; border-left: 1px solid var(--color-border); }
+#appTitle { min-width: 0; font-size: .92rem; font-weight: 720; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.status { color: var(--color-text-muted); font-size: .75rem; }
+.header-actions { display: flex; align-items: center; justify-content: flex-end; gap: .45rem; flex-wrap: wrap; }
+.header-theme { display: flex; align-items: center; gap: .4rem; }
+.header-theme label { color: var(--color-text-muted); font-size: .76rem; }
+#desktopThemeSetting { width: auto; min-width: 112px; }
+nav { display: flex; gap: .28rem; margin-top: .62rem; overflow-x: auto; scrollbar-width: none; }
+nav::-webkit-scrollbar { display: none; }
+nav button { flex: 0 0 auto; min-height: 38px; border: 0; background: transparent; color: var(--color-text-muted); padding: .48rem .72rem; border-radius: 10px; box-shadow: none; }
+nav button:hover:not(:disabled) { border: 0; background: var(--color-hover); }
+nav button.active { color: var(--color-primary-strong); background: var(--color-primary-soft); font-weight: 720; }
+
+main { max-width: 1580px; margin: 0 auto; padding: 1.15rem 1rem 2rem; }
 .view { display: none; }
 .view.active { display: block; }
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-.panel h2, .panel h3 { margin-top: 0; }
-.panel h2 { font-size: 1.15rem; }
-.panel h3 { font-size: 1rem; margin-bottom: .6rem; }
-.help { color: var(--muted); font-size: .9rem; line-height: 1.45; }
-.toolbar {
-  display: flex;
-  gap: .55rem;
-  flex-wrap: wrap;
-  align-items: center;
-  margin-bottom: .8rem;
-}
+.panel { min-width: 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.05rem; margin-bottom: 1rem; box-shadow: var(--shadow-sm); }
+.panel h2,.panel h3 { margin-top: 0; letter-spacing: -.015em; }
+.panel h2 { font-size: 1.13rem; }
+.panel h3 { font-size: .98rem; margin-bottom: .6rem; }
+.help { color: var(--color-text-secondary); font-size: .87rem; line-height: 1.52; }
+.small { font-size: .8rem; }
+.muted { color: var(--color-text-muted); }
+.hidden { display: none !important; }
+.toolbar { display: flex; gap: .55rem; flex-wrap: wrap; align-items: center; margin-bottom: .85rem; }
 .toolbar .spacer { margin-left: auto; }
 #monthSelect { width: auto; min-width: 230px; max-width: 420px; flex: 1 1 300px; }
-#prevMonth, #nextMonth { flex: 0 0 auto; }
-.table-wrap { overflow: auto; }
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-variant-numeric: tabular-nums;
-}
-th, td {
-  border-bottom: 1px solid var(--line);
-  padding: .45rem .5rem;
-  text-align: left;
-  vertical-align: middle;
-  white-space: nowrap;
-}
-th {
-  background: #f1f3f5;
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  font-weight: 650;
-}
-td.num, th.num { text-align: right; }
+#prevMonth,#nextMonth { flex: 0 0 auto; min-width: 42px; }
+
+.table-wrap { max-width: 100%; overflow: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); }
+table { width: 100%; border-collapse: separate; border-spacing: 0; font-variant-numeric: tabular-nums; }
+th,td { border-bottom: 1px solid var(--color-border); padding: .65rem .68rem; text-align: left; vertical-align: middle; white-space: nowrap; }
+th { position: sticky; top: 0; z-index: 2; background: var(--color-surface-subtle); color: var(--color-text-secondary); font-size: .78rem; font-weight: 720; }
+tbody tr:last-child td { border-bottom: 0; }
+td.num,th.num { text-align: right; }
 tr.clickable { cursor: pointer; }
-tr.clickable:hover td { background: #f7f9fb; }
-tr.locked td:first-child::before { content: "🔒 "; }
-tr.total td { font-weight: 700; border-top: 2px solid #aeb4bb; }
-td input, td select { min-width: 8rem; }
+tr.clickable:hover td { background: var(--color-hover); }
+tr.locked td:first-child::before { content: "Gesperrt · "; color: var(--color-text-muted); font-size: .74rem; }
+tr.total td { font-weight: 760; border-top: 2px solid var(--color-border-strong); }
+td input,td select { min-width: 8rem; }
 td input.description { min-width: 12rem; }
 td.actions { width: 1%; }
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1rem;
-}
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: .8rem 1rem;
-}
-.field label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: .25rem; }
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
-  gap: .65rem;
-  margin-bottom: 1rem;
-}
-.summary-card {
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  padding: .7rem;
-  background: #fff;
-}
-.summary-card .label { color: var(--muted); font-size: .8rem; min-height: 2.1em; }
-.summary-card .value { font-size: 1.05rem; font-weight: 700; margin-top: .2rem; text-align: right; }
-.value.negative { color: var(--danger); }
-.value.positive { color: var(--ok); }
-.notice {
-  border-left: 4px solid var(--accent);
-  background: #f4f7fc;
-  padding: .65rem .8rem;
-  margin-bottom: .8rem;
-  font-size: .9rem;
-}
-.notice.warn { border-color: var(--warn); background: #fff8ea; }
-.notice.error { border-color: var(--danger); background: #fff1f1; }
-.lock-banner {
-  border: 1px solid #d7c08a;
-  background: #fff8e6;
-  padding: .7rem;
-  border-radius: 5px;
-  margin-bottom: .8rem;
-}
-.chart-box {
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  padding: .6rem;
-  min-height: 320px;
-  background: #fff;
-}
-.chart-box canvas { width: 100%; height: 285px; display: block; }
-.chart-tooltip {
-  position: fixed;
-  z-index: 50;
-  pointer-events: none;
-  max-width: 320px;
-  padding: .45rem .55rem;
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  background: #fff;
-  box-shadow: 0 6px 20px rgba(0,0,0,.14);
-  font-size: .82rem;
-  line-height: 1.35;
-  white-space: pre-line;
-}
-.progress-row { margin-bottom: .75rem; }
-.progress-head { display: flex; justify-content: space-between; gap: 1rem; font-size: .9rem; }
-.progress-track { height: .75rem; background: #e5e8eb; border-radius: 999px; overflow: hidden; margin-top: .25rem; }
-.progress-fill { height: 100%; background: var(--accent); }
-.badge {
-  display: inline-block;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: .15rem .45rem;
-  font-size: .75rem;
-  color: var(--muted);
-}
-.hidden { display: none !important; }
-.file-button input { display: none; }
-.small { font-size: .82rem; }
-.muted { color: var(--muted); }
-details summary { cursor: pointer; font-weight: 650; }
-@media (max-width: 720px) {
-  main { padding: .65rem; }
-  .panel { padding: .75rem; }
-  .header-inner { padding-left: .65rem; padding-right: .65rem; }
-  th, td { padding: .4rem; }
-  h1 { width: 100%; }
-}
-@media print {
-  header, button, .toolbar, .actions { display: none !important; }
-  body { background: #fff; }
-  .view { display: none !important; }
-  .view.active { display: block !important; }
-  .panel { border: 0; padding: 0; }
-}
-
-
-/* v8: klare Trennung von Liquidität, Sparvermögen, Budgets und Umbuchungen */
-.money-section { border-top: 1px solid var(--line); padding-top: .8rem; margin-top: .8rem; }
-.money-section:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
-.money-section h3 { margin: 0 0 .55rem; font-size: .95rem; color: var(--accent); }
-.inline-check { display: inline-flex; align-items: center; gap: .45rem; font-size: .9rem; color: var(--text); }
-.inline-check input, input[type="checkbox"] { width: auto; min-width: 0; }
-.check-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .5rem .8rem; }
-.check-grid label { display: flex; align-items: center; gap: .45rem; }
-.app-dialog { width: min(680px, calc(100vw - 2rem)); border: 1px solid var(--line); border-radius: 8px; padding: 1rem; color: var(--text); background: #fff; box-shadow: 0 20px 60px rgba(0,0,0,.22); }
-.app-dialog::backdrop { background: rgba(0,0,0,.35); }
-.app-dialog h2 { margin-top: 0; font-size: 1.15rem; }
-.dialog-actions { display: flex; justify-content: flex-end; gap: .55rem; margin-top: 1rem; }
-.readout { border: 1px solid var(--line); border-radius: 4px; background: #f7f8fa; min-height: 2.25rem; padding: .5rem; text-align: right; font-variant-numeric: tabular-nums; }
-.warn-badge { color: var(--danger); border-color: #d9a3a3; }
 td.actions button { margin: .08rem; }
 #budgetUsageTable td.actions { min-width: 250px; }
-.positive { color: var(--ok); }
-.negative { color: var(--danger); }
-@media (max-width: 720px) { #budgetUsageTable td.actions { min-width: 190px; } .dialog-actions { flex-wrap: wrap; } }
 
+.grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(210px,1fr)); gap: .85rem 1rem; }
+.field label { display: block; color: var(--color-text-secondary); font-size: .8rem; font-weight: 620; margin-bottom: .3rem; }
+.summary-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(175px,1fr)); gap: .7rem; margin-bottom: 1rem; }
+.summary-card { min-width: 0; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: .78rem; background: var(--color-surface-subtle); }
+.summary-card .label { min-height: 2.1em; color: var(--color-text-muted); font-size: .76rem; }
+.summary-card .value { margin-top: .22rem; text-align: right; font-size: 1.08rem; font-weight: 780; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.value.negative,.negative { color: var(--color-negative); }
+.value.positive,.positive { color: var(--color-positive); }
+.notice { border-left: 4px solid var(--color-primary); border-radius: var(--radius-sm); background: var(--color-primary-soft); padding: .7rem .82rem; margin-bottom: .8rem; font-size: .87rem; line-height: 1.48; }
+.notice.warn { border-color: var(--color-warning); background: var(--color-warning-soft); }
+.notice.error { border-color: var(--color-negative); background: var(--color-negative-soft); color: var(--color-negative); }
+.lock-banner { border: 1px solid color-mix(in srgb,var(--color-warning) 40%,var(--color-border)); background: var(--color-warning-soft); padding: .72rem .8rem; border-radius: var(--radius-sm); margin-bottom: .8rem; }
 
-/* v10: skalierbare Statistik und Monats-Donut */
-.chart-box { overflow-x: auto; overflow-y: hidden; }
-.chart-box canvas { max-width: none; }
-.statistics-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .75rem; align-items: end; margin-top: .8rem; }
+.chart-box { min-width: 0; overflow-x: auto; overflow-y: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: .7rem; min-height: 320px; background: var(--color-surface-subtle); }
+.chart-box canvas { width: 100%; height: 285px; display: block; max-width: none; }
+.chart-tooltip { position: fixed; z-index: 50; pointer-events: none; max-width: 320px; padding: .5rem .58rem; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-elevated); color: var(--color-text); box-shadow: var(--shadow-lg); font-size: .8rem; line-height: 1.4; white-space: pre-line; }
+.progress-row { margin-bottom: .78rem; }
+.progress-head { display: flex; justify-content: space-between; gap: 1rem; font-size: .87rem; }
+.progress-track { height: .72rem; background: color-mix(in srgb,var(--color-border) 78%,transparent); border-radius: 999px; overflow: hidden; margin-top: .3rem; }
+.progress-fill { height: 100%; background: var(--color-primary); }
+.badge { display: inline-block; border: 1px solid var(--color-border); border-radius: 999px; padding: .18rem .5rem; font-size: .73rem; color: var(--color-text-muted); }
+.file-button input { display: none; }
+details summary { cursor: pointer; font-weight: 680; }
+
+.money-section { border-top: 1px solid var(--color-border); padding-top: .85rem; margin-top: .85rem; }
+.money-section:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
+.money-section h3 { margin: 0 0 .55rem; font-size: .93rem; color: var(--color-primary-strong); }
+.inline-check { display: inline-flex; align-items: center; gap: .45rem; color: var(--color-text); font-size: .87rem; }
+.inline-check input,input[type="checkbox"] { width: auto; min-width: 0; min-height: 18px; }
+.check-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: .55rem .8rem; }
+.check-grid label { display: flex; align-items: center; gap: .48rem; }
+.app-dialog { width: min(680px,calc(100vw - 2rem)); max-height: min(88vh,760px); overflow: auto; border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.1rem; color: var(--color-text); background: var(--color-surface-elevated); box-shadow: var(--shadow-lg); }
+.app-dialog::backdrop { background: var(--color-overlay); backdrop-filter: blur(2px); }
+.app-dialog h2 { margin-top: 0; font-size: 1.12rem; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: .55rem; margin-top: 1rem; }
+.readout { min-height: 2.45rem; padding: .58rem .62rem; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-subtle); text-align: right; font-variant-numeric: tabular-nums; }
+.warn-badge { color: var(--color-negative); border-color: color-mix(in srgb,var(--color-negative) 38%,var(--color-border)); }
+
+.statistics-controls { display: grid; grid-template-columns: repeat(auto-fit,minmax(190px,1fr)); gap: .8rem; align-items: end; margin-top: .8rem; }
 .statistics-controls .field select { min-width: 0; }
-.statistics-resolution { display: inline-block; margin-top: .3rem; color: var(--accent); font-size: .82rem; font-weight: 650; }
+.statistics-resolution { display: inline-block; margin-top: .3rem; color: var(--color-primary-strong); font-size: .8rem; font-weight: 680; }
 .statistics-window-actions { display: flex; gap: .45rem; align-items: center; flex-wrap: wrap; }
-.statistics-range-label { margin-top: .7rem; padding: .55rem .7rem; border: 1px solid var(--line); border-radius: 5px; background: #f7f8fa; font-size: .86rem; color: var(--muted); }
-.donut-layout { display: grid; grid-template-columns: minmax(300px, .9fr) minmax(300px, 1.1fr); gap: 1rem; align-items: center; }
+.statistics-range-label { margin-top: .7rem; padding: .58rem .72rem; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-subtle); color: var(--color-text-muted); font-size: .83rem; }
+.donut-layout { display: grid; grid-template-columns: minmax(300px,.9fr) minmax(300px,1.1fr); gap: 1rem; align-items: center; }
 .donut-chart-box { min-height: 335px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .donut-chart-box canvas { width: 100%; height: 315px; display: block; }
-.donut-legend { display: grid; gap: .32rem; }
-.donut-group-title { margin-top: .55rem; margin-bottom: .15rem; color: var(--muted); font-size: .76rem; font-weight: 700; text-transform: uppercase; letter-spacing: .035em; }
-.donut-legend-row { width: 100%; display: grid; grid-template-columns: auto minmax(0,1fr) auto auto; gap: .55rem; align-items: center; text-align: left; padding: .48rem .52rem; background: #fff; }
-.donut-legend-row.active { border-color: var(--accent); background: #f4f7fc; }
+.donut-legend { display: grid; gap: .34rem; }
+.donut-group-title { margin-top: .55rem; margin-bottom: .15rem; color: var(--color-text-muted); font-size: .73rem; font-weight: 720; text-transform: uppercase; letter-spacing: .05em; }
+.donut-legend-row { width: 100%; display: grid; grid-template-columns: auto minmax(0,1fr) auto auto; gap: .55rem; align-items: center; text-align: left; padding: .5rem .56rem; background: var(--color-surface); }
+.donut-legend-row.active { border-color: var(--color-primary); background: var(--color-primary-soft); }
 .donut-swatch { width: .72rem; height: .72rem; border-radius: 50%; display: inline-block; }
-.donut-legend-name { min-width: 0; white-space: normal; }
-.donut-legend-amount, .donut-legend-percent { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.donut-legend-percent { color: var(--muted); min-width: 4.2rem; text-align: right; }
-.donut-details { margin-top: .9rem; padding-top: .8rem; border-top: 1px solid var(--line); }
-.donut-summary-line { display: flex; gap: .8rem 1.2rem; flex-wrap: wrap; margin-top: .7rem; color: var(--muted); font-size: .86rem; }
-.donut-empty { color: var(--muted); text-align: center; padding: 1rem; }
-@media (max-width: 820px) {
+.donut-legend-name { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+.donut-legend-amount,.donut-legend-percent { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.donut-legend-percent { min-width: 4.2rem; text-align: right; color: var(--color-text-muted); }
+.donut-details { margin-top: .9rem; padding-top: .8rem; border-top: 1px solid var(--color-border); }
+.donut-summary-line { display: flex; gap: .8rem 1.2rem; flex-wrap: wrap; margin-top: .7rem; color: var(--color-text-muted); font-size: .83rem; }
+.donut-empty { color: var(--color-text-muted); text-align: center; padding: 1rem; }
+
+.sync-direction { min-width: 0; padding: .9rem; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface-subtle); }
+.sync-step { display: flex; align-items: center; gap: .65rem; margin-bottom: .75rem; }
+.sync-step > span { width: 32px; height: 32px; flex: 0 0 32px; display: grid; place-items: center; border-radius: 10px; background: var(--color-primary-soft); color: var(--color-primary-strong); font-weight: 800; }
+.sync-step h3 { margin: .08rem 0 0; }
+.sync-kicker { margin: 0; color: var(--color-text-muted); font-size: .7rem; font-weight: 760; text-transform: uppercase; letter-spacing: .055em; }
+.fp1-qr-card { display: grid; place-items: center; width: max-content; max-width: 100%; overflow: auto; margin-top: .6rem; padding: 20px; border: 1px solid #d7e0e4; border-radius: var(--radius-md); background: #fff; }
+
+@media (min-width: 1440px) {
+  main { padding-left: 1.35rem; padding-right: 1.35rem; }
+  .panel { padding: 1.2rem; }
+  .summary-grid { grid-template-columns: repeat(auto-fit,minmax(190px,1fr)); }
+}
+@media (max-width: 1199px) {
+  .header-row { flex-wrap: wrap; }
+  .header-context { flex: 1 1 260px; }
+  .header-actions { flex: 1 1 auto; }
+  .grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 899px) {
+  main { padding: .85rem .8rem 1.5rem; }
+  .header-inner { padding-left: .8rem; padding-right: .8rem; }
+  .panel { padding: .9rem; border-radius: var(--radius-md); }
   .donut-layout { grid-template-columns: 1fr; }
   .donut-chart-box { min-height: 300px; }
   .donut-chart-box canvas { height: 285px; }
+  .header-actions { width: 100%; justify-content: flex-start; }
+  .toolbar .spacer { display: none; }
 }
-
+@media (max-width: 599px) {
+  .desktop-brand-copy small { display: none; }
+  .header-context { order: 3; flex-basis: 100%; border-left: 0; padding-left: 0; padding-top: .45rem; border-top: 1px solid var(--color-border); }
+  .header-actions { margin-left: auto; width: auto; flex: 0 1 auto; }
+  .header-actions > button,.header-actions > .file-button { display: none; }
+  .header-theme label { display: none; }
+  #desktopThemeSetting { min-width: 100px; }
+  nav { margin-top: .45rem; }
+  main { padding: .7rem .6rem 1.25rem; }
+  .panel { padding: .78rem; }
+  .toolbar { align-items: stretch; }
+  .toolbar > h2,.toolbar > div:first-child { width: 100%; }
+  #monthSelect { min-width: 0; flex-basis: 160px; }
+  th,td { padding: .55rem .58rem; }
+  .summary-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .dialog-actions { flex-wrap: wrap; }
+  .progress-head { align-items: flex-start; flex-direction: column; gap: .25rem; }
+  #budgetUsageTable td.actions { min-width: 190px; }
+}
+@media (max-width: 380px) {
+  .summary-grid { grid-template-columns: 1fr; }
+  .desktop-brand-mark { width: 36px; height: 36px; }
+}
+@media print {
+  :root { --color-bg:#fff; --color-surface:#fff; --color-text:#111; --color-border:#bbb; }
+  header,button,.toolbar,.actions { display: none !important; }
+  body { background:#fff; color:#111; }
+  .view { display:none !important; }
+  .view.active { display:block !important; }
+  .panel { border:0; padding:0; box-shadow:none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+}
 </style>
 </head>
 <body>
 <header>
   <div class="header-inner">
     <div class="header-row">
-      <h1 id="appTitle">Finanzplanung – v10</h1>
-      <span id="saveStatus" class="status">Wird geladen …</span>
-      <button id="quickExport">JSON-Backup</button>
-      <label class="file-button"><button type="button" id="quickImportButton">JSON laden</button><input id="quickImport" type="file" accept=".json,application/json"></label>
+      <div class="desktop-brand" aria-label="Benedikt – dein Finanzplaner">
+        <span class="desktop-brand-mark" aria-hidden="true">B</span>
+        <span class="desktop-brand-copy"><strong>Benedikt</strong><small>dein Finanzplaner</small></span>
+      </div>
+      <div class="header-context"><span id="appTitle">Planung</span><span id="saveStatus" class="status">Wird geladen …</span></div>
+      <div class="header-actions">
+        <div class="header-theme"><label for="desktopThemeSetting">Darstellung</label><select id="desktopThemeSetting" aria-label="Darstellung"><option value="system">System</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>
+        <button id="quickExport">Backup</button>
+        <label class="file-button"><button type="button" id="quickImportButton">Import</button><input id="quickImport" type="file" accept=".json,application/json"></label>
+      </div>
     </div>
     <nav aria-label="Hauptnavigation">
       <button data-view="overview" class="active">Monatsübersicht</button>
@@ -328,7 +391,7 @@ td.actions button { margin: .08rem; }
         <select id="monthSelect" aria-label="Monat auswählen"></select>
         <button id="nextMonth" aria-label="Nächster Monat">→</button>
         <span class="spacer"></span>
-        <button id="toggleMonthLock"></button>
+        <button id="toggleMonthLock" aria-label="Monat abschließen oder entsperren">Monat abschließen und sperren</button>
       </div>
       <div id="monthLockInfo"></div>
       <div id="startMonthSetupPanel"></div>
@@ -620,8 +683,8 @@ const BONUS_CATEGORIES = new Set(["bonus", "prämie", "praemie", "provision"]);
 const STATISTICS_GRANULARITIES = new Set(["auto", "monthly", "quarterly", "yearly"]);
 const DONUT_MODES = new Set(["allocation", "expenses"]);
 const DONUT_COLORS = {
-  fixed: "#2457a7", periodic: "#6079b8", loans: "#a34a3a", extra: "#b76a4d", overspend: "#a22b2b",
-  reserves: "#8a5a00", savings: "#397a50", goals: "#5f8b68", budgetSpent: "#b7791f", goalSpent: "#6750a4"
+  fixed: "#4c86af", periodic: "#6f9bb8", loans: "#af4c58", extra: "#c47b84", overspend: "#C10015",
+  reserves: "#71b4a8", savings: "#3f8f73", goals: "#79a989", budgetSpent: "#a96a42", goalSpent: "#806da8"
 };
 const STATISTICS_FLOW_METRICS = [
   "salary","vacationPay","christmasPay","specialPay","bonusPayments","otherManualIncome","totalManualIncome","totalIncome",
@@ -632,6 +695,19 @@ const STATISTICS_FLOW_METRICS = [
 const STATISTICS_STOCK_METRICS = ["endingBalance","effectiveEndingBalance","budgetClosingTotal","regularSavingBalanceTotal","goalOpenBalanceTotal","freeAvailable","savingsAssetsTotal","totalAssets"];
 const currencyFormatter = new Intl.NumberFormat("de-AT", { style: "currency", currency: "EUR" });
 const monthFormatter = new Intl.DateTimeFormat("de-AT", { month: "long", year: "numeric" });
+const THEME_STORAGE_KEY = "benedikt_desktop_theme";
+const THEME_VALUES = new Set(["system", "light", "dark"]);
+function cssColor(token, fallback = "") { return getComputedStyle(document.documentElement).getPropertyValue(token).trim() || fallback; }
+function readDesktopTheme() { try { const value = localStorage.getItem(THEME_STORAGE_KEY) || "system"; return THEME_VALUES.has(value) ? value : "system"; } catch { return "system"; } }
+function applyDesktopTheme(theme, { persist = false, rerender = false } = {}) {
+  const next = THEME_VALUES.has(theme) ? theme : "system";
+  document.documentElement.dataset.theme = next === "system" ? "" : next;
+  document.documentElement.style.colorScheme = next === "dark" ? "dark" : next === "light" ? "light" : "light dark";
+  const select = document.getElementById("desktopThemeSetting"); if (select) select.value = next;
+  if (persist) { try { localStorage.setItem(THEME_STORAGE_KEY, next); } catch {} }
+  if (rerender) requestAnimationFrame(() => { if (activeView === "dashboard") renderDashboard(); else if (activeView === "month") renderMonth(); });
+}
+
 
 let storageAvailable = true;
 let state = loadState();
@@ -1392,7 +1468,7 @@ function buildLiquidityForecast(months, baseResults = null) {
         savings[j] = roundMoney(savings[j] - futureBalance);
         cash[j] = roundMoney(cash[j] + surplus + avoidedFutureContributions);
       }
-      markers.push({ month: ym, label: "Geplante Verwendung", detail: `${goal.name || "Sparziel"}: Ziel erreicht; Prognose berücksichtigt eine geplante Ausgabe von ${money(target)}.`, color: "#5f6b76", symbol: "€" });
+      markers.push({ month: ym, label: "Geplante Verwendung", detail: `${goal.name || "Sparziel"}: Ziel erreicht; Prognose berücksichtigt eine geplante Ausgabe von ${money(target)}.`, color: cssColor("--color-text-muted", "#6c7a84"), symbol: "€" });
       spent = true;
     }
   }
@@ -1489,7 +1565,7 @@ function changePlanningStart(newStart) {
   return true;
 }
 function startMonthChartText(ym, endValue) { return isAnchorStartMonth(ym) ? `\nTeilmonat / Stichtagsmonat\nFinanzieller Stichtag: ${formatLocalDate(state.meta.startAnchorDate)}\nKontostand am Stichtag: ${money(state.settings.openingBalance)}\nPrognose Monatsende: ${money(endValue)}` : ""; }
-function startTimelineMarkers() { return state.meta.startMonthMode === "anchor" ? [{ month: state.meta.start, label: "Finanzieller Start", detail: `Stichtag ${formatLocalDate(state.meta.startAnchorDate)} · Kontostand ${money(state.settings.openingBalance)} · Teilmonat`, color: "#8a5a00" }] : []; }
+function startTimelineMarkers() { return state.meta.startMonthMode === "anchor" ? [{ month: state.meta.start, label: "Finanzieller Start", detail: `Stichtag ${formatLocalDate(state.meta.startAnchorDate)} · Kontostand ${money(state.settings.openingBalance)} · Teilmonat`, color: cssColor("--color-warning", "#397e72") }] : []; }
 
 
 function donutDetailRowsForOpenMonth(ym, result, key) {
@@ -1723,8 +1799,8 @@ function goalTimelineMarkers(results, months) {
       const r = results[ym] || {}, before = Math.max(0, asNumber(r.goalBalancesBeforeSpending && r.goalBalancesBeforeSpending[goal.id]));
       if (before >= target) { reached = ym; break; }
     }
-    if (reached) markers.push({ month: reached, label: "Ziel erreicht", detail: `${goal.name || "Sparziel"}: Zielbetrag ${money(target)} erreicht.`, color: "#286c3f", symbol: "✓" });
-    if (goal.closedMonth && months.includes(goal.closedMonth)) markers.push({ month: goal.closedMonth, label: "Tatsächlich abgeschlossen", detail: `${goal.name || "Sparziel"}: tatsächlich abgeschlossen, Ausgabe ${money(goal.actualSpent || 0)}.`, color: "#5f6b76", symbol: "A" });
+    if (reached) markers.push({ month: reached, label: "Ziel erreicht", detail: `${goal.name || "Sparziel"}: Zielbetrag ${money(target)} erreicht.`, color: cssColor("--color-positive", "#158a35"), symbol: "✓" });
+    if (goal.closedMonth && months.includes(goal.closedMonth)) markers.push({ month: goal.closedMonth, label: "Tatsächlich abgeschlossen", detail: `${goal.name || "Sparziel"}: tatsächlich abgeschlossen, Ausgabe ${money(goal.actualSpent || 0)}.`, color: cssColor("--color-text-muted", "#6c7a84"), symbol: "A" });
   }
   return markers;
 }
@@ -1784,16 +1860,16 @@ function renderDashboard() {
   requestAnimationFrame(() => {
     const labels = flowPeriods.map(p => p.label);
     drawStackedBarChart(document.getElementById("incomeExpenseChart"), labels, [
-      { name: "Einnahmen", values: flowPeriods.map(p => p.data.totalIncome), color: "#2457a7", stack: "income" },
-      { name: "Tatsächliche Ausgaben", values: flowPeriods.map(p => p.data.actualExpenses), color: "#a34a3a", stack: "expense" },
-      { name: "Sparen", values: flowPeriods.map(p => p.data.savingsTransfers), color: "#397a50", stack: "saving" },
-      { name: "Budgetrücklagen", values: flowPeriods.map(p => p.data.reservationTransfers), color: "#8a5a00", stack: "reserve" }
+      { name: "Einnahmen", values: flowPeriods.map(p => p.data.totalIncome), color: cssColor("--color-primary", "#4c86af"), stack: "income" },
+      { name: "Tatsächliche Ausgaben", values: flowPeriods.map(p => p.data.actualExpenses), color: cssColor("--color-secondary", "#af4c58"), stack: "expense" },
+      { name: "Sparen", values: flowPeriods.map(p => p.data.savingsTransfers), color: cssColor("--color-positive", "#158a35"), stack: "saving" },
+      { name: "Budgetrücklagen", values: flowPeriods.map(p => p.data.reservationTransfers), color: cssColor("--color-warning", "#397e72"), stack: "reserve" }
     ], { periods: flowPeriods, granularity: resolvedGranularity });
-    drawLineChart(document.getElementById("balanceChart"), stockPeriods.map(p => p.label), [{ name: "Normales Guthaben", values: stockPeriods.map(p => p.data.effectiveEndingBalance), color: "#2457a7" }], { periods: stockPeriods, granularity: resolvedGranularity, markers: [...startTimelineMarkers(), ...goalTimelineMarkers(results, months)], zeroLine: true });
+    drawLineChart(document.getElementById("balanceChart"), stockPeriods.map(p => p.label), [{ name: "Normales Guthaben", values: stockPeriods.map(p => p.data.effectiveEndingBalance), color: cssColor("--color-primary", "#4c86af") }], { periods: stockPeriods, granularity: resolvedGranularity, markers: [...startTimelineMarkers(), ...goalTimelineMarkers(results, months)], zeroLine: true });
     drawLineChart(document.getElementById("accountRealityChart"), stockPeriods.map(p => p.label), [
-      { name: "Normales Guthaben", values: stockPeriods.map(p => p.data.effectiveEndingBalance), color: "#2457a7" },
-      { name: "Aktive Sparprojekte / Sparvermögen", values: stockPeriods.map(p => p.data.savingsAssetsTotal), color: "#397a50" },
-      { name: "Guthaben + Sparvermögen", values: stockPeriods.map(p => p.data.totalAssets), color: "#1d232a" }
+      { name: "Normales Guthaben", values: stockPeriods.map(p => p.data.effectiveEndingBalance), color: cssColor("--color-primary", "#4c86af") },
+      { name: "Aktive Sparprojekte / Sparvermögen", values: stockPeriods.map(p => p.data.savingsAssetsTotal), color: cssColor("--color-positive", "#158a35") },
+      { name: "Guthaben + Sparvermögen", values: stockPeriods.map(p => p.data.totalAssets), color: cssColor("--color-text", "#17232c") }
     ], { periods: stockPeriods, granularity: resolvedGranularity, markers: [...startTimelineMarkers(), ...forecast.markers], zeroLine: true });
   });
 }
@@ -1820,13 +1896,13 @@ function axisMoney(value) {
 }
 function drawAxes(ctx, width, height, margins, scale) {
   const plotW = width - margins.left - margins.right, plotH = height - margins.top - margins.bottom;
-  ctx.strokeStyle = "#d8dce0"; ctx.fillStyle = "#5f6b76"; ctx.font = "11px system-ui"; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+  ctx.strokeStyle = cssColor("--color-chart-grid", "#d5dfe3"); ctx.fillStyle = cssColor("--color-text-muted", "#6c7a84"); ctx.font = "11px system-ui"; ctx.textAlign = "right"; ctx.textBaseline = "middle";
   for (let i = 0; i <= 5; i++) { const y = margins.top + plotH * i / 5, value = scale.max - (scale.max - scale.min) * i / 5; ctx.beginPath(); ctx.moveTo(margins.left, y); ctx.lineTo(width - margins.right, y); ctx.stroke(); ctx.fillText(axisMoney(value), margins.left - 8, y); }
   return { plotW, plotH };
 }
 function drawLegend(ctx, series, width) {
   ctx.font = "12px system-ui"; ctx.textAlign = "left"; ctx.textBaseline = "middle"; let x = 70;
-  for (const s of series) { ctx.fillStyle = s.color; ctx.fillRect(x, 8, 12, 12); ctx.fillStyle = "#1d232a"; ctx.fillText(s.name, x + 17, 14); x += ctx.measureText(s.name).width + 55; if (x > width - 140) break; }
+  for (const s of series) { ctx.fillStyle = s.color; ctx.fillRect(x, 8, 12, 12); ctx.fillStyle = cssColor("--color-text", "#17232c"); ctx.fillText(s.name, x + 17, 14); x += ctx.measureText(s.name).width + 55; if (x > width - 140) break; }
 }
 function chartTooltipElement() {
   let el = document.getElementById("chartTooltip");
@@ -1844,7 +1920,7 @@ function setCanvasTooltip(canvas, regions) {
   canvas.onmouseleave = () => tooltip.classList.add("hidden");
 }
 function drawXAxisLabels(ctx, labels, positions, height, margins, granularity) {
-  ctx.fillStyle = "#5f6b76"; ctx.font = "10px system-ui"; ctx.textAlign = "center"; ctx.textBaseline = "top";
+  ctx.fillStyle = cssColor("--color-text-muted", "#6c7a84"); ctx.font = "10px system-ui"; ctx.textAlign = "center"; ctx.textBaseline = "top";
   const every = axisLabelEvery(labels.length, granularity || "monthly");
   labels.forEach((label, i) => { if (i % every !== 0 && i !== labels.length - 1) return; ctx.fillText(label, positions[i], height - margins.bottom + 8); });
 }
@@ -1863,7 +1939,7 @@ function drawStackedBarChart(canvas, labels, series, options = {}) {
       for (const item of series.filter(seriesItem => (seriesItem.stack || seriesItem.name) === stack)) {
         const value = Math.max(0, asNumber(item.values[i])), y1 = yFor(base), y2 = yFor(base + value), top = Math.min(y1, y2), bottom = Math.max(y1, y2);
         ctx.save(); ctx.globalAlpha = period && period.status === "forecast" ? .58 : (period && period.status === "mixed" ? .8 : 1); ctx.fillStyle = item.color; ctx.fillRect(x - barW / 2, top, Math.max(1, barW - .5), Math.max(1, bottom - top));
-        if (period && period.status === "mixed") { ctx.strokeStyle = "#8a5a00"; ctx.lineWidth = 1; ctx.strokeRect(x - barW / 2, top, Math.max(1, barW - .5), Math.max(1, bottom - top)); } ctx.restore();
+        if (period && period.status === "mixed") { ctx.strokeStyle = cssColor("--color-warning", "#397e72"); ctx.lineWidth = 1; ctx.strokeRect(x - barW / 2, top, Math.max(1, barW - .5), Math.max(1, bottom - top)); } ctx.restore();
         const header = period ? periodTooltipHeader(period) : label;
         regions.push({ x1:x-barW/2-3,x2:x+barW/2+3,y1:top-3,y2:Math.max(top+7,bottom+3),text:`${header}\n${item.name}: ${money(value)}` }); base += value;
       }
@@ -1877,7 +1953,7 @@ function drawLineChart(canvas, labels, series, options = {}) {
   const { ctx, width, height } = prepareCanvas(canvas, { points: labels.length, pointWidth: 28, scrollable: true, minWidth: 500, maxWidth: 1800 }), margins = { left: 78, right: 18, top: 32, bottom: 44 }, all = series.flatMap(s => s.values.map(asNumber));
   const scale = chartScale(all.concat(options.zeroLine ? [0] : [])), { plotW, plotH } = drawAxes(ctx, width, height, margins, scale); drawLegend(ctx, series, width);
   const stepX = labels.length > 1 ? plotW / (labels.length - 1) : plotW, yFor = value => margins.top + (scale.max - asNumber(value)) / (scale.max - scale.min) * plotH, regions = [], positions = labels.map((_, i) => margins.left + (labels.length > 1 ? i * stepX : plotW / 2));
-  if (options.zeroLine && scale.min <= 0 && scale.max >= 0) { const y = yFor(0); ctx.save(); ctx.strokeStyle = "#a22b2b"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(margins.left, y); ctx.lineTo(width - margins.right, y); ctx.stroke(); ctx.restore(); }
+  if (options.zeroLine && scale.min <= 0 && scale.max >= 0) { const y = yFor(0); ctx.save(); ctx.strokeStyle = cssColor("--color-negative", "#C10015"); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(margins.left, y); ctx.lineTo(width - margins.right, y); ctx.stroke(); ctx.restore(); }
   for (const item of series) {
     for (let i = 1; i < item.values.length; i++) {
       const currentPeriod = options.periods && options.periods[i], previousPeriod = options.periods && options.periods[i - 1];
@@ -1889,7 +1965,7 @@ function drawLineChart(canvas, labels, series, options = {}) {
     item.values.forEach((value, i) => {
       const period = options.periods && options.periods[i], x = positions[i], y = yFor(value);
       ctx.beginPath(); ctx.arc(x, y, 2.8, 0, Math.PI * 2); ctx.fill();
-      if (period && period.status === "mixed") { ctx.save(); ctx.strokeStyle = "#8a5a00"; ctx.lineWidth = 1.7; ctx.beginPath(); ctx.arc(x, y, 5.2, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
+      if (period && period.status === "mixed") { ctx.save(); ctx.strokeStyle = cssColor("--color-warning", "#397e72"); ctx.lineWidth = 1.7; ctx.beginPath(); ctx.arc(x, y, 5.2, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
       const header = period ? periodTooltipHeader(period) : labels[i], endText = period ? `\n${item.name} am Periodenende (${monthName(period.end)}): ${money(value)}` : `\n${item.name}: ${money(value)}`;
       regions.push({ x, y, radius: 10, text: `${header}${endText}` });
     });
@@ -1897,7 +1973,7 @@ function drawLineChart(canvas, labels, series, options = {}) {
   const periods = options.periods || [];
   for (const marker of options.markers || []) {
     let i = periods.findIndex(p => p.months.includes(marker.month)); if (i < 0) continue;
-    const x = positions[i]; ctx.save(); ctx.strokeStyle = marker.color || "#5f6b76"; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(x, margins.top); ctx.lineTo(x, height - margins.bottom); ctx.stroke(); ctx.restore(); regions.push({ x1:x-7,x2:x+7,y1:margins.top,y2:height-margins.bottom,text:`${marker.label}\n${marker.detail}` });
+    const x = positions[i]; ctx.save(); ctx.strokeStyle = marker.color || cssColor("--color-text-muted", "#6c7a84"); ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(x, margins.top); ctx.lineTo(x, height - margins.bottom); ctx.stroke(); ctx.restore(); regions.push({ x1:x-7,x2:x+7,y1:margins.top,y2:height-margins.bottom,text:`${marker.label}\n${marker.detail}` });
   }
   drawXAxisLabels(ctx, labels, positions, height, margins, options.granularity);
   setCanvasTooltip(canvas, regions);
@@ -1907,18 +1983,18 @@ function drawDonutChart(canvas, data) {
   const tooltip = chartTooltipElement(), { ctx, width, height } = prepareCanvas(canvas, { minWidth: 300, minHeight: 260, scrollable: false }), cx = width / 2, cy = height / 2, outer = Math.max(72, Math.min(width, height) * .36), inner = outer * .59;
   const segments = data.segments || [];
   if (!(data.total > 0) || !segments.length) {
-    ctx.fillStyle = "#5f6b76"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = "14px system-ui"; ctx.fillText("Für diesen Monat ist noch keine", cx, cy - 10); ctx.fillText("Geldverwendung eingeplant.", cx, cy + 12); ctx.font = "700 18px system-ui"; ctx.fillStyle = "#1d232a"; ctx.fillText(money(0), cx, cy + 46); canvas.onmousemove = null; canvas.onclick = null; canvas.onmouseleave = () => tooltip.classList.add("hidden"); return;
+    ctx.fillStyle = cssColor("--color-text-muted", "#6c7a84"); ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = "14px system-ui"; ctx.fillText("Für diesen Monat ist noch keine", cx, cy - 10); ctx.fillText("Geldverwendung eingeplant.", cx, cy + 12); ctx.font = "700 18px system-ui"; ctx.fillStyle = cssColor("--color-text", "#17232c"); ctx.fillText(money(0), cx, cy + 46); canvas.onmousemove = null; canvas.onclick = null; canvas.onmouseleave = () => tooltip.classList.add("hidden"); return;
   }
   let hoverIndex = -1;
   const render = () => {
     ctx.clearRect(0, 0, width, height); let angle = -Math.PI / 2;
     segments.forEach((segment, i) => {
       const span = Math.PI * 2 * segment.amount / data.total, end = angle + span;
-      ctx.save(); ctx.globalAlpha = hoverIndex < 0 || hoverIndex === i ? 1 : .48; ctx.beginPath(); ctx.arc(cx, cy, outer, angle, end); ctx.arc(cx, cy, inner, end, angle, true); ctx.closePath(); ctx.fillStyle = segment.color; ctx.fill(); ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); angle = end;
+      ctx.save(); ctx.globalAlpha = hoverIndex < 0 || hoverIndex === i ? 1 : .48; ctx.beginPath(); ctx.arc(cx, cy, outer, angle, end); ctx.arc(cx, cy, inner, end, angle, true); ctx.closePath(); ctx.fillStyle = segment.color; ctx.fill(); ctx.strokeStyle = cssColor("--color-surface", "#ffffff"); ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); angle = end;
     });
-    ctx.fillStyle = "#5f6b76"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = "12px system-ui"; ctx.fillText(data.centerLabel, cx, cy - 24);
-    ctx.fillStyle = "#1d232a"; let amountFont = 22; ctx.font = `700 ${amountFont}px system-ui`; while (amountFont > 14 && ctx.measureText(money(data.total)).width > inner * 1.65) { amountFont -= 1; ctx.font = `700 ${amountFont}px system-ui`; } ctx.fillText(money(data.total), cx, cy);
-    ctx.fillStyle = "#5f6b76"; ctx.font = "11px system-ui"; ctx.fillText(data.centerSubtext, cx, cy + 24);
+    ctx.fillStyle = cssColor("--color-text-muted", "#6c7a84"); ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = "12px system-ui"; ctx.fillText(data.centerLabel, cx, cy - 24);
+    ctx.fillStyle = cssColor("--color-text", "#17232c"); let amountFont = 22; ctx.font = `700 ${amountFont}px system-ui`; while (amountFont > 14 && ctx.measureText(money(data.total)).width > inner * 1.65) { amountFont -= 1; ctx.font = `700 ${amountFont}px system-ui`; } ctx.fillText(money(data.total), cx, cy);
+    ctx.fillStyle = cssColor("--color-text-muted", "#6c7a84"); ctx.font = "11px system-ui"; ctx.fillText(data.centerSubtext, cx, cy + 24);
   };
   const hitIndex = (x, y) => {
     const dx = x - cx, dy = y - cy, radius = Math.hypot(dx, dy); if (radius < inner || radius > outer) return -1;
@@ -1944,13 +2020,13 @@ function renderBackup() {
   else { notice.className = "notice error"; notice.innerHTML = `<strong>Der Browser hat den lokalen Speicher blockiert.</strong> Änderungen bleiben nur bis zum Schließen der Seite erhalten. Verwende den JSON-Export.`; }
 }
 function renderAll() {
-  const title = `Finanzplanung ab ${monthName(state.meta.start)}`; document.getElementById("appTitle").textContent = title; document.title = `${title} – v10`;
+  const title = `Planung ab ${monthName(state.meta.start)}`; document.getElementById("appTitle").textContent = title; document.title = `Benedikt · ${monthName(state.meta.start)}`;
   renderOverview(); renderMonth(); renderBasics(); renderBackup(); if (activeView === "dashboard") renderDashboard();
 }
 function showView(name) {
   activeView = name;
   for (const el of document.querySelectorAll(".view")) el.classList.toggle("active", el.id === `view-${name}`);
-  for (const btn of document.querySelectorAll("nav [data-view]")) btn.classList.toggle("active", btn.dataset.view === name);
+  for (const btn of document.querySelectorAll("nav [data-view]")) { const active = btn.dataset.view === name; btn.classList.toggle("active", active); if (active) btn.setAttribute("aria-current", "page"); else btn.removeAttribute("aria-current"); }
   if (name === "overview") renderOverview(); else if (name === "month") renderMonth(); else if (name === "basics") renderBasics(); else if (name === "dashboard") renderDashboard(); else if (name === "backup") renderBackup();
   location.hash = name === "month" ? `month=${selectedMonth}` : name;
 }
@@ -2090,19 +2166,19 @@ function confirmMonthClose() {
 
 function createBackupPayload(currentState = state) {
   const normalized = normalizeState(currentState);
-  return { app: "Finanzplanung – v10", formatVersion: BACKUP_FORMAT_VERSION, dataVersion: CURRENT_DATA_VERSION, exportedAt: new Date().toISOString(), createdAt: normalized.meta.createdAt, state: normalized };
+  return { app: "Benedikt Desktop", formatVersion: BACKUP_FORMAT_VERSION, dataVersion: CURRENT_DATA_VERSION, exportedAt: new Date().toISOString(), createdAt: normalized.meta.createdAt, state: normalized };
 }
-function exportJson() { const wrapper = createBackupPayload(state); downloadBlob(JSON.stringify(wrapper, null, 2), `Finanzplanung_Backup_${currentLocalDate()}.json`, "application/json"); }
+function exportJson() { const wrapper = createBackupPayload(state); downloadBlob(JSON.stringify(wrapper, null, 2), `Benedikt_Backup_${currentLocalDate()}.json`, "application/json"); }
 function importJsonFile(file) {
   if (!file) return; const reader = new FileReader();
-  reader.onload = () => { try { const parsed = JSON.parse(String(reader.result || "")), normalized = normalizeState(parsed); if (!confirm("Das eingelesene Backup ersetzt die aktuell gespeicherten Daten. Fortfahren?")) return; state = normalized; selectedMonth = state.meta.start; updateAndSave("JSON-Backup eingelesen und migriert"); showView("overview"); } catch (error) { alert("Die Datei konnte nicht als gültiges Finanzplanungs-Backup gelesen werden."); console.error(error); } };
+  reader.onload = () => { try { const parsed = JSON.parse(String(reader.result || "")), normalized = normalizeState(parsed); if (!confirm("Das eingelesene Backup ersetzt die aktuell gespeicherten Daten. Fortfahren?")) return; state = normalized; selectedMonth = state.meta.start; updateAndSave("JSON-Backup eingelesen und migriert"); showView("overview"); } catch (error) { alert("Die Datei konnte nicht als gültiges Benedikt-Backup gelesen werden."); console.error(error); } };
   reader.readAsText(file, "utf-8");
 }
 function downloadBlob(content, filename, type) { const blob = new Blob([content], { type }), url = URL.createObjectURL(blob), a = document.createElement("a"); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
 function exportOverviewCsv() {
   const results = currentResults(), headers = ["Monat","Ist/Plan","Einnahmen","Tatsächliche Ausgaben","Sparen","Budgetrücklagen","Manuelle Umbuchungen","Budgetverbrauch","Budget-Überziehung aus Guthaben","Reserviert am Monatsende","Sparvermögen am Monatsende","Normales Guthaben","Frei verfügbar","Gesamtvermögen","Ist-Kontostand","Ist übernommen"];
   const rows = planningMonths().map(ym => { const r = results[ym]; return [ym,planStatusLabel(ym,r.locked),r.totalIncome,r.actualExpenses,r.savingsTransfers,r.reservationTransfers,r.manualTransferVolume,r.budgetSpent,r.budgetOverspendCash,r.budgetClosingTotal,r.savingsAssetsTotal,r.effectiveEndingBalance,r.freeAvailable,r.totalAssets,r.actualBankBalance ?? "",r.actualBankBalanceAccepted?"ja":"nein"]; });
-  const csv = [headers, ...rows].map(row => row.map(value => { const text = typeof value === "number" ? value.toFixed(2).replace(".", ",") : String(value); return `"${text.replaceAll('"', '""')}"`; }).join(";")).join("\r\n"); downloadBlob("\uFEFF" + csv, `Finanzplanung_Monatsuebersicht_${currentLocalDate()}.csv`, "text/csv;charset=utf-8");
+  const csv = [headers, ...rows].map(row => row.map(value => { const text = typeof value === "number" ? value.toFixed(2).replace(".", ",") : String(value); return `"${text.replaceAll('"', '""')}"`; }).join(";")).join("\r\n"); downloadBlob("\uFEFF" + csv, `Benedikt_Monatsuebersicht_${currentLocalDate()}.csv`, "text/csv;charset=utf-8");
 }
 function resetToDefaults() { if (!confirm("Alle Änderungen, Monatsbuchungen und Sperren werden gelöscht. Wirklich zurücksetzen?")) return; state = createNewState(); selectedMonth = state.meta.start; updateAndSave("Auf leere Ausgangsdaten zurückgesetzt"); showView("overview"); }
 function routeFromHash() {
@@ -2154,6 +2230,11 @@ document.addEventListener("change", event => {
   }
 });
 
+document.getElementById("desktopThemeSetting").addEventListener("change", event => applyDesktopTheme(event.target.value, { persist: true, rerender: true }));
+const systemThemeQuery = matchMedia("(prefers-color-scheme: dark)");
+const onSystemThemeChange = () => { if (readDesktopTheme() === "system") applyDesktopTheme("system", { rerender: true }); };
+if (systemThemeQuery.addEventListener) systemThemeQuery.addEventListener("change", onSystemThemeChange); else systemThemeQuery.addListener(onSystemThemeChange);
+
 document.getElementById("monthSelect").addEventListener("change", event => { selectedDonutCategory = ""; selectedMonth = event.target.value; ensurePlanningThrough(selectedMonth); renderMonth(); location.hash = `month=${selectedMonth}`; });
 document.getElementById("prevMonth").addEventListener("click", () => { selectedDonutCategory = ""; selectedMonth = addMonths(selectedMonth, -1); renderMonth(); location.hash = `month=${selectedMonth}`; });
 document.getElementById("nextMonth").addEventListener("click", () => { selectedDonutCategory = ""; selectedMonth = addMonths(selectedMonth, 1); if (ensurePlanningThrough(selectedMonth)) saveState("Planung erweitert"); renderMonth(); location.hash = `month=${selectedMonth}`; });
@@ -2177,6 +2258,7 @@ for (const [inputId, buttonId] of [["quickImport","quickImportButton"],["importB
 window.addEventListener("hashchange", routeFromHash);
 window.addEventListener("resize", () => { if (activeView === "dashboard") renderDashboard(); else if (activeView === "month") renderMonth(); });
 
+applyDesktopTheme(readDesktopTheme());
 renderAll();
 if (storageAvailable) saveState("Automatisch gespeichert"); else setSaveStatus("Lokaler Speicher blockiert – JSON-Backup verwenden", true);
 if (location.hash) routeFromHash();

@@ -1,6 +1,6 @@
-# Finanzplanung Mobile
+# Benedikt – dein Finanzplaner
 
-Mobile, offline-faehige Begleit-PWA fuer `Finanzplanung_v10.html`.
+Responsive, offline-faehige Finanzplanung fuer Smartphone und Desktop. Die bestehende Finanz- und FP1-Logik bleibt kompatibel; die Oberflaeche ist als **Benedikt – dein Finanzplaner** gebrandet.
 
 ## Grundprinzip
 

@@ -122,7 +122,7 @@ function day(value,name='Datum') { const s=str(value,name); if(!/^\d{4}-(0[1-9]|
 function normalizeDetails(details=[]) { if(!Array.isArray(details)) return []; return details.slice(0,500).map((d,i)=>({ label:str(d?.label||`Position ${i+1}`,'Detailbezeichnung',{max:160}), amountCents:cents(d?.amountCents??0,'Detailbetrag',{allowNegative:false}) })).filter(x=>x.amountCents>0); }
 function normalizeSegments(segments=[]) {
   if(!Array.isArray(segments)) throw new Error('Donut-Segmente müssen eine Liste sein.');
-  return segments.slice(0,100).map((s,i)=>({ key:str(s?.key||`segment-${i+1}`,'Segment-ID',{max:80}), label:str(s?.label||'Segment','Segmentname',{max:120}), amountCents:cents(s?.amountCents??0,'Segmentbetrag',{allowNegative:false}), group:['cost','reserve','saving','available'].includes(s?.group)?s.group:'cost', color:/^#[0-9a-f]{6}$/i.test(String(s?.color||''))?String(s.color):'#6079b8', details:normalizeDetails(s?.details) })).filter(x=>x.amountCents>0);
+  return segments.slice(0,100).map((s,i)=>({ key:str(s?.key||`segment-${i+1}`,'Segment-ID',{max:80}), label:str(s?.label||'Segment','Segmentname',{max:120}), amountCents:cents(s?.amountCents??0,'Segmentbetrag',{allowNegative:false}), group:['cost','reserve','saving','available'].includes(s?.group)?s.group:'cost', color:/^#[0-9a-f]{6}$/i.test(String(s?.color||''))?String(s.color):'#4c86af', details:normalizeDetails(s?.details) })).filter(x=>x.amountCents>0);
 }
 function normalizeDonut(d, mode) {
   const x=d&&typeof d==='object'?d:{}; const segments=normalizeSegments(x.segments||[]); const totalCalc=segments.reduce((s,v)=>s+v.amountCents,0);

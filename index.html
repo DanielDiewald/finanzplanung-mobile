@@ -3,36 +3,42 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#2457a7">
+  <meta name="theme-color" content="#4c86af">
   <meta name="color-scheme" content="light dark">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Finanzmonat">
-  <meta name="description" content="Offline-Begleit-App für Finanzplanung v10: Monatsstand, Budgets, Buchungen und FP1-Synchronisation.">
+  <meta name="apple-mobile-web-app-title" content="Benedikt">
+  <meta name="description" content="Benedikt – dein Finanzplaner. Offlinefähige Finanzplanung mit Monatsübersicht, Budgets, Buchungen und sicherer Synchronisation zwischen Smartphone und PC.">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./assets/icons/icon-180.png">
   <link rel="icon" href="./assets/icons/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./css/app.css">
-  <title>Finanzmonat</title>
+  <title>Benedikt · dein Finanzplaner</title>
 </head>
 <body>
   <noscript><div class="fatal">Diese App benötigt JavaScript.</div></noscript>
 
   <header class="app-header">
-    <div>
-      <p class="eyebrow">Finanzplanung · Mobile</p>
+    <div class="header-identity">
+      <a class="brand-lockup" href="#/month" aria-label="Benedikt – dein Finanzplaner, zur Monatsansicht">
+        <span class="brand-mark" aria-hidden="true">B</span>
+        <span class="brand-copy"><strong>Benedikt</strong><small>dein Finanzplaner</small></span>
+      </a>
+      <span class="header-divider" aria-hidden="true"></span>
       <h1 id="headerTitle">Monat</h1>
     </div>
     <div class="header-actions">
-      <span id="offlineBadge" class="status-pill hidden">Offline</span>
-      <button id="installButton" class="icon-button hidden" type="button" aria-label="App installieren" title="App installieren">↧</button>
+      <span id="offlineBadge" class="status-pill status-offline hidden"><span class="status-dot" aria-hidden="true"></span>Offline</span>
+      <button id="installButton" class="icon-button hidden" type="button" aria-label="Benedikt installieren" title="Benedikt installieren">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg>
+      </button>
     </div>
   </header>
 
   <main id="appMain" class="app-main" tabindex="-1">
     <section id="view-month" class="view active" data-view="month" aria-labelledby="monthHeading">
       <div id="noPlanState" class="empty-state hidden">
-        <div class="empty-icon" aria-hidden="true">↔</div>
+        <div class="empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 7h11m0 0-3-3m3 3-3 3M17 17H6m0 0 3 3m-3-3 3-3"/></svg></div>
         <h2>Noch kein Finanzplan synchronisiert</h2>
         <p>Importiere zuerst den aktuellen Monatsplan vom PC. Planwerte werden am Smartphone nicht bearbeitet.</p>
         <div class="stack-actions">
@@ -142,14 +148,14 @@
     <section id="view-sync" class="view" data-view="sync" aria-labelledby="syncHeading">
       <div class="section-head page-head">
         <div>
-          <p class="eyebrow">FP1 · Offline</p>
+          <p class="eyebrow">Geräte verbinden</p>
           <h2 id="syncHeading">Synchronisieren</h2>
         </div>
       </div>
 
       <section class="card">
-        <h3>Plan vom PC übernehmen</h3>
-        <p class="help">Der Desktop bleibt die maßgebliche Planungsquelle. Erst nach der Vorschau wird der lokale Plan ersetzt.</p>
+        <div class="sync-step"><span>1</span><div><p class="eyebrow">Vom PC auf das Smartphone</p><h3>Plan übernehmen</h3></div></div>
+        <p class="help">Übernimm deinen aktuellen Monatsplan. Du kannst den QR-Code scannen oder den Code manuell eingeben.</p>
         <div class="button-grid">
           <button id="scanPlanButton" class="primary" type="button">QR-Code scannen</button>
           <button id="pastePlanButton" type="button">Code eingeben</button>
@@ -161,8 +167,8 @@
       <section class="card">
         <div class="section-head">
           <div>
-            <h3>Änderungen an PC übertragen</h3>
-            <p class="help">Code-Erzeugung markiert Buchungen nur als „vorbereitet“. Erst ein späterer Plan-Code kann sie bestätigen.</p>
+            <div class="sync-step"><span>2</span><div><p class="eyebrow">Vom Smartphone auf den PC</p><h3>Buchungen übertragen</h3></div></div>
+            <p class="help">Erzeuge einen Übertragungscode für neue oder geänderte Buchungen. Bestätigt werden sie nach der nächsten Planübernahme.</p>
           </div>
         </div>
         <div id="pendingSyncSummary" class="sync-stats"></div>
@@ -195,37 +201,53 @@
         </div>
       </div>
 
-      <section class="card form-stack">
-        <label class="field">
-          <span>Gerätename</span>
-          <input id="deviceName" maxlength="60" autocomplete="off" placeholder="z. B. iPhone">
-        </label>
-        <label class="field">
-          <span>Darstellung</span>
-          <select id="themeSetting">
-            <option value="system">System</option>
-            <option value="light">Hell</option>
-            <option value="dark">Dunkel</option>
-          </select>
-        </label>
-      </section>
-
-      <section class="card compact-card">
-        <h3>Datenschutz &amp; Speicherung</h3>
-        <p class="help">Plan und Buchungen liegen in IndexedDB auf diesem Gerät. Die App enthält keine Analytics, kein Konto, keine Cloud-Synchronisierung und keine Bankanbindung.</p>
-        <div class="button-grid">
-          <button id="exportLocalData" type="button">Lokales Backup</button>
-          <button id="resetLocalData" type="button" class="danger">Lokale Daten löschen</button>
+      <section class="settings-group" aria-labelledby="settingsDeviceHeading">
+        <div class="settings-group-head"><p class="eyebrow">Gerät</p><h3 id="settingsDeviceHeading">Dieses Gerät</h3></div>
+        <div class="card form-stack">
+          <label class="field">
+            <span>Gerätename</span>
+            <input id="deviceName" maxlength="60" autocomplete="off" placeholder="z. B. iPhone">
+          </label>
         </div>
       </section>
 
-      <section class="card compact-card">
-        <h3>App</h3>
+      <section class="settings-group" aria-labelledby="settingsAppearanceHeading">
+        <div class="settings-group-head"><p class="eyebrow">Darstellung</p><h3 id="settingsAppearanceHeading">Farbschema</h3></div>
+        <div class="card compact-card">
+          <label class="field">
+            <span>Darstellung</span>
+            <select id="themeSetting">
+              <option value="system">System</option>
+              <option value="light">Hell</option>
+              <option value="dark">Dunkel</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="settings-group" aria-labelledby="settingsDataHeading">
+        <div class="settings-group-head"><p class="eyebrow">Daten</p><h3 id="settingsDataHeading">Sicherung &amp; Speicher</h3></div>
+        <div class="card compact-card">
+          <p class="help">Plan und Buchungen liegen in IndexedDB auf diesem Gerät. Benedikt verwendet keine Analytics, kein Konto, keine Cloud-Synchronisierung und keine Bankanbindung.</p>
+          <div class="button-grid">
+            <button id="exportLocalData" type="button">Backup erstellen</button>
+          </div>
+          <div class="danger-zone">
+            <div><strong>Lokale Daten löschen</strong><small>Entfernt Pläne, Buchungen und Sync-Stände von diesem Gerät.</small></div>
+            <button id="resetLocalData" type="button" class="danger">Daten löschen</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-group" aria-labelledby="settingsAboutHeading">
+        <div class="settings-group-head"><p class="eyebrow">Über Benedikt</p><h3 id="settingsAboutHeading">App-Information</h3></div>
+        <section class="card compact-card">
         <div class="key-values">
           <div><span>Version</span><strong id="appVersion">1.0.0</strong></div>
           <div><span>Protokoll</span><strong>FP1</strong></div>
           <div><span>Speicherung</span><strong>IndexedDB</strong></div>
         </div>
+        </section>
       </section>
     </section>
   </main>
@@ -233,10 +255,10 @@
   <button id="fabExpense" class="fab hidden" type="button" aria-label="Ausgabe erfassen">+ Ausgabe</button>
 
   <nav class="bottom-nav" aria-label="Hauptnavigation">
-    <button type="button" class="active" data-nav="month"><span aria-hidden="true">◉</span><span>Monat</span></button>
-    <button type="button" data-nav="transactions"><span aria-hidden="true">≡</span><span>Buchungen</span></button>
-    <button type="button" data-nav="sync"><span aria-hidden="true">↔</span><span>Sync</span><span id="syncNavBadge" class="nav-badge hidden">0</span></button>
-    <button type="button" data-nav="settings"><span aria-hidden="true">⚙</span><span>Einstellungen</span></button>
+    <button type="button" class="active" data-nav="month"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V20H4zM9 20v-5h6v5"/></svg><span>Monat</span></button>
+    <button type="button" data-nav="transactions"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 6h13M7 12h13M7 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span>Buchungen</span></button>
+    <button type="button" data-nav="sync"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11m0 0-3-3m3 3-3 3M17 17H6m0 0 3 3m-3-3 3-3"/></svg><span>Sync</span><span id="syncNavBadge" class="nav-badge hidden">0</span></button>
+    <button type="button" data-nav="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM19 12a7 7 0 0 0-.08-1l2.02-1.58-2-3.46-2.46.99a7 7 0 0 0-1.72-1L14.4 3h-4.8l-.36 2.95a7 7 0 0 0-1.72 1l-2.46-.99-2 3.46L5.08 11a7 7 0 0 0 0 2l-2.02 1.58 2 3.46 2.46-.99a7 7 0 0 0 1.72 1L9.6 21h4.8l.36-2.95a7 7 0 0 0 1.72-1l2.46.99 2-3.46L18.92 13c.05-.33.08-.66.08-1z"/></svg><span>Einstellungen</span></button>
   </nav>
 
   <dialog id="transactionDialog" class="sheet-dialog">
@@ -328,7 +350,7 @@
         <button id="scannerPhotoButton" type="button">QR fotografieren</button>
         <button id="scannerPasteFallback" type="button">Stattdessen Code eingeben</button>
       </div>
-      <input id="scannerPhotoInput" class="hidden" type="file" accept="image/*" capture="environment">
+      <input id="scannerPhotoInput" class="hidden" type="file" accept="image/*" capture="environment" aria-label="QR-Code fotografieren">
     </div>
   </dialog>
 
