@@ -1,0 +1,26 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { buildTransactionPayload, decodeFP1, dedupeTransactionImport, encodeFP1, validateMobileTransaction, validatePlanPayload } from '../js/services/sync.js';
+import { parseEuroToCents } from '../js/utils.js';
+
+const planRaw=JSON.parse(fs.readFileSync(new URL('../fixtures/sample-plan.json',import.meta.url),'utf8'));
+const plan=validatePlanPayload(planRaw);
+const settings={deviceId:'dev-1',deviceName:'Testgerät'};
+const tx=(overrides={})=>({id:'tx-1',recordRevision:1,planId:plan.planId,basePlanRevision:14,createdAt:'2026-08-11T17:00:00.000Z',updatedAt:'2026-08-11T17:00:00.000Z',date:'2026-08-11',month:'2026-08',kind:'budget_expense',amountCents:2990,budgetId:'budget-food',category:'Lebensmittel',description:'Billa',note:'',status:'local',...overrides});
+
+test('FP1 PLAN encode -> decode, deflate', async()=>{ const code=await encodeFP1('P',plan,{forceEncoding:'Z'});assert.match(code,/^FP1-P-Z-[0-9A-F]{8}-/);const decoded=await decodeFP1(code,{expectedType:'P'});assert.equal(decoded.planId,plan.planId);assert.equal(decoded.budgets[0].id,'budget-food');assert.equal(decoded.donuts.planned.segments[2].key,'reserves'); });
+test('FP1 fallback N encode -> decode', async()=>{const code=await encodeFP1('P',plan,{forceEncoding:'N'});const decoded=await decodeFP1(code,{expectedType:'P'});assert.equal(decoded.revision,14);});
+test('beschädigter Code schlägt an Prüfsumme fehl', async()=>{const code=await encodeFP1('P',plan,{forceEncoding:'N'});const broken=code.slice(0,-2)+(code.endsWith('AA')?'BB':'AA');await assert.rejects(()=>decodeFP1(broken,{expectedType:'P'}),/Prüfsummenfehler/);});
+test('falsche FP-Version wird abgewiesen', async()=>{await assert.rejects(()=>decodeFP1('FP2-P-N-00000000-AA',{expectedType:'P'}),/Protokollversion|präfix/i);});
+test('falscher Code-Typ wird abgewiesen', async()=>{const payload=buildTransactionPayload({plan,transactions:[tx()],settings,exportId:'exp-1'});const code=await encodeFP1('T',payload,{forceEncoding:'N'});await assert.rejects(()=>decodeFP1(code,{expectedType:'P'}),/Falscher Code-Typ/);});
+test('TRANSACTION encode -> decode mit stabiler ID und Revision', async()=>{const payload=buildTransactionPayload({plan,transactions:[tx()],settings,exportId:'exp-1'});const code=await encodeFP1('T',payload,{forceEncoding:'Z'});const decoded=await decodeFP1(code,{expectedType:'T'});assert.equal(decoded.transactions[0].id,'tx-1');assert.equal(decoded.transactions[0].recordRevision,1);assert.equal(decoded.exportId,'exp-1');});
+test('Duplikatschutz übernimmt nur neue IDs',()=>{const payload=buildTransactionPayload({plan,transactions:[tx(),tx({id:'tx-2'})],settings,exportId:'exp-2'});const {fresh,duplicates}=dedupeTransactionImport(new Set(['tx-1']),payload);assert.deepEqual(fresh.map(x=>x.id),['tx-2']);assert.deepEqual(duplicates.map(x=>x.id),['tx-1']);});
+test('Budget-Umbenennung beeinflusst ID nicht',()=>{const renamed=validatePlanPayload({...planRaw,budgets:planRaw.budgets.map(b=>b.id==='budget-food'?{...b,name:'Essen & Trinken'}:b)});assert.equal(renamed.budgets.find(b=>b.name==='Essen & Trinken').id,'budget-food');});
+test('negative und ungültige Beträge werden verworfen',()=>{assert.throws(()=>validateMobileTransaction({...tx(),amountCents:-1}),/Betrag/);assert.throws(()=>validateMobileTransaction({...tx(),amountCents:12.5}),/Betrag/);assert.equal(parseEuroToCents('29,90'),2990);assert.equal(parseEuroToCents('1.234,56'),123456);});
+test('Monatswechsel: Datum und Monat müssen zusammenpassen',()=>{assert.throws(()=>validateMobileTransaction({...tx(),date:'2026-09-01',month:'2026-08'}),/Buchungsmonat.*Datum/);});
+test('Löschung und Korrektur sind versioniert',()=>{const deleted=validateMobileTransaction({...tx(),recordRevision:3,op:'delete'});assert.equal(deleted.op,'delete');assert.equal(deleted.recordRevision,3);});
+test('alter Basis-Planstand bleibt im T-Code erhalten',()=>{const payload=buildTransactionPayload({plan:{...plan,revision:16},transactions:[tx()],settings,exportId:'exp-old'});assert.equal(payload.basePlanRevision,16);});
+test('viele Transaktionen bleiben verlustfrei codierbar', async()=>{const rows=Array.from({length:600},(_,i)=>tx({id:`tx-${i}`,description:`Buchung ${i}`,amountCents:100+i,recordRevision:1}));const payload=buildTransactionPayload({plan,transactions:rows,settings,exportId:'exp-many'});const code=await encodeFP1('T',payload,{forceEncoding:'Z'});const decoded=await decodeFP1(code,{expectedType:'T'});assert.equal(decoded.transactions.length,600);assert.ok(code.length>1000);});
+
+test('T-Code kann offene Buchungen aus mehreren Monaten tragen',()=>{const rows=[tx(),tx({id:'tx-july',date:'2026-07-31',month:'2026-07'})];const payload=buildTransactionPayload({plan,transactions:rows,settings,exportId:'exp-cross-month'});assert.equal(payload.month,plan.month);assert.deepEqual(payload.transactions.map(x=>x.month),['2026-08','2026-07']);});

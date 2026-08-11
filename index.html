@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#2457a7">
+  <meta name="color-scheme" content="light dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Finanzmonat">
+  <meta name="description" content="Offline-Begleit-App für Finanzplanung v10: Monatsstand, Budgets, Buchungen und FP1-Synchronisation.">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./assets/icons/icon-180.png">
+  <link rel="icon" href="./assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./css/app.css">
+  <title>Finanzmonat</title>
+</head>
+<body>
+  <noscript><div class="fatal">Diese App benötigt JavaScript.</div></noscript>
+
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Finanzplanung · Mobile</p>
+      <h1 id="headerTitle">Monat</h1>
+    </div>
+    <div class="header-actions">
+      <span id="offlineBadge" class="status-pill hidden">Offline</span>
+      <button id="installButton" class="icon-button hidden" type="button" aria-label="App installieren" title="App installieren">↧</button>
+    </div>
+  </header>
+
+  <main id="appMain" class="app-main" tabindex="-1">
+    <section id="view-month" class="view active" data-view="month" aria-labelledby="monthHeading">
+      <div id="noPlanState" class="empty-state hidden">
+        <div class="empty-icon" aria-hidden="true">↔</div>
+        <h2>Noch kein Finanzplan synchronisiert</h2>
+        <p>Importiere zuerst den aktuellen Monatsplan vom PC. Planwerte werden am Smartphone nicht bearbeitet.</p>
+        <div class="stack-actions">
+          <button class="primary" type="button" data-go="sync" data-sync-action="scan">QR-Code scannen</button>
+          <button type="button" data-go="sync" data-sync-action="paste">Code eingeben</button>
+        </div>
+      </div>
+
+      <div id="monthContent" class="hidden">
+        <div id="monthWarnings"></div>
+        <div class="month-toolbar">
+          <div>
+            <p class="eyebrow">Aktueller Planstand</p>
+            <h2 id="monthHeading">–</h2>
+          </div>
+          <span id="planRevisionBadge" class="status-pill">Rev. –</span>
+        </div>
+
+        <section class="hero-card" aria-labelledby="freeAvailableLabel">
+          <div class="hero-label" id="freeAvailableLabel">Frei verfügbar</div>
+          <div class="hero-value" id="freeAvailableValue">0,00 €</div>
+          <div class="hero-meta" id="freeAvailableMeta">nach Mindestpuffer</div>
+        </section>
+
+        <section class="metrics-grid" aria-label="Monatswerte">
+          <article class="metric-card">
+            <span class="metric-label">Kontostand</span>
+            <strong id="accountBalanceValue">–</strong>
+            <small id="accountBalanceHint">vom Desktop</small>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Budgetvermögen</span>
+            <strong id="budgetAssetsValue">0,00 €</strong>
+            <small>reserviert</small>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Sparvermögen</span>
+            <strong id="savingsAssetsValue">0,00 €</strong>
+            <small>nicht frei verfügbar</small>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Gesamtvermögen</span>
+            <strong id="totalAssetsValue">0,00 €</strong>
+            <small>inkl. Budgets &amp; Sparen</small>
+          </article>
+        </section>
+
+        <section class="card" aria-labelledby="donutTitle">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Monat</p>
+              <h2 id="donutTitle">Geldverwendung</h2>
+            </div>
+          </div>
+          <div class="segmented" role="tablist" aria-label="Donut-Ansicht">
+            <button type="button" class="active" data-donut-mode="planned" role="tab">Geplant</button>
+            <button type="button" data-donut-mode="actual" role="tab">Tatsächlich</button>
+            <button type="button" data-donut-mode="available" role="tab">Verfügbar</button>
+          </div>
+          <p id="donutHelp" class="help"></p>
+          <div class="donut-wrap">
+            <canvas id="donutCanvas" width="320" height="320" aria-label="Donut-Diagramm"></canvas>
+            <div class="donut-center" aria-hidden="true">
+              <span id="donutCenterLabel">Geplant</span>
+              <strong id="donutCenterValue">0,00 €</strong>
+            </div>
+          </div>
+          <div id="donutLegend" class="donut-legend"></div>
+          <div id="donutDetails" class="donut-details hidden"></div>
+        </section>
+
+        <section class="card" aria-labelledby="budgetHeading">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Für den Alltag</p>
+              <h2 id="budgetHeading">Budgets</h2>
+            </div>
+            <span id="budgetCount" class="status-pill">0</span>
+          </div>
+          <div id="budgetList" class="budget-list"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="view-transactions" class="view" data-view="transactions" aria-labelledby="transactionsHeading">
+      <div class="section-head page-head">
+        <div>
+          <p class="eyebrow">Lokal erfasst</p>
+          <h2 id="transactionsHeading">Buchungen</h2>
+        </div>
+        <button id="addIncomeButton" type="button">+ Einnahme</button>
+      </div>
+      <div class="filter-row" role="group" aria-label="Buchungen filtern">
+        <button type="button" class="chip active" data-filter="all">Alle</button>
+        <button type="button" class="chip" data-filter="expense">Ausgaben</button>
+        <button type="button" class="chip" data-filter="income">Einnahmen</button>
+        <button type="button" class="chip" data-filter="pending">Nicht bestätigt</button>
+      </div>
+      <label class="field compact-field">
+        <span>Budget / Kategorie</span>
+        <select id="transactionBudgetFilter"><option value="">Alle</option></select>
+      </label>
+      <div id="transactionsSummary" class="notice"></div>
+      <div id="transactionList" class="transaction-list"></div>
+    </section>
+
+    <section id="view-sync" class="view" data-view="sync" aria-labelledby="syncHeading">
+      <div class="section-head page-head">
+        <div>
+          <p class="eyebrow">FP1 · Offline</p>
+          <h2 id="syncHeading">Synchronisieren</h2>
+        </div>
+      </div>
+
+      <section class="card">
+        <h3>Plan vom PC übernehmen</h3>
+        <p class="help">Der Desktop bleibt die maßgebliche Planungsquelle. Erst nach der Vorschau wird der lokale Plan ersetzt.</p>
+        <div class="button-grid">
+          <button id="scanPlanButton" class="primary" type="button">QR-Code scannen</button>
+          <button id="pastePlanButton" type="button">Code eingeben</button>
+        </div>
+        <div id="cameraSupportHint" class="small muted"></div>
+        <div id="planImportPreview" class="sync-preview hidden"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <div>
+            <h3>Änderungen an PC übertragen</h3>
+            <p class="help">Code-Erzeugung markiert Buchungen nur als „vorbereitet“. Erst ein späterer Plan-Code kann sie bestätigen.</p>
+          </div>
+        </div>
+        <div id="pendingSyncSummary" class="sync-stats"></div>
+        <button id="generateTransactionCode" class="primary full" type="button">Synchronisationscode erzeugen</button>
+        <div id="transactionExport" class="export-box hidden">
+          <div id="qrOutput" class="qr-output" aria-label="QR-Code"></div>
+          <div id="qrTooLarge" class="notice warn hidden"></div>
+          <label class="field">
+            <span>Textcode</span>
+            <textarea id="transactionCodeText" rows="6" readonly spellcheck="false"></textarea>
+          </label>
+          <div class="button-grid">
+            <button id="copyTransactionCode" type="button">Code kopieren</button>
+            <button id="shareTransactionCode" type="button">Teilen</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card compact-card">
+        <h3>Letzter Planstand</h3>
+        <div id="syncPlanMeta" class="key-values"></div>
+      </section>
+    </section>
+
+    <section id="view-settings" class="view" data-view="settings" aria-labelledby="settingsHeading">
+      <div class="section-head page-head">
+        <div>
+          <p class="eyebrow">Lokal auf diesem Gerät</p>
+          <h2 id="settingsHeading">Einstellungen</h2>
+        </div>
+      </div>
+
+      <section class="card form-stack">
+        <label class="field">
+          <span>Gerätename</span>
+          <input id="deviceName" maxlength="60" autocomplete="off" placeholder="z. B. iPhone">
+        </label>
+        <label class="field">
+          <span>Darstellung</span>
+          <select id="themeSetting">
+            <option value="system">System</option>
+            <option value="light">Hell</option>
+            <option value="dark">Dunkel</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="card compact-card">
+        <h3>Datenschutz &amp; Speicherung</h3>
+        <p class="help">Plan und Buchungen liegen in IndexedDB auf diesem Gerät. Die App enthält keine Analytics, kein Konto, keine Cloud-Synchronisierung und keine Bankanbindung.</p>
+        <div class="button-grid">
+          <button id="exportLocalData" type="button">Lokales Backup</button>
+          <button id="resetLocalData" type="button" class="danger">Lokale Daten löschen</button>
+        </div>
+      </section>
+
+      <section class="card compact-card">
+        <h3>App</h3>
+        <div class="key-values">
+          <div><span>Version</span><strong id="appVersion">1.0.0</strong></div>
+          <div><span>Protokoll</span><strong>FP1</strong></div>
+          <div><span>Speicherung</span><strong>IndexedDB</strong></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <button id="fabExpense" class="fab hidden" type="button" aria-label="Ausgabe erfassen">+ Ausgabe</button>
+
+  <nav class="bottom-nav" aria-label="Hauptnavigation">
+    <button type="button" class="active" data-nav="month"><span aria-hidden="true">◉</span><span>Monat</span></button>
+    <button type="button" data-nav="transactions"><span aria-hidden="true">≡</span><span>Buchungen</span></button>
+    <button type="button" data-nav="sync"><span aria-hidden="true">↔</span><span>Sync</span><span id="syncNavBadge" class="nav-badge hidden">0</span></button>
+    <button type="button" data-nav="settings"><span aria-hidden="true">⚙</span><span>Einstellungen</span></button>
+  </nav>
+
+  <dialog id="transactionDialog" class="sheet-dialog">
+    <form id="transactionForm" method="dialog" class="sheet">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div class="section-head">
+        <div>
+          <p class="eyebrow" id="transactionDialogEyebrow">Neue Buchung</p>
+          <h2 id="transactionDialogTitle">Ausgabe erfassen</h2>
+        </div>
+        <button type="button" class="icon-button" data-close-dialog="transactionDialog" aria-label="Schließen">×</button>
+      </div>
+      <input id="transactionId" type="hidden">
+      <input id="transactionKind" type="hidden" value="budget_expense">
+
+      <label class="field amount-field">
+        <span>Betrag</span>
+        <div class="amount-input"><input id="transactionAmount" inputmode="decimal" autocomplete="off" placeholder="0,00" required><span>€</span></div>
+      </label>
+
+      <div id="expenseKindSelector" class="segmented" role="group" aria-label="Ausgabenart">
+        <button type="button" class="active" data-expense-kind="budget_expense">Budget</button>
+        <button type="button" data-expense-kind="expense">Sonstige Ausgabe</button>
+      </div>
+
+      <label id="budgetField" class="field">
+        <span>Budget</span>
+        <select id="transactionBudget"></select>
+      </label>
+
+      <label id="categoryField" class="field hidden">
+        <span>Kategorie</span>
+        <select id="transactionCategory"></select>
+      </label>
+
+      <label class="field">
+        <span>Datum</span>
+        <input id="transactionDate" type="date" required>
+      </label>
+      <label class="field">
+        <span>Beschreibung <small>optional</small></span>
+        <input id="transactionDescription" maxlength="100" autocomplete="off" placeholder="z. B. Billa">
+      </label>
+      <label class="field">
+        <span>Notiz <small>optional</small></span>
+        <textarea id="transactionNote" rows="2" maxlength="300" placeholder="Kurze Notiz"></textarea>
+      </label>
+      <div id="transactionLockNotice" class="notice warn hidden">Diese Buchung wurde bereits bestätigt und kann in Version 1 nicht mehr geändert werden.</div>
+      <div class="sheet-actions">
+        <button id="deleteTransactionButton" class="danger hidden" type="button">Löschen</button>
+        <span class="spacer"></span>
+        <button type="button" data-close-dialog="transactionDialog">Abbrechen</button>
+        <button id="saveTransactionButton" class="primary" value="default">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="codeDialog" class="sheet-dialog">
+    <form id="codeForm" method="dialog" class="sheet">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div class="section-head">
+        <div><p class="eyebrow">FP1-P</p><h2>Plan-Code eingeben</h2></div>
+        <button type="button" class="icon-button" data-close-dialog="codeDialog" aria-label="Schließen">×</button>
+      </div>
+      <label class="field">
+        <span>Synchronisationscode</span>
+        <textarea id="planCodeInput" rows="8" spellcheck="false" placeholder="FP1-P-Z-…"></textarea>
+      </label>
+      <div id="codeDialogError" class="notice error hidden"></div>
+      <div class="sheet-actions"><span class="spacer"></span><button type="button" data-close-dialog="codeDialog">Abbrechen</button><button id="decodePlanCode" class="primary" value="default">Prüfen</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="scannerDialog" class="sheet-dialog scanner-dialog">
+    <div class="sheet scanner-sheet">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div class="section-head">
+        <div><p class="eyebrow">Kamera</p><h2>Plan-QR scannen</h2></div>
+        <button type="button" class="icon-button" id="closeScanner" aria-label="Scanner schließen">×</button>
+      </div>
+      <div class="scanner-frame">
+        <video id="scannerVideo" playsinline muted></video>
+        <div class="scanner-guide" aria-hidden="true"></div>
+      </div>
+      <canvas id="scannerCanvas" class="hidden"></canvas>
+      <div id="scannerStatus" class="notice">Kamera wird erst nach deiner Freigabe verwendet.</div>
+      <div class="button-grid">
+        <button id="startScanner" class="primary" type="button">Kamera starten</button>
+        <button id="scannerPasteFallback" type="button">Stattdessen Code eingeben</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="toastRegion" class="toast-region" role="status" aria-live="polite"></div>
+
+  <script src="./assets/vendor/qrcode.min.js"></script>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

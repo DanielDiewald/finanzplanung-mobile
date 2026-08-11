@@ -1,0 +1,38 @@
+{
+  "protocolVersion": 1,
+  "type": "P",
+  "planId": "11111111-2222-4333-8444-555555555555",
+  "planName": "Finanzplanung",
+  "revision": 14,
+  "month": "2026-08",
+  "createdAt": "2026-08-11T16:42:00.000Z",
+  "source": {"app":"Finanzplanung v10","dataVersion":10},
+  "accountBalanceCents": 450000,
+  "normalBalanceCents": 170000,
+  "freeAvailableCents": 120000,
+  "minimumCashBufferCents": 50000,
+  "budgetAssetsCents": 93160,
+  "savingsAssetsCents": 180000,
+  "totalAssetsCents": 443160,
+  "budgets": [
+    {"id":"budget-food","name":"Lebensmittel","category":"Lebensmittel","plannedCents":35000,"reserveCents":35000,"spentCents":12840,"availableCents":22160},
+    {"id":"budget-fun","name":"Freizeit","category":"Freizeit","plannedCents":15000,"reserveCents":15000,"spentCents":6000,"availableCents":9000},
+    {"id":"budget-clothes","name":"Gewand","category":"Gewand","plannedCents":30000,"reserveCents":30000,"spentCents":3000,"availableCents":27000},
+    {"id":"budget-travel","name":"Reisen","category":"Freizeit","plannedCents":35000,"reserveCents":35000,"spentCents":0,"availableCents":35000}
+  ],
+  "savingsGoals": [{"id":"goal-license","name":"Führerschein","balanceCents":100000,"targetCents":150000}],
+  "donuts": {
+    "planned": {"title":"Geplante Geldverwendung","centerLabel":"Geplant","centerSubtext":"vom normalen Guthaben","totalCents":245000,"segments":[
+      {"key":"fixed","label":"Laufende Kosten","amountCents":90000,"group":"cost","color":"#2457a7","details":[]},
+      {"key":"loans","label":"Kredite / Raten","amountCents":20000,"group":"cost","color":"#a34a3a","details":[]},
+      {"key":"reserves","label":"Budgetrücklagen","amountCents":115000,"group":"reserve","color":"#8a5a00","details":[]},
+      {"key":"savings","label":"Regelmäßiges Sparen","amountCents":20000,"group":"saving","color":"#397a50","details":[]}
+    ]},
+    "actual": {"title":"Nur tatsächliche Ausgaben","centerLabel":"Ausgaben","centerSubtext":"in diesem Monat","totalCents":107840,"segments":[
+      {"key":"fixed","label":"Laufende Kosten","amountCents":90000,"group":"cost","color":"#2457a7","details":[]},
+      {"key":"budgetSpent","label":"Budgetverbrauch","amountCents":17840,"group":"cost","color":"#b7791f","details":[]}
+    ]}
+  },
+  "acknowledgedTransactions": [],
+  "acknowledgedExportIds": []
+}

@@ -1,0 +1,2190 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finanzplanung – v10</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f4f5f7;
+  --panel: #ffffff;
+  --line: #d6d9de;
+  --text: #1d232a;
+  --muted: #5f6b76;
+  --accent: #2457a7;
+  --danger: #a22b2b;
+  --ok: #286c3f;
+  --warn: #8a5a00;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+button, input, select { font: inherit; }
+button {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--text);
+  padding: .48rem .72rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+button:hover { border-color: #8d96a0; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.danger { color: var(--danger); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+input, select {
+  width: 100%;
+  min-width: 7rem;
+  padding: .43rem .5rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--text);
+}
+input[type="number"] { text-align: right; }
+input:disabled, select:disabled { background: #eef0f2; color: #6d747b; }
+header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+.header-inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: .8rem 1rem .45rem;
+}
+.header-row {
+  display: flex;
+  gap: .7rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+h1 { font-size: 1.25rem; margin: 0 auto 0 0; }
+.status { font-size: .85rem; color: var(--muted); }
+nav {
+  display: flex;
+  gap: .25rem;
+  margin-top: .65rem;
+  overflow-x: auto;
+}
+nav button {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+nav button.active {
+  color: var(--accent);
+  border-color: var(--line);
+  border-bottom-color: #fff;
+  font-weight: 650;
+}
+main {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+.view { display: none; }
+.view.active { display: block; }
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.panel h2, .panel h3 { margin-top: 0; }
+.panel h2 { font-size: 1.15rem; }
+.panel h3 { font-size: 1rem; margin-bottom: .6rem; }
+.help { color: var(--muted); font-size: .9rem; line-height: 1.45; }
+.toolbar {
+  display: flex;
+  gap: .55rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: .8rem;
+}
+.toolbar .spacer { margin-left: auto; }
+#monthSelect { width: auto; min-width: 230px; max-width: 420px; flex: 1 1 300px; }
+#prevMonth, #nextMonth { flex: 0 0 auto; }
+.table-wrap { overflow: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+th, td {
+  border-bottom: 1px solid var(--line);
+  padding: .45rem .5rem;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+th {
+  background: #f1f3f5;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  font-weight: 650;
+}
+td.num, th.num { text-align: right; }
+tr.clickable { cursor: pointer; }
+tr.clickable:hover td { background: #f7f9fb; }
+tr.locked td:first-child::before { content: "🔒 "; }
+tr.total td { font-weight: 700; border-top: 2px solid #aeb4bb; }
+td input, td select { min-width: 8rem; }
+td input.description { min-width: 12rem; }
+td.actions { width: 1%; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: .8rem 1rem;
+}
+.field label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: .25rem; }
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+  gap: .65rem;
+  margin-bottom: 1rem;
+}
+.summary-card {
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: .7rem;
+  background: #fff;
+}
+.summary-card .label { color: var(--muted); font-size: .8rem; min-height: 2.1em; }
+.summary-card .value { font-size: 1.05rem; font-weight: 700; margin-top: .2rem; text-align: right; }
+.value.negative { color: var(--danger); }
+.value.positive { color: var(--ok); }
+.notice {
+  border-left: 4px solid var(--accent);
+  background: #f4f7fc;
+  padding: .65rem .8rem;
+  margin-bottom: .8rem;
+  font-size: .9rem;
+}
+.notice.warn { border-color: var(--warn); background: #fff8ea; }
+.notice.error { border-color: var(--danger); background: #fff1f1; }
+.lock-banner {
+  border: 1px solid #d7c08a;
+  background: #fff8e6;
+  padding: .7rem;
+  border-radius: 5px;
+  margin-bottom: .8rem;
+}
+.chart-box {
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: .6rem;
+  min-height: 320px;
+  background: #fff;
+}
+.chart-box canvas { width: 100%; height: 285px; display: block; }
+.chart-tooltip {
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  max-width: 320px;
+  padding: .45rem .55rem;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #fff;
+  box-shadow: 0 6px 20px rgba(0,0,0,.14);
+  font-size: .82rem;
+  line-height: 1.35;
+  white-space: pre-line;
+}
+.progress-row { margin-bottom: .75rem; }
+.progress-head { display: flex; justify-content: space-between; gap: 1rem; font-size: .9rem; }
+.progress-track { height: .75rem; background: #e5e8eb; border-radius: 999px; overflow: hidden; margin-top: .25rem; }
+.progress-fill { height: 100%; background: var(--accent); }
+.badge {
+  display: inline-block;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: .15rem .45rem;
+  font-size: .75rem;
+  color: var(--muted);
+}
+.hidden { display: none !important; }
+.file-button input { display: none; }
+.small { font-size: .82rem; }
+.muted { color: var(--muted); }
+details summary { cursor: pointer; font-weight: 650; }
+@media (max-width: 720px) {
+  main { padding: .65rem; }
+  .panel { padding: .75rem; }
+  .header-inner { padding-left: .65rem; padding-right: .65rem; }
+  th, td { padding: .4rem; }
+  h1 { width: 100%; }
+}
+@media print {
+  header, button, .toolbar, .actions { display: none !important; }
+  body { background: #fff; }
+  .view { display: none !important; }
+  .view.active { display: block !important; }
+  .panel { border: 0; padding: 0; }
+}
+
+
+/* v8: klare Trennung von Liquidität, Sparvermögen, Budgets und Umbuchungen */
+.money-section { border-top: 1px solid var(--line); padding-top: .8rem; margin-top: .8rem; }
+.money-section:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
+.money-section h3 { margin: 0 0 .55rem; font-size: .95rem; color: var(--accent); }
+.inline-check { display: inline-flex; align-items: center; gap: .45rem; font-size: .9rem; color: var(--text); }
+.inline-check input, input[type="checkbox"] { width: auto; min-width: 0; }
+.check-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .5rem .8rem; }
+.check-grid label { display: flex; align-items: center; gap: .45rem; }
+.app-dialog { width: min(680px, calc(100vw - 2rem)); border: 1px solid var(--line); border-radius: 8px; padding: 1rem; color: var(--text); background: #fff; box-shadow: 0 20px 60px rgba(0,0,0,.22); }
+.app-dialog::backdrop { background: rgba(0,0,0,.35); }
+.app-dialog h2 { margin-top: 0; font-size: 1.15rem; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: .55rem; margin-top: 1rem; }
+.readout { border: 1px solid var(--line); border-radius: 4px; background: #f7f8fa; min-height: 2.25rem; padding: .5rem; text-align: right; font-variant-numeric: tabular-nums; }
+.warn-badge { color: var(--danger); border-color: #d9a3a3; }
+td.actions button { margin: .08rem; }
+#budgetUsageTable td.actions { min-width: 250px; }
+.positive { color: var(--ok); }
+.negative { color: var(--danger); }
+@media (max-width: 720px) { #budgetUsageTable td.actions { min-width: 190px; } .dialog-actions { flex-wrap: wrap; } }
+
+
+/* v10: skalierbare Statistik und Monats-Donut */
+.chart-box { overflow-x: auto; overflow-y: hidden; }
+.chart-box canvas { max-width: none; }
+.statistics-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .75rem; align-items: end; margin-top: .8rem; }
+.statistics-controls .field select { min-width: 0; }
+.statistics-resolution { display: inline-block; margin-top: .3rem; color: var(--accent); font-size: .82rem; font-weight: 650; }
+.statistics-window-actions { display: flex; gap: .45rem; align-items: center; flex-wrap: wrap; }
+.statistics-range-label { margin-top: .7rem; padding: .55rem .7rem; border: 1px solid var(--line); border-radius: 5px; background: #f7f8fa; font-size: .86rem; color: var(--muted); }
+.donut-layout { display: grid; grid-template-columns: minmax(300px, .9fr) minmax(300px, 1.1fr); gap: 1rem; align-items: center; }
+.donut-chart-box { min-height: 335px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.donut-chart-box canvas { width: 100%; height: 315px; display: block; }
+.donut-legend { display: grid; gap: .32rem; }
+.donut-group-title { margin-top: .55rem; margin-bottom: .15rem; color: var(--muted); font-size: .76rem; font-weight: 700; text-transform: uppercase; letter-spacing: .035em; }
+.donut-legend-row { width: 100%; display: grid; grid-template-columns: auto minmax(0,1fr) auto auto; gap: .55rem; align-items: center; text-align: left; padding: .48rem .52rem; background: #fff; }
+.donut-legend-row.active { border-color: var(--accent); background: #f4f7fc; }
+.donut-swatch { width: .72rem; height: .72rem; border-radius: 50%; display: inline-block; }
+.donut-legend-name { min-width: 0; white-space: normal; }
+.donut-legend-amount, .donut-legend-percent { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.donut-legend-percent { color: var(--muted); min-width: 4.2rem; text-align: right; }
+.donut-details { margin-top: .9rem; padding-top: .8rem; border-top: 1px solid var(--line); }
+.donut-summary-line { display: flex; gap: .8rem 1.2rem; flex-wrap: wrap; margin-top: .7rem; color: var(--muted); font-size: .86rem; }
+.donut-empty { color: var(--muted); text-align: center; padding: 1rem; }
+@media (max-width: 820px) {
+  .donut-layout { grid-template-columns: 1fr; }
+  .donut-chart-box { min-height: 300px; }
+  .donut-chart-box canvas { height: 285px; }
+}
+
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="header-row">
+      <h1 id="appTitle">Finanzplanung – v10</h1>
+      <span id="saveStatus" class="status">Wird geladen …</span>
+      <button id="quickExport">JSON-Backup</button>
+      <label class="file-button"><button type="button" id="quickImportButton">JSON laden</button><input id="quickImport" type="file" accept=".json,application/json"></label>
+    </div>
+    <nav aria-label="Hauptnavigation">
+      <button data-view="overview" class="active">Monatsübersicht</button>
+      <button data-view="month">Monat</button>
+      <button data-view="basics">Grundlagen</button>
+      <button data-view="dashboard">Statistik</button>
+      <button data-view="backup">Backup &amp; Hilfe</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section id="view-overview" class="view active">
+    <div class="panel">
+      <div class="toolbar">
+        <h2 style="margin:0">Zentrale Monatsübersicht</h2>
+        <span class="spacer"></span>
+        <button id="overviewCsv">Übersicht als CSV</button>
+      </div>
+      <p class="help">Die Hauptansicht zeigt nur die wichtigsten Geldflüsse. Ein Klick auf einen Monat öffnet alle Details. Rücklagen, Sparen und Umbuchungen werden getrennt von tatsächlichen Ausgaben ausgewiesen.</p>
+      <div id="overviewTable" class="table-wrap"></div>
+    </div>
+  </section>
+
+  <section id="view-month" class="view">
+    <div class="panel">
+      <div class="toolbar">
+        <button id="prevMonth" aria-label="Voriger Monat">←</button>
+        <select id="monthSelect" aria-label="Monat auswählen"></select>
+        <button id="nextMonth" aria-label="Nächster Monat">→</button>
+        <span class="spacer"></span>
+        <button id="toggleMonthLock"></button>
+      </div>
+      <div id="monthLockInfo"></div>
+      <div id="startMonthSetupPanel"></div>
+      <div id="monthSummary"></div>
+    </div>
+
+    <div class="panel" id="monthAllocationPanel">
+      <div class="toolbar">
+        <div>
+          <h2 id="donutHeading" style="margin:0">Geplante Geldverwendung</h2>
+          <p id="donutHelp" class="help" style="margin:.3rem 0 0">Zeigt, wofür normales Guthaben in diesem Monat vorgesehen ist. Tatsächliche Kosten, Rücklagen und Sparen bleiben getrennt erkennbar.</p>
+        </div>
+        <span class="spacer"></span>
+        <div class="field" style="min-width:210px"><label for="donutMode">Ansicht</label><select id="donutMode"><option value="allocation">Geldverwendung</option><option value="expenses">Nur tatsächliche Ausgaben</option></select></div>
+      </div>
+      <div class="donut-layout">
+        <div class="chart-box donut-chart-box"><canvas id="monthAllocationChart"></canvas></div>
+        <div>
+          <div id="monthAllocationLegend" class="donut-legend"></div>
+          <div id="monthAllocationSummary" class="donut-summary-line"></div>
+        </div>
+      </div>
+      <div id="monthAllocationDetails" class="donut-details hidden"></div>
+    </div>
+
+    <div class="panel">
+      <div class="toolbar">
+        <h2 style="margin:0">Budgets / reserviert</h2>
+        <span class="spacer"></span>
+        <button id="addBudgetTransfer" type="button">Zwischen Budgets umbuchen</button>
+      </div>
+      <p class="help">Monatliche Budgetrücklagen sind interne Reservierungen: normales Guthaben sinkt, Budgetvermögen steigt, Gesamtvermögen bleibt gleich. Tatsächlicher Verbrauch reduziert das Gesamtvermögen. Reicht der Topf nicht aus, wird die Differenz sofort im selben Monat aus dem normalen Guthaben bezahlt.</p>
+      <div id="budgetUsageTable" class="table-wrap"></div>
+      <div id="budgetTransactions" style="margin-top:1rem"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Sparprojekte in diesem Monat</h2>
+      <p class="help">Automatische Raten werden am noch offenen Zielbetrag gedeckelt. Ein erreichtes Ziel erhält keine weitere automatische Rate. Zusätzliche Einzahlungen bleiben bewusst manuell möglich. Ein tatsächlicher Abschluss speichert Kaufpreis und Abschlusszeitpunkt; nur die Differenz zwischen angespartem Betrag und Kaufpreis verändert das normale Guthaben.</p>
+      <div id="monthGoalsTable" class="table-wrap"></div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <div class="toolbar">
+          <h2 style="margin:0">Zusätzliche Einnahmen</h2>
+          <span class="spacer"></span>
+          <button id="addIncome" class="primary">Eintrag hinzufügen</button>
+        </div>
+        <p class="help">Bonus, Prämie und Provision werden in der Statistik separat ausgewiesen. Alle Einträge erhöhen die tatsächlichen Einnahmen.</p>
+        <div id="incomeTable" class="table-wrap"></div>
+      </div>
+
+      <div class="panel">
+        <div class="toolbar">
+          <h2 style="margin:0">Zusätzliche Ausgaben</h2>
+          <span class="spacer"></span>
+          <button id="addExpense" class="primary">Eintrag hinzufügen</button>
+        </div>
+        <p class="help">Hier nur Ausgaben außerhalb der Budget-Töpfe erfassen. Budgetverbrauch gehört oben in den jeweiligen Topf, damit keine Ausgabe doppelt gezählt wird.</p>
+        <div id="expenseTable" class="table-wrap"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-basics" class="view">
+    <div class="panel">
+      <h2>Planungsbeginn</h2>
+      <div id="planningStartNotice"></div>
+      <div class="form-grid">
+        <div class="field"><label for="planningStartMonth">Startmonat</label><input id="planningStartMonth" type="month"></div>
+        <div class="field"><label for="startAnchorDate">Finanzieller Stichtag</label><input id="startAnchorDate" type="date"></div>
+        <div class="field"><label id="openingBalanceLabel" for="openingBalance">Kontostand am finanziellen Stichtag</label><input id="openingBalance" data-setting="openingBalance" type="number" step="0.01"></div>
+        <div class="field"><label>Erstellt</label><div id="createdAtReadout" class="readout" style="text-align:left"></div></div>
+      </div>
+      <label id="startMonthStatisticsRow" class="inline-check" style="margin-top:.8rem"><input id="startMonthUseForStatistics" type="checkbox"> Startmonat als vollständigen Statistikmonat verwenden</label>
+      <p id="planningStartHelp" class="help"></p>
+    </div>
+
+    <div class="panel">
+      <h2>Einkommen und Liquiditätspuffer</h2>
+      <div class="form-grid">
+        <div class="field"><label for="baseSalary">Normales Monatsgehalt</label><input id="baseSalary" data-setting="baseSalary" type="number" min="0" step="0.01"></div>
+        <div class="field"><label for="vacationPay">Urlaubsgeld, zusätzlich im Juli</label><input id="vacationPay" data-setting="vacationPay" type="number" min="0" step="0.01"></div>
+        <div class="field"><label for="christmasPay">Weihnachtsgeld, zusätzlich im Dezember</label><input id="christmasPay" data-setting="christmasPay" type="number" min="0" step="0.01"></div>
+        <div class="field"><label for="minimumCashBuffer">Gewünschter Mindestpuffer</label><input id="minimumCashBuffer" data-setting="minimumCashBuffer" type="number" min="0" step="0.01"></div>
+      </div>
+      <p class="help">Startbestände von Budgets und Sparposten werden separat in den jeweiligen Tabellen gepflegt. Sie sind Bestandswerte und werden nicht noch einmal als Einzahlung oder Ausgabe gebucht.</p>
+    </div>
+
+    <div class="panel">
+      <div class="toolbar"><h2 style="margin:0">Gehaltserhöhungen</h2><span class="spacer"></span><button data-add="salaryRaises" class="primary">Erhöhung hinzufügen</button></div>
+      <p class="help">Ab dem angegebenen Monat ersetzt das neue Gehalt das bisherige reguläre Monatsgehalt. Manuelle Boni verändern das Gehalt nicht.</p>
+      <div id="raisesTable" class="table-wrap"></div>
+    </div>
+
+    <div class="panel">
+      <div class="toolbar"><h2 style="margin:0">Urlaubs- und Weihnachtsgeld-Erhöhungen</h2><span class="spacer"></span><button data-add="specialPayRaises" class="primary">Erhöhung hinzufügen</button></div>
+      <p class="help">Die neue Summe gilt ab dem angegebenen Monat für künftige Juli- beziehungsweise Dezemberzahlungen.</p>
+      <div id="specialPayRaisesTable" class="table-wrap"></div>
+    </div>
+
+    <div class="panel">
+      <div class="toolbar"><h2 style="margin:0">Fixe und laufende Kosten</h2><span class="spacer"></span><button data-add="recurringCosts" class="primary">Kosten hinzufügen</button></div>
+      <p class="help">Hier gehören echte laufende Verpflichtungen hinein. Variable Konsumbereiche werden als Budget geführt. Die bestehende Intervalllogik für laufende Kosten bleibt zur Rückwärtskompatibilität erhalten.</p>
+      <div id="costsTable" class="table-wrap"></div>
+    </div>
+
+    <div class="panel">
+      <div class="toolbar"><h2 style="margin:0">Variable Budgets</h2><span class="spacer"></span><button data-add="variableBudgets" class="primary">Budget hinzufügen</button></div>
+      <p class="help">Der Betrag ist der gewünschte Betrag je Zyklus. Für den ersten Quartals-/Jahreszyklus wird die Rücklage ab dem gewählten Planungsstart automatisch so verteilt, dass die erste Fälligkeit vollständig finanziert ist. Danach gilt Betrag ÷ 3 beziehungsweise Betrag ÷ 12. Ein vorhandener Startbestand reduziert den noch zu finanzierenden ersten Zyklus.</p>
+      <div id="budgetsTable" class="table-wrap"></div>
+    </div>
+
+    <div class="panel">
+      <div class="toolbar"><h2 style="margin:0">Kredite und Raten</h2><span class="spacer"></span><button data-add="loans" class="primary">Kredit hinzufügen</button></div>
+      <p class="help">Die Rate wird ab der ersten beziehungsweise nächsten Abbuchung bis einschließlich des Monats der letzten Zahlung berechnet.</p>
+      <div id="loansTable" class="table-wrap"></div>
+    </div>
+
+    <div class="panel">
+      <div class="toolbar"><h2 style="margin:0">Regelmäßiges Sparen / Budget</h2><span class="spacer"></span><button data-add="recurringSavings" class="primary">Sparposten hinzufügen</button></div>
+      <p class="help">Als „Sparen“ behandelte Posten werden vom normalen Guthaben in eigenes Sparvermögen verschoben und sind damit keine Ausgabe. Als „Budget“ behandelte Posten folgen derselben Budgetlogik wie variable Budgets.</p>
+      <div id="recurringSavingsTable" class="table-wrap"></div>
+    </div>
+
+    <div class="panel">
+      <div class="toolbar"><h2 style="margin:0">Sparziele</h2><span class="spacer"></span><button data-add="savingsGoals" class="primary">Sparziel hinzufügen</button></div>
+      <p class="help">Startbestand, dynamische Restbetragsrate und geplante Verwendung können je Ziel eingestellt werden. Erreichte Ziele werden nicht automatisch endgültig abgeschlossen; der echte Abschluss erfolgt immer bewusst in der Monatsansicht.</p>
+      <div id="goalsTable" class="table-wrap"></div>
+    </div>
+  </section>
+
+  <section id="view-dashboard" class="view">
+    <div class="panel">
+      <div class="toolbar">
+        <h2 style="margin:0">Statistik-Zeitraum</h2>
+        <span class="spacer"></span>
+        <label for="statisticsEndMonth">Auswertung bis einschließlich</label>
+        <input id="statisticsEndMonth" type="month" style="width:auto;min-width:10rem">
+      </div>
+      <p class="help">Abgeschlossene Monate sind Ist-Werte. Nicht gesperrte Monate werden als Planung/Prognose behandelt.</p>
+      <div class="statistics-controls">
+        <div class="field"><label for="statisticsGranularity">Darstellung</label><select id="statisticsGranularity"><option value="auto">Automatisch</option><option value="monthly">Monatlich</option><option value="quarterly">Quartalsweise</option><option value="yearly">Jährlich</option></select><span id="statisticsGranularityResolved" class="statistics-resolution"></span></div>
+        <div class="field"><label for="statisticsVisibleRange">Sichtbarer Zeitraum</label><select id="statisticsVisibleRange"><option value="12">12 Monate</option><option value="24">24 Monate</option><option value="36">36 Monate</option><option value="60">60 Monate</option><option value="all">Gesamt</option></select></div>
+        <div class="field"><label>Zeitraum verschieben</label><div class="statistics-window-actions"><button id="statisticsEarlier" type="button">← früher</button><button id="statisticsLater" type="button">später →</button></div></div>
+      </div>
+      <div id="diagramRangeLabel" class="statistics-range-label"></div>
+    </div>
+    <div id="dashboardWarnings"></div>
+    <div id="dashboardKpis" class="summary-grid"></div>
+    <div class="grid">
+      <div class="panel">
+        <h2>Einnahmen, tatsächliche Ausgaben, Sparen und Rücklagen</h2>
+        <p class="help">Tatsächliche Ausgaben, Spartransfers und Budgetrücklagen sind getrennte Blöcke. Umbuchungen werden nicht als Einnahmen oder Ausgaben dargestellt.</p>
+        <div class="chart-box"><canvas id="incomeExpenseChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <h2>Normales Guthaben</h2>
+        <p class="help">Die rote Linie zeigt 0 €. Der Übergang nach dem letzten gesperrten Monat markiert den Prognosebeginn.</p>
+        <div class="chart-box"><canvas id="balanceChart"></canvas></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="toolbar">
+        <div>
+          <h2 style="margin:0">Liquiditätsprognose</h2>
+          <p class="help" style="margin:.3rem 0 0">Zukünftige Werte sind Prognosen auf Basis der hinterlegten Einnahmen, Ausgaben, Sparpläne und bisherigen Budgetverbräuche.</p>
+        </div>
+        <span class="spacer"></span>
+        <label class="inline-check"><input id="budgetForecastEnabled" type="checkbox"> Budgetprognose anhand bisherigen Verbrauchs berücksichtigen</label>
+      </div>
+      <div id="budgetForecastHint" class="small muted"></div>
+      <div class="chart-box" style="margin-top:.6rem"><canvas id="accountRealityChart"></canvas></div>
+    </div>
+    <div class="panel">
+      <h2>Jahresübersicht</h2>
+      <div id="yearTable" class="table-wrap"></div>
+    </div>
+    <div class="panel">
+      <h2>Sparziele und Fortschritt</h2>
+      <div id="goalProgress"></div>
+    </div>
+    <div class="panel">
+      <details>
+        <summary>Monatliche Statistik im Detail</summary>
+        <div id="dashboardDetail" class="table-wrap" style="margin-top:.8rem"></div>
+      </details>
+    </div>
+  </section>
+
+  <section id="view-backup" class="view">
+    <div class="panel">
+      <h2>Speicherung und Backups</h2>
+      <div id="storageNotice" class="notice"></div>
+      <div class="toolbar">
+        <button id="exportBackup" class="primary">JSON-Backup herunterladen</button>
+        <label class="file-button"><button type="button" id="importBackupButton">JSON-Backup einlesen</button><input id="importBackup" type="file" accept=".json,application/json"></label>
+        <button id="resetData" class="danger">Auf leere Ausgangsdaten zurücksetzen</button>
+      </div>
+      <p class="help">Der bestehende LocalStorage-Schlüssel wird weiterverwendet. v9-, v8- und ältere bereits unterstützte JSON-Stände, direkte alte States und Wrapper-Backups werden zentral normalisiert und auf Datenversion 10 migriert. Alte Pläne behalten dabei ihre bisherige Vollmonat-Logik. Unbekannte Alt-Felder bleiben nach Möglichkeit erhalten.</p>
+    </div>
+    <div class="panel">
+      <h2>Berechnungslogik</h2>
+      <ul class="help">
+        <li>Normales Guthaben, Budgetvermögen und Sparvermögen werden getrennt geführt. Interne Verschiebungen verändern das Gesamtvermögen nicht.</li>
+        <li>Budgetrücklagen fließen monatlich vom normalen Guthaben in den Budgettopf. Die Fälligkeit selbst erzeugt keine zweite Belastung.</li>
+        <li>Erster Quartals-/Jahreszyklus: Rest bis zum ersten Fälligkeitstermin wird gleichmäßig auf die Monate ab dem gewählten Planungsstart verteilt; danach normale Rate Betrag ÷ 3 beziehungsweise ÷ 12.</li>
+        <li>Budgetverbrauch ist eine tatsächliche Ausgabe. Soweit Budgetvermögen reicht, sinkt nur der Topf; eine Überziehung wird sofort aus dem normalen Guthaben gedeckt.</li>
+        <li>Regelmäßiges Sparen und Sparziel-Einzahlungen sind Vermögensverschiebungen, keine Ausgaben. Erst eine tatsächliche Sparziel-Verwendung reduziert das Gesamtvermögen.</li>
+        <li>Ein Sparziel wird automatisch höchstens bis zum Zielbetrag bespart. Dynamische Rate verteilt den verbleibenden Rest auf die verbleibenden Monate.</li>
+        <li>Bei echtem Sparziel-Abschluss wird die Differenz zwischen angespartem Stand und tatsächlichem Kaufpreis dem normalen Guthaben gutgeschrieben oder belastet.</li>
+        <li>Ein gesperrter Monat bleibt als Snapshot unverändert. Optional kann ein Ist-Kontostand als Übertrag in den nächsten Monat übernommen werden.</li>
+        <li>Budget-Verbrauchsprognosen verwenden nach mindestens drei bestätigten gesperrten Monaten bis zu sechs jüngste Ist-Monate.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<dialog id="goalCloseDialog" class="app-dialog">
+  <form method="dialog" id="goalCloseForm">
+    <h2>Sparziel tatsächlich abschließen</h2>
+    <div id="goalCloseSummary" class="notice"></div>
+    <div class="field"><label for="goalCloseAmount">Tatsächlich ausgegebener Betrag</label><input id="goalCloseAmount" type="number" min="0" step="0.01" required></div>
+    <div id="goalCloseDifference" class="help" style="margin-top:.6rem"></div>
+    <div class="dialog-actions"><button value="cancel">Abbrechen</button><button id="goalCloseConfirm" value="default" class="primary">Abschluss speichern</button></div>
+  </form>
+</dialog>
+
+<dialog id="monthCloseDialog" class="app-dialog">
+  <form method="dialog" id="monthCloseForm">
+    <h2>Monat abschließen</h2>
+    <div id="monthCloseSummary" class="notice"></div>
+    <div class="check-grid">
+      <label><input id="closeCheckAccount" type="checkbox"> Kontostand geprüft</label>
+      <label><input id="closeCheckBudgets" type="checkbox"> Budgetverbräuche geprüft/erfasst</label>
+      <label><input id="closeCheckGoals" type="checkbox"> Sparziel-Abschlüsse geprüft</label>
+      <label><input id="closeCheckExtras" type="checkbox"> Zusätzliche Einnahmen/Ausgaben geprüft</label>
+    </div>
+    <div id="startMonthCloseChecks" class="check-grid hidden" style="margin-top:.7rem">
+      <label><input id="closeCheckStartBalance" type="checkbox"> Startkontostand geprüft</label>
+      <label><input id="closeCheckStartHandled" type="checkbox"> Bereits erledigte Verpflichtungen geprüft</label>
+      <label><input id="closeCheckStartOutstanding" type="checkbox"> Noch ausstehende Verpflichtungen geprüft</label>
+    </div>
+    <div class="form-grid" style="margin-top:.8rem">
+      <div class="field"><label for="monthCloseBankBalance">Kontostand laut Bank am Monatsende (optional)</label><input id="monthCloseBankBalance" type="number" step="0.01"></div>
+      <div class="field"><label>Berechneter Kontostand</label><div id="monthCloseCalculated" class="readout"></div></div>
+      <div class="field"><label>Differenz Ist – Berechnung</label><div id="monthCloseDifference" class="readout"></div></div>
+    </div>
+    <label class="inline-check" style="margin-top:.7rem"><input id="monthCloseUseActual" type="checkbox"> Ist-Kontostand als Startwert des nächsten Monats übernehmen</label>
+    <div class="dialog-actions"><button value="cancel">Abbrechen</button><button id="monthCloseConfirm" value="default" class="primary">Monat sperren</button></div>
+  </form>
+</dialog>
+
+
+<datalist id="incomeCategories">
+  <option value="Bonus"><option value="Prämie"><option value="Provision"><option value="Rückerstattung"><option value="Nebenverdienst"><option value="Geldgeschenk"><option value="Sonstiges">
+</datalist>
+<datalist id="expenseCategories">
+  <option value="Unerwartet"><option value="Freizeit"><option value="Einkauf"><option value="Reparatur"><option value="Sonstiges">
+</datalist>
+<datalist id="costCategories">
+  <option value="Transport"><option value="Abos"><option value="Fixkosten"><option value="Spenden"><option value="Sonstiges">
+</datalist>
+<datalist id="budgetCategories">
+  <option value="Freizeit"><option value="Gewand"><option value="Haushalt"><option value="Lebensmittel"><option value="Mobilität"><option value="Gesundheit"><option value="Sonstiges">
+</datalist>
+
+<div id="chartTooltip" class="chart-tooltip hidden"></div>
+
+<script>
+"use strict";
+
+const STORAGE_KEY = "cash_finanzplanung_2026_leer_v1";
+const CURRENT_DATA_VERSION = 10;
+const BACKUP_FORMAT_VERSION = 10;
+const LEGACY_DEFAULT_START = "2026-08";
+const LEGACY_DEFAULT_HORIZON = "2029-07";
+const DEFAULT_STATE = {
+  version: CURRENT_DATA_VERSION,
+  meta: { start: LEGACY_DEFAULT_START, end: LEGACY_DEFAULT_HORIZON, horizon: LEGACY_DEFAULT_HORIZON, statisticsEnd: LEGACY_DEFAULT_HORIZON, currency: "EUR", createdAt: null, startAnchorDate: null, startMonthMode: "legacy", startMonthUseForStatistics: false },
+  settings: { baseSalary: "", vacationPay: "", christmasPay: "", openingBalance: "", minimumCashBuffer: 0 },
+  forecastSettings: { budgetForecastEnabled: false },
+  statisticsDisplay: { granularity: "auto", visibleRangeMonths: 24, windowStart: null, donutMode: "allocation" },
+  salaryRaises: [], specialPayRaises: [], recurringCosts: [], loans: [], recurringSavings: [], savingsGoals: [], variableBudgets: [], months: {}
+};
+const INTERVAL_LABELS = { monthly: "monatlich", quarterly: "quartalsweise", yearly: "jährlich" };
+const BONUS_CATEGORIES = new Set(["bonus", "prämie", "praemie", "provision"]);
+const STATISTICS_GRANULARITIES = new Set(["auto", "monthly", "quarterly", "yearly"]);
+const DONUT_MODES = new Set(["allocation", "expenses"]);
+const DONUT_COLORS = {
+  fixed: "#2457a7", periodic: "#6079b8", loans: "#a34a3a", extra: "#b76a4d", overspend: "#a22b2b",
+  reserves: "#8a5a00", savings: "#397a50", goals: "#5f8b68", budgetSpent: "#b7791f", goalSpent: "#6750a4"
+};
+const STATISTICS_FLOW_METRICS = [
+  "salary","vacationPay","christmasPay","specialPay","bonusPayments","otherManualIncome","totalManualIncome","totalIncome",
+  "fixedCosts","loanRates","quarterlyCosts","annualCosts","variableCosts","directCashExpenses","budgetReserve","budgetSpent","budgetOverspendCash",
+  "budgetCashDeposits","budgetCashWithdrawals","budgetInternalTransfers","regularSavings","goalSavingsPlanned","goalSavingsExtra","goalSavings",
+  "goalSpendingTotal","goalCompletionAdjustmentTotal","actualExpenses","savingsTransfers","reservationTransfers","manualTransferVolume"
+];
+const STATISTICS_STOCK_METRICS = ["endingBalance","effectiveEndingBalance","budgetClosingTotal","regularSavingBalanceTotal","goalOpenBalanceTotal","freeAvailable","savingsAssetsTotal","totalAssets"];
+const currencyFormatter = new Intl.NumberFormat("de-AT", { style: "currency", currency: "EUR" });
+const monthFormatter = new Intl.DateTimeFormat("de-AT", { month: "long", year: "numeric" });
+
+let storageAvailable = true;
+let state = loadState();
+let activeView = "overview";
+let selectedMonth = state.meta.start;
+let renderTimer = 0;
+let pendingGoalCloseId = "";
+let pendingMonthCloseResult = null;
+let selectedDonutCategory = "";
+
+function deepClone(value) { return JSON.parse(JSON.stringify(value)); }
+function uid(prefix) {
+  if (globalThis.crypto && typeof globalThis.crypto.randomUUID === "function") return prefix + "-" + globalThis.crypto.randomUUID();
+  return prefix + "-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
+}
+function asNumber(value) {
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  const n = Number(String(value ?? "").replace(",", "."));
+  return Number.isFinite(n) ? n : 0;
+}
+function nullableNumber(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const n = typeof value === "number" ? value : Number(String(value).replace(",", ".").trim());
+  return Number.isFinite(n) ? n : null;
+}
+function roundMoney(value) { return Math.round((asNumber(value) + Number.EPSILON) * 100) / 100; }
+function money(value) { return currencyFormatter.format(roundMoney(value)); }
+function escapeHtml(value) {
+  return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+}
+function isPlainObject(value) { return Boolean(value) && typeof value === "object" && !Array.isArray(value); }
+function hasOwn(object, key) { return Boolean(object) && Object.prototype.hasOwnProperty.call(object, key); }
+function firstDefined(...values) { for (const value of values) if (value !== undefined) return value; return undefined; }
+function monthIndex(ym) {
+  if (!/^\d{4}-\d{2}$/.test(String(ym || ""))) return NaN;
+  const [y, m] = ym.split("-").map(Number);
+  return y * 12 + m - 1;
+}
+function compareMonths(a, b) { return monthIndex(a) - monthIndex(b); }
+function addMonths(ym, amount) {
+  const idx = monthIndex(ym) + amount;
+  const y = Math.floor(idx / 12);
+  const m = idx % 12 + 1;
+  return `${String(y).padStart(4, "0")}-${String(m).padStart(2, "0")}`;
+}
+function monthsInclusive(start, end) {
+  const output = [];
+  if (!Number.isFinite(monthIndex(start)) || !Number.isFinite(monthIndex(end))) return output;
+  for (let m = start; compareMonths(m, end) <= 0; m = addMonths(m, 1)) output.push(m);
+  return output;
+}
+function isValidMonth(value) { return /^\d{4}-(0[1-9]|1[0-2])$/.test(String(value || "")) && Number.isFinite(monthIndex(value)); }
+function maxMonth(values, fallback) {
+  let best = isValidMonth(fallback) ? fallback : LEGACY_DEFAULT_START;
+  for (const value of values) if (isValidMonth(value) && compareMonths(value, best) > 0) best = value;
+  return best;
+}
+function monthName(ym) {
+  if (!isValidMonth(ym)) return String(ym || "–");
+  const [y, m] = ym.split("-").map(Number);
+  return monthFormatter.format(new Date(y, m - 1, 1));
+}
+function monthShort(ym) { const [y, m] = String(ym).split("-"); return `${m}/${String(y).slice(2)}`; }
+function monthDateBounds(ym) {
+  const [y, m] = ym.split("-").map(Number);
+  const last = new Date(y, m, 0).getDate();
+  return { min: `${ym}-01`, max: `${ym}-${String(last).padStart(2, "0")}` };
+}
+function currentLocalMonth(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`; }
+function currentLocalDate(date = new Date()) { return `${currentLocalMonth(date)}-${String(date.getDate()).padStart(2, "0")}`; }
+function formatLocalDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ""))) return "–";
+  const [y,m,d] = value.split("-").map(Number);
+  return new Intl.DateTimeFormat("de-AT").format(new Date(y, m - 1, d));
+}
+function defaultStartMonthSetup() { return { handled: {}, specialPayments: { vacation: "included", christmas: "included" } }; }
+function normalizeStartMonthSetup(source) {
+  const raw = isPlainObject(source) ? source : {}, handled = {};
+  if (isPlainObject(raw.handled)) for (const [key, value] of Object.entries(raw.handled)) handled[String(key)] = Boolean(value);
+  const specials = isPlainObject(raw.specialPayments) ? raw.specialPayments : {};
+  const normalizeSpecial = value => value === "outstanding" ? "outstanding" : "included";
+  return { ...deepClone(raw), handled, specialPayments: { vacation: normalizeSpecial(specials.vacation), christmas: normalizeSpecial(specials.christmas) } };
+}
+function createNewState(date = new Date()) {
+  const start = currentLocalMonth(date), horizon = addMonths(start, 35), fresh = deepClone(DEFAULT_STATE);
+  fresh.version = CURRENT_DATA_VERSION;
+  fresh.meta = { ...fresh.meta, start, end: horizon, horizon, statisticsEnd: horizon, createdAt: date.toISOString(), startAnchorDate: currentLocalDate(date), startMonthMode: "anchor", startMonthUseForStatistics: false, migratedFromVersion: null };
+  fresh.months = {};
+  for (const ym of monthsInclusive(start, horizon)) fresh.months[ym] = normalizedMonthData({}, ym);
+  return fresh;
+}
+function isAnchorStartMonth(ym) { return state.meta.startMonthMode === "anchor" && ym === state.meta.start; }
+function startMonthItemKey(type, id) { return `${String(type)}:${String(id)}`; }
+function startMonthSetupFor(ym = state.meta.start) { const data = state.months[ym]; return data ? normalizeStartMonthSetup(data.startMonthSetup) : defaultStartMonthSetup(); }
+function isStartMonthItemHandled(type, id, ym) { return isAnchorStartMonth(ym) && Boolean(startMonthSetupFor(ym).handled[startMonthItemKey(type, id)]); }
+function startMonthScheduledAmount(type, id, amount, ym) { return isStartMonthItemHandled(type, id, ym) ? 0 : roundMoney(amount); }
+function specialPayScheduledAmount(type, amount, ym) {
+  if (!isAnchorStartMonth(ym)) return roundMoney(amount);
+  return startMonthSetupFor(ym).specialPayments[type] === "outstanding" ? roundMoney(amount) : 0;
+}
+function normalizeMoneyMap(source, allowNegative = false) {
+  const output = {};
+  if (!isPlainObject(source)) return output;
+  for (const [id, amount] of Object.entries(source)) output[id] = allowNegative ? asNumber(amount) : Math.max(0, asNumber(amount));
+  return output;
+}
+function normalizeTransaction(entry, index, fallbackType) {
+  const x = isPlainObject(entry) ? entry : {};
+  return { ...deepClone(x), id: x.id || `${fallbackType}-${index + 1}`, date: String(x.date || ""), description: String(x.description || x.name || ""), category: String(x.category || x.kind || "Sonstiges"), amount: Math.max(0, asNumber(x.amount)), type: String(x.type || fallbackType) };
+}
+function normalizeBudgetTransaction(entry, index) {
+  const x = isPlainObject(entry) ? entry : {};
+  let type = String(firstDefined(x.type, x.kind, x.direction, "") || "").toLowerCase();
+  if (["deposit", "cash-in", "cash_to_budget", "einzahlung", "from_cash"].includes(type)) type = "cash_to_budget";
+  else if (["withdrawal", "payout", "cash-out", "budget_to_cash", "auszahlung", "to_cash"].includes(type)) type = "budget_to_cash";
+  else if (["transfer", "budget_to_budget", "umbuchung"].includes(type)) type = "budget_to_budget";
+  else if (x.fromBudgetId && x.toBudgetId) type = "budget_to_budget";
+  else if (x.budgetId && (x.toCash === true || x.direction === "out")) type = "budget_to_cash";
+  else type = "cash_to_budget";
+  return {
+    ...deepClone(x),
+    id: x.id || `budget-tx-${index + 1}`,
+    type,
+    budgetId: String(firstDefined(x.budgetId, x.targetBudgetId, x.toBudgetId, "") || ""),
+    fromBudgetId: String(firstDefined(x.fromBudgetId, x.sourceBudgetId, "") || ""),
+    toBudgetId: String(firstDefined(x.toBudgetId, x.targetBudgetId, "") || ""),
+    amount: Math.max(0, asNumber(x.amount)),
+    date: String(x.date || ""),
+    note: String(firstDefined(x.note, x.description, "") || "")
+  };
+}
+function normalizeLegacyBudgetTransfer(entry, index) {
+  const x = isPlainObject(entry) ? entry : {};
+  return { ...deepClone(x), id: x.id || `budget-transfer-${index + 1}`, fromBudgetId: String(firstDefined(x.fromBudgetId, x.fromId, x.sourceBudgetId, x.sourceId, "") || ""), toBudgetId: String(firstDefined(x.toBudgetId, x.toId, x.targetBudgetId, x.targetId, "") || ""), amount: Math.max(0, asNumber(x.amount)), note: String(firstDefined(x.note, x.description, "") || "") };
+}
+function normalizeSnapshot(source, ym = "") {
+  if (!isPlainObject(source)) return null;
+  const snap = deepClone(source);
+  const hadBudgetConfirmation = hasOwn(source, "budgetUsageConfirmed") || hasOwn(source, "budgetUsageChecked");
+  const legacyBudgetDetails = isPlainObject(source.budgetDetails) && Object.values(source.budgetDetails).some(detail => isPlainObject(detail) && hasOwn(detail, "spent"));
+  snap.month = isValidMonth(snap.month) ? snap.month : ym;
+  snap.locked = true;
+  snap.actualBankBalance = nullableNumber(firstDefined(snap.actualBankBalance, snap.bankBalanceActual, snap.actualBalance));
+  snap.actualBankBalanceAccepted = Boolean(firstDefined(snap.actualBankBalanceAccepted, snap.useActualBankBalance, snap.actualBalanceAccepted, false));
+  snap.budgetUsageConfirmed = Boolean(firstDefined(snap.budgetUsageConfirmed, snap.budgetUsageChecked, false));
+  snap.legacyBudgetUsageEvidence = Boolean(firstDefined(snap.legacyBudgetUsageEvidence, !hadBudgetConfirmation && legacyBudgetDetails));
+  if (!Array.isArray(snap.budgetTransactions)) snap.budgetTransactions = [];
+  if (!isPlainObject(snap.regularSavingBalances)) snap.regularSavingBalances = isPlainObject(snap.regularSavingsClosingBalances) ? deepClone(snap.regularSavingsClosingBalances) : {};
+  return snap;
+}
+function extractStateFromBackup(raw) { return isPlainObject(raw) && isPlainObject(raw.state) ? raw.state : (isPlainObject(raw) ? raw : {}); }
+function detectedDataVersion(raw) {
+  if (!isPlainObject(raw)) return 1;
+  const candidates = [raw.version, raw.dataVersion, raw.formatVersion, isPlainObject(raw.state) ? raw.state.version : undefined];
+  for (const value of candidates) { const n = Number(value); if (Number.isInteger(n) && n > 0) return n; }
+  return 1;
+}
+function normalizedMonthData(source = {}, ym = "") {
+  const raw = isPlainObject(source) ? source : {};
+  const payoutSource = firstDefined(raw.budgetPayouts, raw.budgetWithdrawals, {});
+  const legacyTransfersArray = Array.isArray(raw.budgetTransfers) ? raw.budgetTransfers : (Array.isArray(raw.transfers) ? raw.transfers : []);
+  const legacyTransfersMap = isPlainObject(raw.budgetTransfers) ? raw.budgetTransfers : null;
+  const actualBankBalance = nullableNumber(firstDefined(raw.actualBankBalance, raw.bankBalanceActual, raw.actualBalance));
+  return {
+    ...deepClone(raw),
+    ...(legacyTransfersMap && !hasOwn(raw, "legacyBudgetTransfers") ? { legacyBudgetTransfers: deepClone(legacyTransfersMap) } : {}),
+    locked: Boolean(raw.locked && isPlainObject(raw.snapshot)),
+    snapshot: raw.locked && isPlainObject(raw.snapshot) ? normalizeSnapshot(raw.snapshot, ym) : null,
+    incomes: Array.isArray(raw.incomes) ? raw.incomes.map((entry, index) => normalizeTransaction(entry, index, "income")) : [],
+    expenses: Array.isArray(raw.expenses) ? raw.expenses.map((entry, index) => normalizeTransaction(entry, index, "expense")) : [],
+    transactions: Array.isArray(raw.transactions) ? raw.transactions.map((entry, index) => normalizeTransaction(entry, index, String(entry && entry.type || "transaction"))) : [],
+    budgetUsage: normalizeMoneyMap(raw.budgetUsage),
+    budgetUsageConfirmed: Boolean(firstDefined(raw.budgetUsageConfirmed, raw.budgetUsageChecked, false)),
+    budgetPayouts: normalizeMoneyMap(legacyTransfersMap || payoutSource),
+    budgetTransfers: legacyTransfersArray.map(normalizeLegacyBudgetTransfer),
+    budgetTransactions: Array.isArray(raw.budgetTransactions) ? raw.budgetTransactions.map(normalizeBudgetTransaction) : [],
+    goalExtraContributions: normalizeMoneyMap(firstDefined(raw.goalExtraContributions, raw.extraGoalContributions, {})),
+    goalActualSpending: normalizeMoneyMap(firstDefined(raw.goalActualSpending, raw.goalActualSpendings, raw.goalSpending, {})),
+    actualBankBalance,
+    actualBankBalanceAccepted: Boolean(firstDefined(raw.actualBankBalanceAccepted, raw.useActualBankBalance, raw.actualBalanceAccepted, false)),
+    startMonthSetup: normalizeStartMonthSetup(raw.startMonthSetup)
+  };
+}
+
+function normalizeState(raw) {
+  const sourceVersion = detectedDataVersion(raw);
+  const source = extractStateFromBackup(raw);
+  const base = isPlainObject(source) ? deepClone(source) : {};
+  const sourceMeta = isPlainObject(source.meta) ? source.meta : {};
+  const sourceMonths = isPlainObject(source.months) ? source.months : {};
+  const monthKeys = Object.keys(sourceMonths).filter(isValidMonth).sort(compareMonths);
+  const start = isValidMonth(sourceMeta.start) ? sourceMeta.start : (monthKeys[0] || LEGACY_DEFAULT_START);
+  const explicitHorizon = isValidMonth(sourceMeta.horizon) ? sourceMeta.horizon : (isValidMonth(sourceMeta.end) ? sourceMeta.end : "");
+  const dateCandidates = [monthKeys.at(-1)];
+  for (const item of Array.isArray(source.salaryRaises) ? source.salaryRaises : []) dateCandidates.push(item && item.effectiveMonth);
+  for (const item of Array.isArray(source.specialPayRaises) ? source.specialPayRaises : []) dateCandidates.push(item && item.effectiveMonth);
+  for (const item of Array.isArray(source.recurringCosts) ? source.recurringCosts : []) dateCandidates.push(item && item.nextDue);
+  for (const item of Array.isArray(source.variableBudgets) ? source.variableBudgets : []) dateCandidates.push(item && (item.nextDue || item.nextAddition));
+  for (const item of Array.isArray(source.loans) ? source.loans : []) dateCandidates.push(item && item.startMonth, item && item.lastPayment);
+  for (const item of Array.isArray(source.recurringSavings) ? source.recurringSavings : []) dateCandidates.push(item && item.nextDue);
+  for (const item of Array.isArray(source.savingsGoals) ? source.savingsGoals : []) if (item) dateCandidates.push(item.startMonth, item.endMonth, item.closedMonth, item.completedMonth, item.completionMonth);
+  let horizon = explicitHorizon;
+  if (!horizon || compareMonths(horizon, start) < 0) horizon = maxMonth([LEGACY_DEFAULT_HORIZON, ...dateCandidates], start);
+  let statisticsEnd = firstDefined(sourceMeta.statisticsEnd, sourceMeta.statsEnd, sourceMeta.end, sourceMeta.horizon, horizon);
+  if (!isValidMonth(statisticsEnd) || compareMonths(statisticsEnd, start) < 0) statisticsEnd = horizon;
+  const explicitMode = sourceMeta.startMonthMode === "anchor" || sourceMeta.startMonthMode === "legacy" ? sourceMeta.startMonthMode : "";
+  const startMonthMode = explicitMode || "legacy";
+  const createdAtRaw = firstDefined(sourceMeta.createdAt, source.createdAt, isPlainObject(raw) ? raw.createdAt : undefined);
+  const anchorDateRaw = firstDefined(sourceMeta.startAnchorDate, source.startAnchorDate);
+  const startAnchorDate = /^\d{4}-\d{2}-\d{2}$/.test(String(anchorDateRaw || "")) && String(anchorDateRaw).startsWith(start + "-") ? String(anchorDateRaw) : null;
+
+  base.version = CURRENT_DATA_VERSION;
+  base.meta = {
+    ...deepClone(DEFAULT_STATE.meta), ...deepClone(sourceMeta), start,
+    end: isValidMonth(sourceMeta.end) ? sourceMeta.end : horizon, horizon, statisticsEnd,
+    currency: String(sourceMeta.currency || "EUR"),
+    createdAt: createdAtRaw == null || createdAtRaw === "" ? null : String(createdAtRaw),
+    startAnchorDate: startMonthMode === "anchor" ? (startAnchorDate || `${start}-01`) : null,
+    startMonthMode,
+    startMonthUseForStatistics: Boolean(firstDefined(sourceMeta.startMonthUseForStatistics, false)),
+    migratedFromVersion: sourceVersion < CURRENT_DATA_VERSION ? sourceVersion : (sourceMeta.migratedFromVersion || null)
+  };
+  const sourceSettings = isPlainObject(source.settings) ? source.settings : {};
+  base.settings = { ...deepClone(DEFAULT_STATE.settings), ...deepClone(sourceSettings) };
+  for (const key of ["baseSalary", "vacationPay", "christmasPay", "openingBalance"]) {
+    const rawValue = base.settings[key];
+    base.settings[key] = rawValue === "" || rawValue == null ? "" : asNumber(rawValue);
+  }
+  base.settings.minimumCashBuffer = Math.max(0, asNumber(firstDefined(sourceSettings.minimumCashBuffer, sourceSettings.cashBuffer, 0)));
+  const sourceForecast = isPlainObject(source.forecastSettings) ? source.forecastSettings : (isPlainObject(source.forecast) ? source.forecast : {});
+  base.forecastSettings = { ...deepClone(DEFAULT_STATE.forecastSettings), ...deepClone(sourceForecast), budgetForecastEnabled: Boolean(firstDefined(sourceForecast.budgetForecastEnabled, sourceForecast.budgetConsumptionForecastEnabled, sourceSettings.budgetForecastEnabled, false)) };
+  const sourceDisplay = isPlainObject(source.statisticsDisplay) ? source.statisticsDisplay : (isPlainObject(source.displaySettings) ? source.displaySettings : {});
+  const granularity = STATISTICS_GRANULARITIES.has(sourceDisplay.granularity) ? sourceDisplay.granularity : "auto";
+  const rawVisibleRange = firstDefined(sourceDisplay.visibleRangeMonths, sourceDisplay.visibleMonths, 24);
+  const visibleRangeMonths = rawVisibleRange === "all" ? "all" : ([12,24,36,60].includes(Number(rawVisibleRange)) ? Number(rawVisibleRange) : 24);
+  base.statisticsDisplay = { ...deepClone(DEFAULT_STATE.statisticsDisplay), ...deepClone(sourceDisplay), granularity, visibleRangeMonths, windowStart: isValidMonth(sourceDisplay.windowStart) ? sourceDisplay.windowStart : null, donutMode: DONUT_MODES.has(sourceDisplay.donutMode) ? sourceDisplay.donutMode : "allocation" };
+
+  base.salaryRaises = (Array.isArray(source.salaryRaises) ? source.salaryRaises : []).map((item, index) => {
+    const x = isPlainObject(item) ? item : {};
+    return { ...deepClone(x), id: x.id || `raise-${index + 1}`, amount: Math.max(0, asNumber(x.amount)), effectiveMonth: isValidMonth(x.effectiveMonth) ? x.effectiveMonth : start };
+  });
+  base.specialPayRaises = (Array.isArray(source.specialPayRaises) ? source.specialPayRaises : []).map((item, index) => {
+    const x = isPlainObject(item) ? item : {};
+    const rawType = String(x.type || x.kind || "vacation").toLocaleLowerCase("de");
+    return { ...deepClone(x), id: x.id || `special-${index + 1}`, type: rawType.startsWith("christ") || rawType.startsWith("weih") ? "christmas" : "vacation", amount: Math.max(0, asNumber(x.amount)), effectiveMonth: isValidMonth(x.effectiveMonth) ? x.effectiveMonth : start };
+  });
+  base.recurringCosts = (Array.isArray(source.recurringCosts) ? source.recurringCosts : []).map((item, index) => {
+    const x = isPlainObject(item) ? item : {};
+    return { ...deepClone(x), id: x.id || `cost-${index + 1}`, description: String(x.description || ""), category: String(x.category || "Sonstiges"), amount: Math.max(0, asNumber(x.amount)), interval: ["monthly", "quarterly", "yearly"].includes(x.interval) ? x.interval : "monthly", nextDue: isValidMonth(x.nextDue) ? x.nextDue : "" };
+  });
+  base.loans = (Array.isArray(source.loans) ? source.loans : []).map((item, index) => {
+    const x = isPlainObject(item) ? item : {};
+    return { ...deepClone(x), id: x.id || `loan-${index + 1}`, description: String(x.description || ""), monthlyRate: Math.max(0, asNumber(x.monthlyRate)), startMonth: isValidMonth(x.startMonth) ? x.startMonth : start, lastPayment: isValidMonth(x.lastPayment) ? x.lastPayment : "" };
+  });
+  base.recurringSavings = (Array.isArray(source.recurringSavings) ? source.recurringSavings : []).map((item, index) => {
+    const x = isPlainObject(item) ? item : {};
+    return { ...deepClone(x), id: x.id || `saving-${index + 1}`, description: String(x.description || ""), amount: Math.max(0, asNumber(x.amount)), interval: ["monthly", "quarterly", "yearly"].includes(x.interval) ? x.interval : "monthly", nextDue: isValidMonth(x.nextDue) ? x.nextDue : "", mode: x.mode === "budget" || x.kind === "budget" || x.asBudget === true || x.isBudget === true ? "budget" : "saving", startBalance: Math.max(0, asNumber(firstDefined(x.startBalance, x.openingBalance, x.initialBalance, 0))) };
+  });
+  base.savingsGoals = (Array.isArray(source.savingsGoals) ? source.savingsGoals : []).map((item, index) => {
+    const x = isPlainObject(item) ? item : {};
+    const startMonth = isValidMonth(x.startMonth) ? x.startMonth : start;
+    const endMonth = isValidMonth(x.endMonth) ? x.endMonth : startMonth;
+    const rawClosedMonth = firstDefined(x.closedMonth, x.completedMonth, x.completionMonth, x.closed === true ? endMonth : "");
+    const rawActualSpent = firstDefined(x.actualSpent, x.actualSpending, x.spentAmount);
+    const rawCompletedAt = firstDefined(x.actualCompletedAt, x.completedAt, x.completionDate, x.closedAt);
+    return {
+      ...deepClone(x), id: x.id || `goal-${index + 1}`, name: String(x.name || ""), target: Math.max(0, asNumber(x.target)), startMonth, endMonth,
+      startBalance: Math.max(0, asNumber(firstDefined(x.startBalance, x.openingBalance, x.initialBalance, 0))),
+      dynamicRate: Boolean(firstDefined(x.dynamicRate, x.dynamicSavingsRate, x.autoAdjustRate, x.adjustRateToRemaining, false)),
+      assumePlannedSpending: typeof x.assumePlannedSpending === "boolean" ? x.assumePlannedSpending : (typeof x.plannedSpendingEnabled === "boolean" ? x.plannedSpendingEnabled : true),
+      closedMonth: isValidMonth(rawClosedMonth) ? rawClosedMonth : "", actualSpent: nullableNumber(rawActualSpent), actualCompletedAt: rawCompletedAt == null || rawCompletedAt === "" ? null : String(rawCompletedAt)
+    };
+  });
+  base.variableBudgets = (Array.isArray(source.variableBudgets) ? source.variableBudgets : []).map((item, index) => {
+    const x = isPlainObject(item) ? item : {};
+    return { ...deepClone(x), id: x.id || `budget-${index + 1}`, description: String(x.description || x.name || ""), category: String(x.category || "Sonstiges"), amount: Math.max(0, asNumber(x.amount)), interval: ["monthly", "quarterly", "yearly"].includes(x.interval) ? x.interval : "monthly", nextDue: isValidMonth(x.nextDue || x.nextAddition) ? String(x.nextDue || x.nextAddition) : start, startBalance: Math.max(0, asNumber(firstDefined(x.startBalance, x.openingBalance, x.initialBalance, 0))) };
+  });
+
+  base.months = isPlainObject(sourceMonths) ? deepClone(sourceMonths) : {};
+  for (const ym of Object.keys(base.months)) if (isValidMonth(ym)) base.months[ym] = normalizedMonthData(base.months[ym], ym);
+  for (const ym of monthsInclusive(start, horizon)) if (!isPlainObject(base.months[ym])) base.months[ym] = normalizedMonthData({}, ym);
+  if (base.months[start]) base.months[start].startMonthSetup = normalizeStartMonthSetup(base.months[start].startMonthSetup);
+
+  for (const goal of base.savingsGoals) {
+    if (goal.actualSpent !== null || !goal.closedMonth) continue;
+    const closingMonth = base.months[goal.closedMonth];
+    if (closingMonth && hasOwn(closingMonth.goalActualSpending, goal.id)) goal.actualSpent = Math.max(0, asNumber(closingMonth.goalActualSpending[goal.id]));
+  }
+  return base;
+}
+
+function planningMonths() { return monthsInclusive(state.meta.start, state.meta.horizon); }
+function statisticsEndMonth() { const value = state.meta.statisticsEnd; return isValidMonth(value) && compareMonths(value, state.meta.start) >= 0 ? value : state.meta.horizon; }
+function statisticsMonths() { return monthsInclusive(state.meta.start, statisticsEndMonth()); }
+
+function statisticsDisplaySettings() {
+  if (!isPlainObject(state.statisticsDisplay)) state.statisticsDisplay = deepClone(DEFAULT_STATE.statisticsDisplay);
+  if (!STATISTICS_GRANULARITIES.has(state.statisticsDisplay.granularity)) state.statisticsDisplay.granularity = "auto";
+  const rawRange = state.statisticsDisplay.visibleRangeMonths;
+  state.statisticsDisplay.visibleRangeMonths = rawRange === "all" ? "all" : ([12,24,36,60].includes(Number(rawRange)) ? Number(rawRange) : 24);
+  if (!DONUT_MODES.has(state.statisticsDisplay.donutMode)) state.statisticsDisplay.donutMode = "allocation";
+  if (!isValidMonth(state.statisticsDisplay.windowStart)) state.statisticsDisplay.windowStart = null;
+  return state.statisticsDisplay;
+}
+function statisticsWindow(allMonths = statisticsMonths()) {
+  const settings = statisticsDisplaySettings();
+  if (!allMonths.length) return { months: [], startIndex: 0, endIndex: -1, all: true };
+  if (settings.visibleRangeMonths === "all" || allMonths.length <= Number(settings.visibleRangeMonths)) return { months: allMonths.slice(), startIndex: 0, endIndex: allMonths.length - 1, all: true };
+  const count = Number(settings.visibleRangeMonths), maxStart = Math.max(0, allMonths.length - count);
+  let startIndex = settings.windowStart && allMonths.includes(settings.windowStart) ? allMonths.indexOf(settings.windowStart) : 0;
+  startIndex = Math.max(0, Math.min(maxStart, startIndex));
+  const months = allMonths.slice(startIndex, startIndex + count);
+  if (months.length) settings.windowStart = months[0];
+  return { months, startIndex, endIndex: startIndex + months.length - 1, all: false };
+}
+function visibleStatisticsMonths(allMonths = statisticsMonths()) { return statisticsWindow(allMonths).months; }
+function statisticsGranularity(months = visibleStatisticsMonths()) {
+  const selected = statisticsDisplaySettings().granularity;
+  if (selected !== "auto") return selected;
+  if (months.length <= 18) return "monthly";
+  if (months.length <= 48) return "quarterly";
+  return "yearly";
+}
+function statisticsGranularityLabel(value) { return value === "monthly" ? "Monatlich" : (value === "quarterly" ? "Quartalsweise" : (value === "yearly" ? "Jährlich" : "Automatisch")); }
+function statisticsPeriodKey(ym, granularity) {
+  if (granularity === "monthly") return ym;
+  const year = ym.slice(0, 4), month = Number(ym.slice(5));
+  if (granularity === "quarterly") return `${year}-Q${Math.floor((month - 1) / 3) + 1}`;
+  return year;
+}
+function statisticsPeriodLabel(ym, granularity) {
+  if (granularity === "monthly") return monthShort(ym);
+  const year = ym.slice(0, 4), month = Number(ym.slice(5));
+  if (granularity === "quarterly") return `Q${Math.floor((month - 1) / 3) + 1} ${year}`;
+  return year;
+}
+function periodStatus(months, results) {
+  const actualCount = months.filter(ym => results[ym] && results[ym].locked).length, forecastCount = Math.max(0, months.length - actualCount);
+  const status = actualCount === months.length ? "actual" : (actualCount === 0 ? "forecast" : "mixed");
+  return { status, actualCount, forecastCount };
+}
+function periodStatusText(period) {
+  if (!period) return "";
+  if (period.months.length === 1) return period.status === "actual" ? "Ist" : (period.status === "mixed" ? "Gemischt" : "Prognose");
+  if (period.status === "mixed") return `${period.actualCount} Monate Ist · ${period.forecastCount} Monate Prognose`;
+  return period.status === "actual" ? `${period.actualCount} Monate Ist` : `${period.forecastCount} Monate Prognose`;
+}
+function aggregateStatisticsPeriods(months, results, granularity) {
+  const grouped = [], byKey = new Map();
+  for (const ym of months) {
+    if (!results[ym]) continue;
+    const key = statisticsPeriodKey(ym, granularity);
+    if (!byKey.has(key)) { const p = { key, label: statisticsPeriodLabel(ym, granularity), granularity, months: [] }; byKey.set(key, p); grouped.push(p); }
+    byKey.get(key).months.push(ym);
+  }
+  return grouped.map(period => {
+    const start = period.months[0], end = period.months.at(-1), last = results[end] || {}, data = { ...deepClone(last) };
+    for (const metric of STATISTICS_FLOW_METRICS) data[metric] = roundMoney(period.months.reduce((sum, ym) => sum + asNumber(results[ym] && results[ym][metric]), 0));
+    for (const metric of STATISTICS_STOCK_METRICS) data[metric] = asNumber(last[metric]);
+    const status = periodStatus(period.months, results);
+    return { ...period, start, end, rangeLabel: start === end ? monthName(start) : `${monthName(start)} – ${monthName(end)}`, ...status, data };
+  });
+}
+function periodTooltipHeader(period) {
+  if (!period) return "";
+  const title = period.granularity === "monthly" ? monthName(period.start) : period.label;
+  const range = period.granularity === "monthly" ? "" : `\n${period.rangeLabel}`;
+  const anchorNote = state.meta.startMonthMode === "anchor" && period.months.includes(state.meta.start) ? `\nFinanzieller Start ab ${formatLocalDate(state.meta.startAnchorDate)}` : "";
+  return `${title}${range}\n${periodStatusText(period)}${anchorNote}`;
+}
+function axisLabelEvery(count, granularity) {
+  if (granularity === "yearly") return 1;
+  if (granularity === "quarterly") return count <= 20 ? 1 : Math.max(1, Math.ceil(count / 16));
+  if (count <= 18) return 1;
+  if (count <= 24) return 2;
+  if (count <= 36) return 3;
+  return Math.max(4, Math.ceil(count / 12));
+}
+function shiftStatisticsWindow(deltaMonths) {
+  const allMonths = statisticsMonths(), windowInfo = statisticsWindow(allMonths), settings = statisticsDisplaySettings();
+  if (windowInfo.all || !allMonths.length) return;
+  const count = Number(settings.visibleRangeMonths), maxStart = Math.max(0, allMonths.length - count);
+  const nextIndex = Math.max(0, Math.min(maxStart, windowInfo.startIndex + deltaMonths));
+  settings.windowStart = allMonths[nextIndex];
+  updateAndSave("Diagrammausschnitt gespeichert");
+}
+function ensurePlanningThrough(endMonth) {
+  if (!isValidMonth(endMonth) || compareMonths(endMonth, state.meta.start) < 0) return false;
+  let changed = false;
+  if (!isValidMonth(state.meta.horizon) || compareMonths(endMonth, state.meta.horizon) > 0) { state.meta.horizon = endMonth; changed = true; }
+  for (const ym of monthsInclusive(state.meta.start, state.meta.horizon)) if (!state.months[ym]) { state.months[ym] = normalizedMonthData({}, ym); changed = true; }
+  return changed;
+}
+function allBudgetItems() {
+  const direct = state.variableBudgets.map(item => ({ ...item, budgetSource: "variable" }));
+  const savings = state.recurringSavings.filter(item => item.mode === "budget").map(item => ({ ...item, category: "Sparbudget", budgetSource: "recurringSaving" }));
+  return [...direct, ...savings];
+}
+function savingItems() { return state.recurringSavings.filter(item => item.mode !== "budget"); }
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return createNewState();
+    return normalizeState(JSON.parse(saved));
+  } catch (error) {
+    storageAvailable = false;
+    console.warn("Lokaler Speicher konnte nicht gelesen werden.", error);
+    return createNewState();
+  }
+}
+function saveState(message = "Automatisch gespeichert") {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    storageAvailable = true;
+    setSaveStatus(message);
+  } catch (error) {
+    storageAvailable = false;
+    setSaveStatus("Lokaler Speicher blockiert – bitte JSON-Backup verwenden", true);
+    console.warn("Lokaler Speicher konnte nicht geschrieben werden.", error);
+  }
+}
+function setSaveStatus(text, isError = false) {
+  const el = document.getElementById("saveStatus");
+  if (!el) return;
+  el.textContent = text;
+  el.style.color = isError ? "var(--danger)" : "var(--muted)";
+}
+
+function recurringScheduleAmount(item, ym) {
+  const amount = Math.max(0, asNumber(item.amount));
+  const due = item.nextDue || "";
+  if (item.interval === "monthly") return !due || compareMonths(ym, due) >= 0 ? amount : 0;
+  const divisor = item.interval === "quarterly" ? 3 : 12;
+  if (!due) return amount / divisor;
+  const cmp = compareMonths(ym, due);
+  if (cmp < 0) return 0;
+  if (cmp === 0) return amount;
+  return amount / divisor;
+}
+function budgetIntervalMonths(interval) { return interval === "quarterly" ? 3 : (interval === "yearly" ? 12 : 1); }
+function budgetReserveContribution(item, ym) {
+  const amount = Math.max(0, asNumber(item.amount));
+  if (!amount) return 0;
+  const due = isValidMonth(item.nextDue) ? item.nextDue : state.meta.start;
+  if (item.interval === "monthly") return compareMonths(ym, due) >= 0 ? roundMoney(amount) : 0;
+  const divisor = budgetIntervalMonths(item.interval);
+  if (compareMonths(due, state.meta.start) >= 0 && compareMonths(ym, state.meta.start) >= 0 && compareMonths(ym, due) <= 0) {
+    const count = monthsInclusive(state.meta.start, due).length;
+    const required = Math.max(0, amount - Math.max(0, asNumber(item.startBalance)));
+    if (!count || !required) return 0;
+    const baseRate = roundMoney(required / count);
+    if (ym === due) return roundMoney(required - baseRate * (count - 1));
+    return baseRate;
+  }
+  if (compareMonths(ym, due) > 0 || compareMonths(due, state.meta.start) < 0) return roundMoney(amount / divisor);
+  return 0;
+}
+function salaryForMonth(ym) {
+  let salary = asNumber(state.settings.baseSalary), best = "";
+  for (const raise of state.salaryRaises) {
+    const effective = raise.effectiveMonth || "";
+    if (!effective || compareMonths(effective, ym) > 0) continue;
+    if (!best || compareMonths(effective, best) >= 0) { salary = asNumber(raise.amount); best = effective; }
+  }
+  return salary;
+}
+function specialPayForMonth(type, ym) {
+  const key = type === "christmas" ? "christmasPay" : "vacationPay";
+  let amount = asNumber(state.settings[key]), best = "";
+  for (const raise of state.specialPayRaises || []) {
+    if (raise.type !== type) continue;
+    const effective = raise.effectiveMonth || "";
+    if (!effective || compareMonths(effective, ym) > 0) continue;
+    if (!best || compareMonths(effective, best) >= 0) { amount = asNumber(raise.amount); best = effective; }
+  }
+  return amount;
+}
+function loanAmount(loan, ym) {
+  const start = loan.startMonth || state.meta.start;
+  const last = loan.lastPayment || "";
+  if (compareMonths(ym, start) < 0 || (last && compareMonths(ym, last) > 0)) return 0;
+  return Math.max(0, asNumber(loan.monthlyRate));
+}
+function goalBaseRate(goal) {
+  if (!goal.startMonth || !goal.endMonth) return 0;
+  const count = monthIndex(goal.endMonth) - monthIndex(goal.startMonth) + 1;
+  return count > 0 ? roundMoney(Math.max(0, asNumber(goal.target) - asNumber(goal.startBalance)) / count) : 0;
+}
+function plannedGoalContribution(goal, ym, priorSaved) {
+  if (!goal.startMonth || !goal.endMonth) return 0;
+  if (compareMonths(ym, goal.startMonth) < 0 || compareMonths(ym, goal.endMonth) > 0) return 0;
+  if (goal.closedMonth && compareMonths(ym, goal.closedMonth) > 0) return 0;
+  const remaining = Math.max(0, asNumber(goal.target) - Math.max(0, asNumber(priorSaved)));
+  if (remaining <= 0) return 0;
+  let rate = goalBaseRate(goal);
+  if (goal.dynamicRate) {
+    const monthsLeft = monthIndex(goal.endMonth) - monthIndex(ym) + 1;
+    rate = monthsLeft > 0 ? roundMoney(remaining / monthsLeft) : remaining;
+  }
+  return roundMoney(Math.min(remaining, Math.max(0, rate)));
+}
+function goalAcceptsExtraInMonth(goal, ym) {
+  if (!goal.startMonth || compareMonths(ym, goal.startMonth) < 0) return false;
+  return !goal.closedMonth || compareMonths(ym, goal.closedMonth) <= 0;
+}
+function isBonusCategory(category) { return BONUS_CATEGORIES.has(String(category || "").trim().toLocaleLowerCase("de")); }
+function latestLockedMonth() {
+  let latest = "";
+  for (const ym of planningMonths()) if (state.months[ym] && state.months[ym].locked) latest = ym;
+  return latest;
+}
+function budgetUsageValue(monthData, budgetId) {
+  if (!monthData || !monthData.locked || !monthData.snapshot) return { known: false, value: 0 };
+  const confirmed = Boolean(monthData.budgetUsageConfirmed || monthData.snapshot.budgetUsageConfirmed || monthData.snapshot.legacyBudgetUsageEvidence);
+  if (!confirmed) return { known: false, value: 0 };
+  const snapDetail = isPlainObject(monthData.snapshot.budgetDetails) ? monthData.snapshot.budgetDetails[budgetId] : null;
+  if (isPlainObject(snapDetail) && hasOwn(snapDetail, "spent")) return { known: true, value: Math.max(0, asNumber(snapDetail.spent)) };
+  if (hasOwn(monthData.budgetUsage, budgetId)) return { known: true, value: Math.max(0, asNumber(monthData.budgetUsage[budgetId])) };
+  return { known: false, value: 0 };
+}
+function budgetForecastProfile() {
+  const items = allBudgetItems(), averages = {}, perBudgetMonths = {}, budgetEligible = {};
+  const allLocked = planningMonths().filter(ym => state.months[ym] && state.months[ym].locked && state.months[ym].snapshot && (!isAnchorStartMonth(ym) || state.meta.startMonthUseForStatistics));
+  for (const budget of items) {
+    const history = allLocked.filter(ym => budgetUsageValue(state.months[ym], budget.id).known).slice(-6);
+    const total = history.reduce((sum, ym) => sum + budgetUsageValue(state.months[ym], budget.id).value, 0);
+    perBudgetMonths[budget.id] = history;
+    budgetEligible[budget.id] = history.length >= 3;
+    averages[budget.id] = history.length ? roundMoney(total / history.length) : 0;
+  }
+  const eligibleMonths = allLocked.filter(ym => items.some(budget => budgetUsageValue(state.months[ym], budget.id).known)).slice(-6);
+  return { eligible: items.length > 0 && eligibleMonths.length >= 3 && Object.values(budgetEligible).some(Boolean), months: eligibleMonths, averages, perBudgetMonths, budgetEligible };
+}
+function normalizedBudgetTransactionFlow(monthData, budgetIds) {
+  const cashToBudget = {}, budgetToCash = {}, transferIn = {}, transferOut = {};
+  let manualCashTransferVolume = 0, internalTransferVolume = 0;
+  const add = (map, id, amount) => { if (budgetIds.has(id)) map[id] = roundMoney(asNumber(map[id]) + amount); };
+  for (const [id, amount] of Object.entries(monthData.budgetPayouts || {})) {
+    const value = roundMoney(Math.max(0, asNumber(amount)));
+    if (value) { add(budgetToCash, id, value); manualCashTransferVolume += value; }
+  }
+  for (const tx of monthData.budgetTransactions || []) {
+    const amount = roundMoney(Math.max(0, asNumber(tx.amount)));
+    if (!amount) continue;
+    if (tx.type === "cash_to_budget") { add(cashToBudget, String(tx.budgetId || tx.toBudgetId || ""), amount); manualCashTransferVolume += amount; }
+    else if (tx.type === "budget_to_cash") { add(budgetToCash, String(tx.budgetId || tx.fromBudgetId || ""), amount); manualCashTransferVolume += amount; }
+    else if (tx.type === "budget_to_budget") {
+      const fromId = String(tx.fromBudgetId || ""), toId = String(tx.toBudgetId || tx.budgetId || "");
+      if (fromId && toId && fromId !== toId && budgetIds.has(fromId) && budgetIds.has(toId)) {
+        add(transferOut, fromId, amount); add(transferIn, toId, amount); internalTransferVolume += amount;
+      }
+    }
+  }
+  for (const tx of monthData.budgetTransfers || []) {
+    const fromId = String(tx.fromBudgetId || ""), toId = String(tx.toBudgetId || ""), amount = roundMoney(Math.max(0, asNumber(tx.amount)));
+    if (amount && fromId !== toId && budgetIds.has(fromId) && budgetIds.has(toId)) { add(transferOut, fromId, amount); add(transferIn, toId, amount); internalTransferVolume += amount; }
+  }
+  return { cashToBudget, budgetToCash, transferIn, transferOut, manualCashTransferVolume: roundMoney(manualCashTransferVolume), internalTransferVolume: roundMoney(internalTransferVolume) };
+}
+
+function lockedSnapshotResult(monthData, ym, previous) {
+  const raw = deepClone(monthData.snapshot || {});
+  const snap = {
+    month: ym, locked: true, carry: previous.cash,
+    salary: 0, vacationPay: 0, christmasPay: 0, specialPay: 0, bonusPayments: 0, otherManualIncome: 0, totalManualIncome: 0, totalIncome: 0,
+    fixedCosts: 0, loanRates: 0, quarterlyCosts: 0, annualCosts: 0, variableCosts: 0, directCashExpenses: 0,
+    budgetReserve: 0, budgetSpent: 0, budgetOverspendCash: 0, budgetCashDeposits: 0, budgetCashWithdrawals: 0, budgetInternalTransfers: 0, budgetClosingTotal: 0, budgetDetails: {}, budgetClosingBalances: {},
+    regularSavings: 0, regularSavingBalanceTotal: 0, regularSavingBalances: {},
+    goalSavingsPlanned: 0, goalSavingsExtra: 0, goalSavings: 0, goalSpendingTotal: 0, goalCompletionAdjustmentTotal: 0, goalOpenBalanceTotal: 0,
+    goalPlannedContributions: {}, goalExtraContributions: {}, goalContributions: {}, goalBalancesBefore: {}, goalBalancesBeforeSpending: {}, goalBalancesAfter: {}, goalActualSpendings: {}, goalCompletionAdjustments: {},
+    actualExpenses: 0, savingsTransfers: 0, reservationTransfers: 0, manualTransferVolume: 0, endingBalance: 0, effectiveEndingBalance: 0, freeAvailable: 0, savingsAssetsTotal: 0, totalAssets: 0,
+    actualBankBalance: monthData.actualBankBalance, actualBankBalanceAccepted: monthData.actualBankBalanceAccepted, budgetUsageConfirmed: monthData.budgetUsageConfirmed,
+    ...raw
+  };
+  snap.actualBankBalance = nullableNumber(firstDefined(raw.actualBankBalance, monthData.actualBankBalance));
+  snap.actualBankBalanceAccepted = Boolean(firstDefined(raw.actualBankBalanceAccepted, monthData.actualBankBalanceAccepted, false));
+  snap.budgetUsageConfirmed = Boolean(firstDefined(raw.budgetUsageConfirmed, monthData.budgetUsageConfirmed, false));
+  snap.budgetDetails = isPlainObject(snap.budgetDetails) ? snap.budgetDetails : {};
+  snap.budgetClosingBalances = isPlainObject(snap.budgetClosingBalances) ? snap.budgetClosingBalances : {};
+  if (!Object.keys(snap.budgetClosingBalances).length && Object.keys(snap.budgetDetails).length) {
+    for (const [id, detail] of Object.entries(snap.budgetDetails)) if (isPlainObject(detail) && hasOwn(detail, "closingBalance")) snap.budgetClosingBalances[id] = asNumber(detail.closingBalance);
+  }
+  snap.regularSavingBalances = isPlainObject(snap.regularSavingBalances) ? snap.regularSavingBalances : (isPlainObject(snap.regularSavingsClosingBalances) ? snap.regularSavingsClosingBalances : {});
+  if (!hasOwn(raw, "regularSavingBalanceTotal")) snap.regularSavingBalanceTotal = Object.values(snap.regularSavingBalances).reduce((s, v) => s + Math.max(0, asNumber(v)), 0);
+  snap.goalBalancesAfter = isPlainObject(snap.goalBalancesAfter) ? snap.goalBalancesAfter : {};
+  if (!hasOwn(raw, "goalOpenBalanceTotal")) snap.goalOpenBalanceTotal = Object.values(snap.goalBalancesAfter).reduce((s, v) => s + Math.max(0, asNumber(v)), 0);
+  if (!hasOwn(raw, "budgetClosingTotal")) snap.budgetClosingTotal = Object.values(snap.budgetClosingBalances).reduce((s, v) => s + asNumber(v), 0);
+  if (!hasOwn(raw, "effectiveEndingBalance")) snap.effectiveEndingBalance = snap.actualBankBalanceAccepted && snap.actualBankBalance !== null ? snap.actualBankBalance : asNumber(snap.endingBalance);
+  if (!hasOwn(raw, "savingsAssetsTotal")) snap.savingsAssetsTotal = roundMoney(asNumber(snap.regularSavingBalanceTotal) + asNumber(snap.goalOpenBalanceTotal));
+  if (!hasOwn(raw, "totalAssets")) snap.totalAssets = Number.isFinite(Number(raw.accountBalanceTotal)) ? asNumber(raw.accountBalanceTotal) : roundMoney(asNumber(snap.effectiveEndingBalance) + asNumber(snap.budgetClosingTotal) + asNumber(snap.savingsAssetsTotal));
+  if (!hasOwn(raw, "manualTransferVolume")) snap.manualTransferVolume = roundMoney(asNumber(raw.budgetPayouts) + asNumber(raw.budgetCashDeposits) + asNumber(raw.budgetCashWithdrawals) + asNumber(raw.budgetInternalTransfers));
+  if (!hasOwn(raw, "freeAvailable")) snap.freeAvailable = roundMoney(asNumber(snap.effectiveEndingBalance) - Math.max(0, asNumber(state.settings.minimumCashBuffer)));
+  if (!hasOwn(raw, "actualExpenses")) snap.actualExpenses = roundMoney(asNumber(snap.fixedCosts) + asNumber(snap.loanRates) + asNumber(snap.quarterlyCosts) + asNumber(snap.annualCosts) + asNumber(snap.variableCosts) + asNumber(snap.budgetSpent) + asNumber(snap.goalSpendingTotal));
+  if (!hasOwn(raw, "savingsTransfers")) snap.savingsTransfers = roundMoney(asNumber(snap.regularSavings) + asNumber(snap.goalSavings));
+  if (!hasOwn(raw, "reservationTransfers")) snap.reservationTransfers = roundMoney(asNumber(firstDefined(snap.budgetReserve, snap.budgetPrepared, snap.budgetCosts, 0)));
+  snap.endingBalance = asNumber(snap.endingBalance);
+  return snap;
+}
+
+function calculateAll(options = {}) {
+  const results = {};
+  const profile = options.forecastBudgetUsage ? (options.profile || budgetForecastProfile()) : null;
+  let previous = { cash: asNumber(state.settings.openingBalance), budgetBalances: {}, goalBalances: {}, regularSavingBalances: {} };
+  for (const ym of planningMonths()) {
+    const monthData = state.months[ym] || normalizedMonthData({}, ym);
+    if (monthData.locked && monthData.snapshot) {
+      const snap = lockedSnapshotResult(monthData, ym, previous);
+      results[ym] = snap;
+      previous = { cash: asNumber(snap.effectiveEndingBalance), budgetBalances: deepClone(snap.budgetClosingBalances || {}), goalBalances: deepClone(snap.goalBalancesAfter || {}), regularSavingBalances: deepClone(snap.regularSavingBalances || {}) };
+      continue;
+    }
+
+    const anchorMonth = isAnchorStartMonth(ym);
+    const salary = anchorMonth ? 0 : salaryForMonth(ym);
+    const vacationGross = ym.endsWith("-07") ? specialPayForMonth("vacation", ym) : 0;
+    const christmasGross = ym.endsWith("-12") ? specialPayForMonth("christmas", ym) : 0;
+    const vacationPay = specialPayScheduledAmount("vacation", vacationGross, ym);
+    const christmasPay = specialPayScheduledAmount("christmas", christmasGross, ym);
+    const specialPay = roundMoney(vacationPay + christmasPay);
+    let bonusPayments = 0, otherManualIncome = 0;
+    for (const entry of monthData.incomes) {
+      const amount = Math.max(0, asNumber(entry.amount));
+      if (isBonusCategory(entry.category)) bonusPayments += amount; else otherManualIncome += amount;
+    }
+    const totalManualIncome = roundMoney(bonusPayments + otherManualIncome);
+    const totalIncome = roundMoney(salary + specialPay + totalManualIncome);
+
+    let fixedCosts = 0, quarterlyCosts = 0, annualCosts = 0;
+    for (const item of state.recurringCosts) {
+      const gross = recurringScheduleAmount(item, ym), value = startMonthScheduledAmount("cost", item.id, gross, ym);
+      if (item.interval === "monthly") fixedCosts += value; else if (item.interval === "quarterly") quarterlyCosts += value; else annualCosts += value;
+    }
+    fixedCosts = roundMoney(fixedCosts); quarterlyCosts = roundMoney(quarterlyCosts); annualCosts = roundMoney(annualCosts);
+    const loanRates = roundMoney(state.loans.reduce((sum, loan) => sum + startMonthScheduledAmount("loan", loan.id, loanAmount(loan, ym), ym), 0));
+    const variableCosts = roundMoney(monthData.expenses.reduce((sum, entry) => sum + Math.max(0, asNumber(entry.amount)), 0));
+    const directCashExpenses = roundMoney(fixedCosts + quarterlyCosts + annualCosts + loanRates + variableCosts);
+
+    const budgetItems = allBudgetItems();
+    const budgetIds = new Set(budgetItems.map(item => item.id));
+    const flows = normalizedBudgetTransactionFlow(monthData, budgetIds);
+    const budgetDetails = {}, budgetClosingBalances = {};
+    let budgetReserve = 0, budgetSpent = 0, budgetOverspendCash = 0, budgetClosingTotal = 0;
+    for (const budget of budgetItems) {
+      const firstMonth = ym === state.meta.start;
+      const priorBalance = roundMoney(hasOwn(previous.budgetBalances, budget.id) ? asNumber(previous.budgetBalances[budget.id]) : (firstMonth ? Math.max(0, asNumber(budget.startBalance)) : 0));
+      const reserveGross = roundMoney(budgetReserveContribution(budget, ym));
+      const reserve = startMonthScheduledAmount("budget", budget.id, reserveGross, ym);
+      const cashDeposit = roundMoney(asNumber(flows.cashToBudget[budget.id]));
+      const cashWithdrawal = roundMoney(asNumber(flows.budgetToCash[budget.id]));
+      const transferredIn = roundMoney(asNumber(flows.transferIn[budget.id]));
+      const transferredOut = roundMoney(asNumber(flows.transferOut[budget.id]));
+      let spent;
+      if (options.forecastBudgetUsage && profile && profile.eligible && profile.budgetEligible && profile.budgetEligible[budget.id] && !monthData.locked && !hasOwn(monthData.budgetUsage, budget.id)) spent = roundMoney(Math.max(0, asNumber(profile.averages[budget.id])));
+      else spent = roundMoney(Math.max(0, asNumber(monthData.budgetUsage[budget.id])));
+      const availableBeforeSpend = roundMoney(priorBalance + reserve + cashDeposit + transferredIn - cashWithdrawal - transferredOut);
+      const coveredByBudget = roundMoney(Math.min(spent, Math.max(0, availableBeforeSpend)));
+      const overspendFromCash = roundMoney(Math.max(0, spent - coveredByBudget));
+      const closingBalance = roundMoney(availableBeforeSpend - coveredByBudget);
+      budgetReserve += reserve; budgetSpent += spent; budgetOverspendCash += overspendFromCash; budgetClosingTotal += closingBalance;
+      budgetClosingBalances[budget.id] = closingBalance;
+      budgetDetails[budget.id] = { priorBalance, reserve, scheduledReserve: reserveGross, handledBeforeAnchor: isStartMonthItemHandled("budget", budget.id, ym), cashDeposit, cashWithdrawal, transferredIn, transferredOut, availableBeforeSpend, spent, coveredByBudget, overspendFromCash, closingBalance, forecasted: Boolean(options.forecastBudgetUsage && profile && profile.eligible && profile.budgetEligible && profile.budgetEligible[budget.id] && !hasOwn(monthData.budgetUsage, budget.id)) };
+    }
+    budgetReserve = roundMoney(budgetReserve); budgetSpent = roundMoney(budgetSpent); budgetOverspendCash = roundMoney(budgetOverspendCash); budgetClosingTotal = roundMoney(budgetClosingTotal);
+    const budgetCashDeposits = roundMoney(Object.values(flows.cashToBudget).reduce((s, v) => s + asNumber(v), 0));
+    const budgetCashWithdrawals = roundMoney(Object.values(flows.budgetToCash).reduce((s, v) => s + asNumber(v), 0));
+
+    const regularSavingBalances = {};
+    let regularSavings = 0, regularSavingBalanceTotal = 0;
+    for (const item of savingItems()) {
+      const priorBalance = roundMoney(hasOwn(previous.regularSavingBalances, item.id) ? asNumber(previous.regularSavingBalances[item.id]) : (ym === state.meta.start ? Math.max(0, asNumber(item.startBalance)) : 0));
+      const contributionGross = roundMoney(Math.max(0, recurringScheduleAmount(item, ym)));
+      const contribution = startMonthScheduledAmount("saving", item.id, contributionGross, ym);
+      const closingBalance = roundMoney(priorBalance + contribution);
+      regularSavings += contribution; regularSavingBalanceTotal += closingBalance; regularSavingBalances[item.id] = closingBalance;
+    }
+    regularSavings = roundMoney(regularSavings); regularSavingBalanceTotal = roundMoney(regularSavingBalanceTotal);
+
+    let goalSavingsPlanned = 0, goalSavingsExtra = 0, goalSavings = 0, goalSpendingTotal = 0, goalCompletionAdjustmentTotal = 0, goalOpenBalanceTotal = 0;
+    const goalPlannedContributions = {}, goalExtraContributions = {}, goalContributions = {}, goalBalancesBefore = {}, goalBalancesBeforeSpending = {}, goalBalancesAfter = {}, goalActualSpendings = {}, goalCompletionAdjustments = {};
+    for (const goal of state.savingsGoals) {
+      const activation = compareMonths(goal.startMonth, state.meta.start) < 0 ? state.meta.start : goal.startMonth;
+      const priorSaved = roundMoney(hasOwn(previous.goalBalances, goal.id) ? Math.max(0, asNumber(previous.goalBalances[goal.id])) : (ym === activation ? Math.max(0, asNumber(goal.startBalance)) : 0));
+      const plannedGross = plannedGoalContribution(goal, ym, priorSaved);
+      const planned = startMonthScheduledAmount("goal", goal.id, plannedGross, ym);
+      const extra = goalAcceptsExtraInMonth(goal, ym) ? roundMoney(Math.max(0, asNumber(monthData.goalExtraContributions[goal.id]))) : 0;
+      const totalContribution = roundMoney(planned + extra);
+      const beforeSpending = roundMoney(priorSaved + totalContribution);
+      const closesThisMonth = goal.closedMonth === ym;
+      const afterClosure = Boolean(goal.closedMonth && compareMonths(ym, goal.closedMonth) > 0);
+      let actualSpent = 0, adjustment = 0, after = afterClosure ? 0 : beforeSpending;
+      if (closesThisMonth) {
+        const stored = hasOwn(monthData.goalActualSpending, goal.id) ? nullableNumber(monthData.goalActualSpending[goal.id]) : nullableNumber(goal.actualSpent);
+        const legacyFallback = roundMoney(Math.min(beforeSpending, Math.max(0, asNumber(goal.target)) || beforeSpending));
+        actualSpent = stored === null ? legacyFallback : Math.max(0, stored);
+        adjustment = roundMoney(beforeSpending - actualSpent);
+        after = 0;
+      }
+      goalPlannedContributions[goal.id] = planned; goalExtraContributions[goal.id] = extra; goalContributions[goal.id] = totalContribution; goalBalancesBefore[goal.id] = priorSaved; goalBalancesBeforeSpending[goal.id] = beforeSpending; goalBalancesAfter[goal.id] = after; goalActualSpendings[goal.id] = actualSpent; goalCompletionAdjustments[goal.id] = adjustment;
+      goalSavingsPlanned += planned; goalSavingsExtra += extra; goalSavings += totalContribution; goalSpendingTotal += actualSpent; goalCompletionAdjustmentTotal += adjustment; goalOpenBalanceTotal += Math.max(0, after);
+    }
+    goalSavingsPlanned = roundMoney(goalSavingsPlanned); goalSavingsExtra = roundMoney(goalSavingsExtra); goalSavings = roundMoney(goalSavings); goalSpendingTotal = roundMoney(goalSpendingTotal); goalCompletionAdjustmentTotal = roundMoney(goalCompletionAdjustmentTotal); goalOpenBalanceTotal = roundMoney(goalOpenBalanceTotal);
+
+    const savingsTransfers = roundMoney(regularSavings + goalSavings);
+    const reservationTransfers = budgetReserve;
+    const carry = roundMoney(previous.cash);
+    const endingBalance = roundMoney(carry + totalIncome - directCashExpenses - reservationTransfers - budgetCashDeposits + budgetCashWithdrawals - budgetOverspendCash - savingsTransfers + goalCompletionAdjustmentTotal);
+    const effectiveEndingBalance = endingBalance;
+    const actualExpenses = roundMoney(directCashExpenses + budgetSpent + goalSpendingTotal);
+    const savingsAssetsTotal = roundMoney(regularSavingBalanceTotal + goalOpenBalanceTotal);
+    const totalAssets = roundMoney(effectiveEndingBalance + budgetClosingTotal + savingsAssetsTotal);
+    const freeAvailable = roundMoney(effectiveEndingBalance - Math.max(0, asNumber(state.settings.minimumCashBuffer)));
+    const manualTransferVolume = roundMoney(flows.manualCashTransferVolume + flows.internalTransferVolume);
+
+    results[ym] = {
+      month: ym, locked: false, carry, salary, vacationPay, christmasPay, specialPay, bonusPayments: roundMoney(bonusPayments), otherManualIncome: roundMoney(otherManualIncome), totalManualIncome, totalIncome,
+      fixedCosts, loanRates, quarterlyCosts, annualCosts, variableCosts, directCashExpenses,
+      budgetReserve, budgetSpent, budgetOverspendCash, budgetCashDeposits, budgetCashWithdrawals, budgetInternalTransfers: flows.internalTransferVolume, budgetClosingTotal, budgetDetails, budgetClosingBalances,
+      regularSavings, regularSavingBalanceTotal, regularSavingBalances,
+      goalSavingsPlanned, goalSavingsExtra, goalSavings, goalSpendingTotal, goalCompletionAdjustmentTotal, goalOpenBalanceTotal,
+      goalPlannedContributions, goalExtraContributions, goalContributions, goalBalancesBefore, goalBalancesBeforeSpending, goalBalancesAfter, goalActualSpendings, goalCompletionAdjustments,
+      actualExpenses, savingsTransfers, reservationTransfers, manualTransferVolume, endingBalance, effectiveEndingBalance, freeAvailable, savingsAssetsTotal, totalAssets,
+      actualBankBalance: monthData.actualBankBalance, actualBankBalanceAccepted: monthData.actualBankBalanceAccepted, budgetUsageConfirmed: monthData.budgetUsageConfirmed,
+      minimumCashBuffer: Math.max(0, asNumber(state.settings.minimumCashBuffer)),
+      startMonthMode: anchorMonth ? "anchor" : state.meta.startMonthMode, startAnchorDate: anchorMonth ? state.meta.startAnchorDate : null, salarySuppressed: anchorMonth,
+      startMonthSetup: anchorMonth ? deepClone(startMonthSetupFor(ym)) : null
+    };
+    previous = { cash: effectiveEndingBalance, budgetBalances: budgetClosingBalances, goalBalances: goalBalancesAfter, regularSavingBalances };
+  }
+  return results;
+}
+function currentResults() { return calculateAll(); }
+
+function buildLiquidityForecast(months, baseResults = null) {
+  const profile = budgetForecastProfile();
+  const budgetForecastActive = Boolean(state.forecastSettings.budgetForecastEnabled && profile.eligible);
+  const results = budgetForecastActive ? calculateAll({ forecastBudgetUsage: true, profile }) : (baseResults || currentResults());
+  const cash = months.map(ym => roundMoney(results[ym].effectiveEndingBalance));
+  const savings = months.map(ym => roundMoney(results[ym].savingsAssetsTotal));
+  const markers = [];
+  for (const goal of state.savingsGoals) {
+    if (goal.closedMonth || !goal.assumePlannedSpending) continue;
+    const target = Math.max(0, asNumber(goal.target));
+    if (!target) continue;
+    let spent = false;
+    for (let i = 0; i < months.length; i++) {
+      const ym = months[i], r = results[ym];
+      if (spent || r.locked) continue;
+      const before = Math.max(0, asNumber(r.goalBalancesBeforeSpending && r.goalBalancesBeforeSpending[goal.id]));
+      if (before < target) continue;
+      const saved = Math.max(0, asNumber(r.goalBalancesAfter && r.goalBalancesAfter[goal.id]));
+      const surplus = roundMoney(Math.max(0, saved - target));
+      let avoidedFutureContributions = 0;
+      for (let j = i; j < months.length; j++) {
+        const futureResult = results[months[j]];
+        const futureBalance = Math.max(0, asNumber(futureResult.goalBalancesAfter && futureResult.goalBalancesAfter[goal.id]));
+        if (j > i) avoidedFutureContributions += Math.max(0, asNumber(futureResult.goalContributions && futureResult.goalContributions[goal.id]));
+        savings[j] = roundMoney(savings[j] - futureBalance);
+        cash[j] = roundMoney(cash[j] + surplus + avoidedFutureContributions);
+      }
+      markers.push({ month: ym, label: "Geplante Verwendung", detail: `${goal.name || "Sparziel"}: Ziel erreicht; Prognose berücksichtigt eine geplante Ausgabe von ${money(target)}.`, color: "#5f6b76", symbol: "€" });
+      spent = true;
+    }
+  }
+  const total = months.map((ym, i) => roundMoney(cash[i] + savings[i]));
+  const latest = latestLockedMonth();
+  const forecastStartIndex = latest && months.includes(latest) ? Math.min(months.length - 1, months.indexOf(latest) + 1) : 0;
+  return { results, profile, budgetForecastActive, cash, savings, total, markers, forecastStartIndex };
+}
+
+function metricCard(label, value, valueClass = "") { return `<div class="summary-card"><div class="label">${escapeHtml(label)}</div><div class="value ${valueClass}">${money(value)}</div></div>`; }
+function intervalSelect(value, collection, id, disabled = false) {
+  return `<select data-collection="${escapeHtml(collection)}" data-id="${escapeHtml(id)}" data-field="interval" ${disabled ? "disabled" : ""}><option value="monthly" ${value === "monthly" ? "selected" : ""}>monatlich</option><option value="quarterly" ${value === "quarterly" ? "selected" : ""}>quartalsweise</option><option value="yearly" ${value === "yearly" ? "selected" : ""}>jährlich</option></select>`;
+}
+function emptyRow(colspan, text = "Noch keine Einträge.") { return `<tr><td colspan="${colspan}" class="muted">${escapeHtml(text)}</td></tr>`; }
+function valueClass(value) { return asNumber(value) < 0 ? "negative" : (asNumber(value) > 0 ? "positive" : ""); }
+function planStatusLabel(ym, locked) { return isAnchorStartMonth(ym) ? (locked ? "Start · Ist" : "Start / Teilmonat") : (locked ? "Ist" : "Plan"); }
+function startMonthAutomaticItems() {
+  const ym = state.meta.start, items = [];
+  if (state.meta.startMonthMode !== "anchor") return items;
+  for (const item of state.recurringCosts) {
+    const amount = roundMoney(recurringScheduleAmount(item, ym));
+    if (amount > 0) items.push({ key:startMonthItemKey("cost", item.id), type:"cost", id:item.id, label:item.description || "Laufende Kosten", category:item.interval === "monthly" ? "Laufende Kosten" : (item.interval === "quarterly" ? "Quartalskosten" : "Jahreskosten"), amount });
+  }
+  for (const loan of state.loans) {
+    const amount = roundMoney(loanAmount(loan, ym));
+    if (amount > 0) items.push({ key:startMonthItemKey("loan", loan.id), type:"loan", id:loan.id, label:loan.description || "Kredit", category:"Kreditrate", amount });
+  }
+  for (const item of savingItems()) {
+    const amount = roundMoney(recurringScheduleAmount(item, ym));
+    if (amount > 0) items.push({ key:startMonthItemKey("saving", item.id), type:"saving", id:item.id, label:item.description || "Regelmäßiges Sparen", category:"Regelmäßiges Sparen", amount });
+  }
+  for (const budget of allBudgetItems()) {
+    const amount = roundMoney(budgetReserveContribution(budget, ym));
+    if (amount > 0) items.push({ key:startMonthItemKey("budget", budget.id), type:"budget", id:budget.id, label:budget.description || "Budget", category:"Budgetrücklage", amount });
+  }
+  for (const goal of state.savingsGoals) {
+    const activation = compareMonths(goal.startMonth, state.meta.start) < 0 ? state.meta.start : goal.startMonth;
+    const prior = ym === activation ? Math.max(0, asNumber(goal.startBalance)) : 0;
+    const amount = roundMoney(plannedGoalContribution(goal, ym, prior));
+    if (amount > 0) items.push({ key:startMonthItemKey("goal", goal.id), type:"goal", id:goal.id, label:goal.name || "Sparziel", category:"Sparzielrate", amount });
+  }
+  return items;
+}
+function renderStartMonthSetup(monthData, result, locked) {
+  const target = document.getElementById("startMonthSetupPanel");
+  if (!target) return;
+  if (!isAnchorStartMonth(selectedMonth)) { target.innerHTML = ""; return; }
+  const snapshot = locked && isPlainObject(monthData.snapshot) ? monthData.snapshot : null;
+  const setup = snapshot && isPlainObject(snapshot.startMonthSetup) ? normalizeStartMonthSetup(snapshot.startMonthSetup) : startMonthSetupFor(selectedMonth);
+  const items = snapshot && Array.isArray(snapshot.startMonthAutomaticItems) ? snapshot.startMonthAutomaticItems : startMonthAutomaticItems();
+  const displayAnchorDate = snapshot && snapshot.startAnchorDate ? snapshot.startAnchorDate : state.meta.startAnchorDate;
+  const displayOpeningBalance = snapshot && hasOwn(snapshot, "startOpeningBalance") ? snapshot.startOpeningBalance : state.settings.openingBalance;
+  const rows = items.map(item => {
+    const done = Boolean(setup.handled[item.key]);
+    return `<tr><td>${escapeHtml(item.label)}</td><td>${escapeHtml(item.category)}</td><td class="num">${money(item.amount)}</td><td><label class="inline-check"><input data-start-handled="${escapeHtml(item.key)}" type="checkbox" ${done ? "checked" : ""} ${locked ? "disabled" : ""}> ${done ? "bereits bezahlt / erledigt" : "noch ausstehend"}</label></td></tr>`;
+  }).join("");
+  const specials = [];
+  const specialSnapshot = snapshot && isPlainObject(snapshot.startSpecialPayments) ? snapshot.startSpecialPayments : {};
+  const vacationAmount = specialSnapshot.vacation && hasOwn(specialSnapshot.vacation, "scheduled") ? asNumber(specialSnapshot.vacation.scheduled) : specialPayForMonth("vacation", selectedMonth);
+  const christmasAmount = specialSnapshot.christmas && hasOwn(specialSnapshot.christmas, "scheduled") ? asNumber(specialSnapshot.christmas.scheduled) : specialPayForMonth("christmas", selectedMonth);
+  if (selectedMonth.endsWith("-07") && vacationAmount > 0) specials.push({type:"vacation", label:"Urlaubsgeld", amount:vacationAmount});
+  if (selectedMonth.endsWith("-12") && christmasAmount > 0) specials.push({type:"christmas", label:"Weihnachtsgeld", amount:christmasAmount});
+  const specialHtml = specials.length ? `<h3 style="margin-top:1rem">Sonderzahlung im Startmonat</h3>${specials.map(x => `<div class="form-grid"><div class="field"><label>${escapeHtml(x.label)} · ${money(x.amount)}</label><select data-special-pay-status="${x.type}" ${locked ? "disabled" : ""}><option value="included" ${setup.specialPayments[x.type] !== "outstanding" ? "selected" : ""}>bereits im Kontostand enthalten</option><option value="outstanding" ${setup.specialPayments[x.type] === "outstanding" ? "selected" : ""}>noch ausstehend</option></select></div></div>`).join("")}` : "";
+  target.innerHTML = `<div class="notice"><strong>Finanzieller Start · Teilmonat seit ${escapeHtml(formatLocalDate(displayAnchorDate))}</strong><br>Kontostand am Stichtag: <strong>${money(displayOpeningBalance)}</strong> · Automatisches Monatsgehalt: <strong>0 €</strong> – nicht erneut berücksichtigt.<br><span class="small">Markiere automatische Vorgänge, die vor dem Stichtag bereits erledigt wurden. Sie werden dann im Startmonat nicht noch einmal berechnet.</span></div><div class="money-section"><h3>Bereits erledigte / noch offene automatische Vorgänge</h3><div class="table-wrap"><table><thead><tr><th>Vorgang</th><th>Art</th><th class="num">Betrag</th><th>Status</th></tr></thead><tbody>${rows || emptyRow(4, "Für diesen Startmonat sind derzeit keine automatischen Vorgänge geplant.")}</tbody></table></div>${specialHtml}</div>`;
+}
+function monthHasUserData(data) {
+  if (!isPlainObject(data)) return false;
+  if (data.locked || data.snapshot || data.actualBankBalance !== null && data.actualBankBalance !== undefined) return true;
+  if ((data.incomes || []).length || (data.expenses || []).length || (data.transactions || []).length || (data.budgetTransfers || []).length || (data.budgetTransactions || []).length) return true;
+  const maps = [data.budgetUsage, data.budgetPayouts, data.goalExtraContributions, data.goalActualSpending];
+  if (maps.some(map => isPlainObject(map) && Object.keys(map).length)) return true;
+  const setup = normalizeStartMonthSetup(data.startMonthSetup);
+  return Object.values(setup.handled).some(Boolean) || Object.values(setup.specialPayments).some(v => v === "outstanding");
+}
+function changePlanningStart(newStart) {
+  if (!isValidMonth(newStart) || newStart === state.meta.start) return true;
+  const locked = planningMonths().filter(ym => state.months[ym] && state.months[ym].locked);
+  if (locked.length) { alert("Der Planungsbeginn kann nicht geändert werden, solange abgeschlossene Monate vorhanden sind. Entsperre zuerst die betroffenen Monate oder erstelle einen neuen Finanzplan."); return false; }
+  let newHorizon = state.meta.horizon;
+  if (state.meta.startMonthMode === "anchor") newHorizon = addMonths(newStart, 35);
+  if (!isValidMonth(newHorizon) || compareMonths(newHorizon, newStart) < 0) { alert("Der neue Startmonat liegt außerhalb des bestehenden Planungshorizonts. Bitte erstelle dafür einen neuen Finanzplan."); return false; }
+  const outside = Object.keys(state.months).filter(isValidMonth).filter(ym => (compareMonths(ym, newStart) < 0 || compareMonths(ym, newHorizon) > 0) && monthHasUserData(state.months[ym]));
+  if (outside.length) { alert(`Der Planungsbeginn wurde nicht geändert, weil Finanzdaten außerhalb des neuen Planungszeitraums liegen würden (${outside.slice(0,4).map(monthName).join(", ")}${outside.length > 4 ? " …" : ""}). Es werden keine Finanzdaten automatisch verworfen.`); return false; }
+  const oldStart = state.meta.start;
+  state.meta.start = newStart;
+  if (state.meta.startMonthMode === "anchor") {
+    state.meta.horizon = newHorizon; state.meta.end = newHorizon; state.meta.statisticsEnd = newHorizon;
+    state.meta.startAnchorDate = newStart === currentLocalMonth() ? currentLocalDate() : `${newStart}-01`;
+  } else if (compareMonths(state.meta.statisticsEnd, newStart) < 0) state.meta.statisticsEnd = state.meta.horizon;
+  for (const ym of monthsInclusive(newStart, state.meta.horizon)) if (!state.months[ym]) state.months[ym] = normalizedMonthData({}, ym);
+  if (state.months[newStart] && newStart !== oldStart) state.months[newStart].startMonthSetup = defaultStartMonthSetup();
+  selectedMonth = newStart;
+  updateAndSave("Planungsbeginn geändert");
+  return true;
+}
+function startMonthChartText(ym, endValue) { return isAnchorStartMonth(ym) ? `\nTeilmonat / Stichtagsmonat\nFinanzieller Stichtag: ${formatLocalDate(state.meta.startAnchorDate)}\nKontostand am Stichtag: ${money(state.settings.openingBalance)}\nPrognose Monatsende: ${money(endValue)}` : ""; }
+function startTimelineMarkers() { return state.meta.startMonthMode === "anchor" ? [{ month: state.meta.start, label: "Finanzieller Start", detail: `Stichtag ${formatLocalDate(state.meta.startAnchorDate)} · Kontostand ${money(state.settings.openingBalance)} · Teilmonat`, color: "#8a5a00" }] : []; }
+
+
+function donutDetailRowsForOpenMonth(ym, result, key) {
+  const monthData = state.months[ym] || normalizedMonthData({}, ym);
+  if (key === "fixed") return state.recurringCosts.filter(item => item.interval === "monthly").map(item => ({ label: item.description || "Laufende Kosten", amount: startMonthScheduledAmount("cost", item.id, recurringScheduleAmount(item, ym), ym) }));
+  if (key === "periodic") return state.recurringCosts.filter(item => item.interval !== "monthly").map(item => ({ label: item.description || (item.interval === "quarterly" ? "Quartalskosten" : "Jahreskosten"), amount: startMonthScheduledAmount("cost", item.id, recurringScheduleAmount(item, ym), ym) }));
+  if (key === "loans") return state.loans.map(item => ({ label: item.description || "Kredit / Rate", amount: startMonthScheduledAmount("loan", item.id, loanAmount(item, ym), ym) }));
+  if (key === "extra") return (monthData.expenses || []).map(item => ({ label: item.description || item.category || "Zusätzliche Ausgabe", amount: Math.max(0, asNumber(item.amount)) }));
+  if (key === "reserves") return allBudgetItems().map(item => { const d = result.budgetDetails && result.budgetDetails[item.id] || {}; return { label: item.description || item.category || "Budget", amount: roundMoney(asNumber(d.reserve) + asNumber(d.cashDeposit)) }; });
+  if (key === "savings") return savingItems().map(item => ({ label: item.description || "Regelmäßiges Sparen", amount: startMonthScheduledAmount("saving", item.id, recurringScheduleAmount(item, ym), ym) }));
+  if (key === "goals") return state.savingsGoals.map(goal => ({ label: goal.name || "Sparziel", amount: Math.max(0, asNumber(result.goalContributions && result.goalContributions[goal.id])) }));
+  if (key === "overspend") return allBudgetItems().map(item => { const d = result.budgetDetails && result.budgetDetails[item.id] || {}; return { label: item.description || item.category || "Budgetüberziehung", amount: Math.max(0, asNumber(d.overspendFromCash)) }; });
+  if (key === "goalShortfall") return state.savingsGoals.map(goal => ({ label: goal.name || "Sparprojekt", amount: Math.max(0, -asNumber(result.goalCompletionAdjustments && result.goalCompletionAdjustments[goal.id])) }));
+  if (key === "budgetSpent") return allBudgetItems().map(item => { const d = result.budgetDetails && result.budgetDetails[item.id] || {}; return { label: item.description || item.category || "Budgetverbrauch", amount: Math.max(0, asNumber(d.spent)) }; });
+  if (key === "goalSpent") return state.savingsGoals.map(goal => ({ label: goal.name || "Sparziel-Ausgabe", amount: Math.max(0, asNumber(result.goalActualSpendings && result.goalActualSpendings[goal.id])) }));
+  return [];
+}
+function normalizeDonutDetails(details, total, fallbackLabel) {
+  const cleaned = (details || []).map(x => ({ label: String(x.label || fallbackLabel), amount: roundMoney(Math.max(0, asNumber(x.amount))) })).filter(x => x.amount > 0);
+  if (!(total > 0)) return [];
+  const detailSum = roundMoney(cleaned.reduce((sum, x) => sum + x.amount, 0)), diff = roundMoney(total - detailSum);
+  if (Math.abs(diff) <= .02) return cleaned;
+  if (diff > 0 && cleaned.length) return [...cleaned, { label: "Sonstiger Anteil", amount: diff }];
+  return [{ label: fallbackLabel, amount: roundMoney(total) }];
+}
+function buildMonthAllocationData(ym, result, options = {}) {
+  const monthData = state.months[ym] || normalizedMonthData({}, ym), locked = Boolean(options.forSnapshot || (monthData.locked && monthData.snapshot));
+  if (!options.ignoreStored && monthData.locked && monthData.snapshot && isPlainObject(monthData.snapshot.monthDonut) && isPlainObject(monthData.snapshot.monthDonut.allocation)) return deepClone(monthData.snapshot.monthDonut.allocation);
+  const generic = locked && !options.forSnapshot;
+  const defs = [
+    ["fixed", "Laufende Kosten", result.fixedCosts, "cost", DONUT_COLORS.fixed],
+    ["periodic", "Quartals-/Jahreskosten", roundMoney(asNumber(result.quarterlyCosts) + asNumber(result.annualCosts)), "cost", DONUT_COLORS.periodic],
+    ["loans", "Kredite / Raten", result.loanRates, "cost", DONUT_COLORS.loans],
+    ["extra", "Zusätzliche Ausgaben", result.variableCosts, "cost", DONUT_COLORS.extra],
+    ["overspend", "Budgetüberziehung", result.budgetOverspendCash, "cost", DONUT_COLORS.overspend],
+    ["goalShortfall", "Sparprojekt-Mehrkosten", Math.max(0, -asNumber(result.goalCompletionAdjustmentTotal)), "cost", DONUT_COLORS.goalSpent],
+    ["reserves", "Budgetrücklagen", roundMoney(asNumber(result.reservationTransfers) + asNumber(result.budgetCashDeposits)), "reserve", DONUT_COLORS.reserves],
+    ["savings", "Regelmäßiges Sparen", result.regularSavings, "saving", DONUT_COLORS.savings],
+    ["goals", "Sparprojekte", result.goalSavings, "saving", DONUT_COLORS.goals]
+  ];
+  const segments = defs.map(([key,label,amount,group,color]) => {
+    const value = roundMoney(Math.max(0, asNumber(amount)));
+    const details = generic ? [{ label: "Gespeicherter Monatswert", amount: value }] : normalizeDonutDetails(donutDetailRowsForOpenMonth(ym, result, key), value, label);
+    return { key, label, amount: value, group, color, details };
+  }).filter(x => x.amount > 0);
+  const total = roundMoney(segments.reduce((sum, x) => sum + x.amount, 0));
+  return { mode: "allocation", month: ym, locked, title: locked ? "Verwendung laut Monatsabschluss" : "Geplante Geldverwendung", centerLabel: locked ? "Verwendet" : "Geplant", centerSubtext: "vom normalen Guthaben", total, endingBalance: asNumber(result.effectiveEndingBalance), segments };
+}
+function buildMonthExpenseData(ym, result, options = {}) {
+  const monthData = state.months[ym] || normalizedMonthData({}, ym), locked = Boolean(options.forSnapshot || (monthData.locked && monthData.snapshot));
+  if (!options.ignoreStored && monthData.locked && monthData.snapshot && isPlainObject(monthData.snapshot.monthDonut) && isPlainObject(monthData.snapshot.monthDonut.expenses)) return deepClone(monthData.snapshot.monthDonut.expenses);
+  const generic = locked && !options.forSnapshot;
+  const defs = [
+    ["fixed", "Laufende Kosten", result.fixedCosts, DONUT_COLORS.fixed],
+    ["periodic", "Quartals-/Jahreskosten", roundMoney(asNumber(result.quarterlyCosts) + asNumber(result.annualCosts)), DONUT_COLORS.periodic],
+    ["loans", "Kredite / Raten", result.loanRates, DONUT_COLORS.loans],
+    ["extra", "Zusätzliche Ausgaben", result.variableCosts, DONUT_COLORS.extra],
+    ["budgetSpent", "Budgetverbrauch", result.budgetSpent, DONUT_COLORS.budgetSpent],
+    ["goalSpent", "Tatsächliche Sparziel-Ausgaben", result.goalSpendingTotal, DONUT_COLORS.goalSpent]
+  ];
+  const segments = defs.map(([key,label,amount,color]) => {
+    const value = roundMoney(Math.max(0, asNumber(amount)));
+    const details = generic ? [{ label: "Gespeicherter Monatswert", amount: value }] : normalizeDonutDetails(donutDetailRowsForOpenMonth(ym, result, key), value, label);
+    return { key, label, amount: value, group: "cost", color, details };
+  }).filter(x => x.amount > 0);
+  const total = roundMoney(segments.reduce((sum, x) => sum + x.amount, 0));
+  return { mode: "expenses", month: ym, locked, title: locked ? "Tatsächliche Ausgaben laut Monatsabschluss" : "Nur tatsächliche Ausgaben", centerLabel: "Ausgaben", centerSubtext: locked ? "im abgeschlossenen Monat" : "in diesem Monat", total, endingBalance: asNumber(result.effectiveEndingBalance), segments };
+}
+function donutPercent(amount, total) { return total > 0 ? asNumber(amount) / total * 100 : 0; }
+function donutGroupLabel(group) { return group === "reserve" ? "Reservierungen" : (group === "saving" ? "Sparen / Vermögensverschiebung" : "Tatsächliche Kosten"); }
+function selectDonutCategory(key) { selectedDonutCategory = key || ""; const r = currentResults()[selectedMonth]; renderMonthAllocation(r, state.months[selectedMonth]); }
+function renderMonthAllocation(result, monthData) {
+  const mode = statisticsDisplaySettings().donutMode, data = mode === "expenses" ? buildMonthExpenseData(selectedMonth, result) : buildMonthAllocationData(selectedMonth, result);
+  const heading = document.getElementById("donutHeading"), modeSelect = document.getElementById("donutMode");
+  if (!heading || !modeSelect) return;
+  heading.textContent = data.title; modeSelect.value = mode;
+  document.getElementById("donutHelp").textContent = mode === "expenses" ? "Zeigt ausschließlich Vermögensverbrauch. Budgetrücklagen und Spartransfers werden hier nicht als Ausgaben gezählt." : "Zeigt die Verwendung des normalen Guthabens. Budgetverbrauch aus bereits reservierten Töpfen wird nicht doppelt gezählt; nur eine Überziehung belastet zusätzlich das normale Guthaben.";
+  if (selectedDonutCategory && !data.segments.some(x => x.key === selectedDonutCategory)) selectedDonutCategory = "";
+  let previousGroup = "";
+  document.getElementById("monthAllocationLegend").innerHTML = data.segments.length ? data.segments.map(segment => {
+    const groupTitle = segment.group !== previousGroup ? `<div class="donut-group-title">${escapeHtml(donutGroupLabel(segment.group))}</div>` : ""; previousGroup = segment.group;
+    return `${groupTitle}<button type="button" class="donut-legend-row ${selectedDonutCategory === segment.key ? "active" : ""}" data-donut-category="${escapeHtml(segment.key)}"><span class="donut-swatch" style="background:${segment.color}"></span><span class="donut-legend-name">${escapeHtml(segment.label)}</span><span class="donut-legend-amount">${money(segment.amount)}</span><span class="donut-legend-percent">${donutPercent(segment.amount, data.total).toFixed(1).replace(".", ",")} %</span></button>`;
+  }).join("") : `<div class="donut-empty">Für diesen Monat ist noch keine Geldverwendung eingeplant.</div>`;
+  document.getElementById("monthAllocationSummary").innerHTML = `<span><strong>Summe:</strong> ${money(data.total)}</span><span><strong>${data.locked ? "Monatsendstand" : "Prognostizierter Monatsendstand"}:</strong> ${money(data.endingBalance)}</span>`;
+  const detailsTarget = document.getElementById("monthAllocationDetails"), selected = data.segments.find(x => x.key === selectedDonutCategory);
+  if (!selected) { detailsTarget.classList.add("hidden"); detailsTarget.innerHTML = ""; }
+  else {
+    const rows = selected.details.map(row => `<tr><td>${escapeHtml(row.label)}</td><td class="num">${money(row.amount)}</td></tr>`).join("");
+    detailsTarget.innerHTML = `<h3>${escapeHtml(selected.label)} · ${money(selected.amount)}</h3><div class="table-wrap"><table><thead><tr><th>Position</th><th class="num">Betrag</th></tr></thead><tbody>${rows || emptyRow(2, "Keine weitere Aufschlüsselung im historischen Snapshot gespeichert.")}</tbody></table></div>`;
+    detailsTarget.classList.remove("hidden");
+  }
+  requestAnimationFrame(() => drawDonutChart(document.getElementById("monthAllocationChart"), data));
+}
+
+function renderOverview() {
+  const results = currentResults(), months = planningMonths();
+  const rows = months.map(ym => {
+    const r = results[ym];
+    const actualMark = `<span class="badge">${escapeHtml(planStatusLabel(ym, r.locked))}</span>`;
+    return `<tr class="clickable ${r.locked ? "locked" : ""}" data-open-month="${ym}"><td>${escapeHtml(monthName(ym))} ${actualMark}</td><td class="num">${money(r.totalIncome)}</td><td class="num">${money(r.actualExpenses)}</td><td class="num">${money(r.savingsTransfers)}</td><td class="num">${money(r.manualTransferVolume)}</td><td class="num">${money(r.budgetClosingTotal)}</td><td class="num ${valueClass(r.effectiveEndingBalance)}">${money(r.effectiveEndingBalance)}</td></tr>`;
+  }).join("");
+  document.getElementById("overviewTable").innerHTML = `<table><thead><tr><th>Monat</th><th class="num">Einnahmen</th><th class="num">Tatsächliche Ausgaben</th><th class="num">Sparen</th><th class="num">Umbuchungen</th><th class="num">Reserviert</th><th class="num">Monatsendstand</th></tr></thead><tbody>${rows || emptyRow(7)}</tbody></table>`;
+}
+function renderMonthSelector() {
+  ensurePlanningThrough(selectedMonth);
+  const select = document.getElementById("monthSelect");
+  select.innerHTML = planningMonths().map(ym => `<option value="${ym}" ${ym === selectedMonth ? "selected" : ""}>${escapeHtml(monthName(ym))} – ${escapeHtml(planStatusLabel(ym, state.months[ym].locked))}${state.months[ym].locked ? " – gesperrt" : ""}</option>`).join("");
+  document.getElementById("prevMonth").disabled = compareMonths(selectedMonth, state.meta.start) <= 0;
+}
+function renderMonth() {
+  renderMonthSelector();
+  const r = currentResults()[selectedMonth], data = state.months[selectedMonth], locked = data.locked;
+  const lockButton = document.getElementById("toggleMonthLock");
+  lockButton.textContent = locked ? "Monat entsperren" : "Monat abschließen und sperren";
+  lockButton.className = locked ? "danger" : "primary";
+  document.getElementById("addIncome").disabled = locked;
+  document.getElementById("addExpense").disabled = locked;
+  document.getElementById("addBudgetTransfer").disabled = locked;
+  const actualText = r.actualBankBalance !== null ? ` Ist-Kontostand: <strong>${money(r.actualBankBalance)}</strong>${r.actualBankBalanceAccepted ? " (als Übertrag übernommen)" : ""}.` : "";
+  document.getElementById("monthLockInfo").innerHTML = locked ? `<div class="lock-banner"><strong>Dieser Monat ist gesperrt.</strong> Die Werte stammen aus dem gespeicherten Snapshot.${actualText}</div>` : "";
+  renderStartMonthSetup(data, r, locked);
+  const free = r.freeAvailable;
+  document.getElementById("monthSummary").innerHTML = `
+    <div class="money-section"><h3>Konto</h3><div class="summary-grid">${metricCard("Startguthaben / Übertrag", r.carry)}${metricCard("Einnahmen", r.totalIncome)}${metricCard("Direkte Kontoein-/ausgaben", r.directCashExpenses)}${metricCard("Budget-Überziehung aus Guthaben", r.budgetOverspendCash)}${metricCard("Berechneter Monatsendstand", r.endingBalance, valueClass(r.endingBalance))}${r.actualBankBalance !== null ? metricCard(r.actualBankBalanceAccepted ? "Übernommener Ist-Endstand" : "Ist-Kontostand (Info)", r.actualBankBalance, valueClass(r.actualBankBalance)) : ""}${metricCard("Frei verfügbar nach Mindestpuffer", free, valueClass(free))}</div></div>
+    <div class="money-section"><h3>Budgets / reserviert</h3><div class="summary-grid">${metricCard("Budgetrücklagen", r.reservationTransfers)}${metricCard("Tatsächlicher Budgetverbrauch", r.budgetSpent)}${metricCard("Manuell aus Guthaben → Budget", r.budgetCashDeposits)}${metricCard("Budget → Guthaben", r.budgetCashWithdrawals)}${metricCard("Reserviert am Monatsende", r.budgetClosingTotal, valueClass(r.budgetClosingTotal))}</div></div>
+    <div class="money-section"><h3>Sparen</h3><div class="summary-grid">${metricCard("Regelmäßiges Sparen", r.regularSavings)}${metricCard("Sparziel-Raten", r.goalSavingsPlanned)}${metricCard("Zusätzliche Sparziel-Einzahlungen", r.goalSavingsExtra)}${metricCard("Tatsächliche Sparziel-Ausgaben", r.goalSpendingTotal)}${metricCard("Sparvermögen am Monatsende", r.savingsAssetsTotal)}</div></div>
+    <div class="money-section"><h3>Sonstiges / Gesamtbild</h3><div class="summary-grid">${metricCard("Bonus / Prämie / Provision", r.bonusPayments)}${metricCard("Sonstige Einnahmen", r.otherManualIncome)}${metricCard("Zusätzliche Ausgaben", r.variableCosts)}${metricCard("Tatsächliche Ausgaben gesamt", r.actualExpenses)}${metricCard("Gesamtvermögen inkl. Budgets/Sparen", r.totalAssets, valueClass(r.totalAssets))}</div></div>`;
+  renderMonthAllocation(r, data);
+  renderBudgetUsageTable(data, r, locked);
+  renderBudgetTransactions(data, locked);
+  renderGoalContributionTable(data, r, locked);
+  renderTransactionTable("incomeTable", data.incomes, "income", locked);
+  renderTransactionTable("expenseTable", data.expenses, "expense", locked);
+}
+function renderBudgetUsageTable(monthData, result, locked) {
+  const items = allBudgetItems(), details = isPlainObject(result.budgetDetails) ? result.budgetDetails : {};
+  if (!items.length) { document.getElementById("budgetUsageTable").innerHTML = `<table><tbody>${emptyRow(12, "Noch keine Budget-Töpfe angelegt oder markiert.")}</tbody></table>`; return; }
+  const rows = items.map(item => {
+    const d = details[item.id] || {};
+    const usage = locked ? asNumber(d.spent) : Math.max(0, asNumber(monthData.budgetUsage[item.id]));
+    const warning = asNumber(d.overspendFromCash) > 0 ? `<span class="badge warn-badge">${money(d.overspendFromCash)} aus Guthaben</span>` : "–";
+    return `<tr><td>${escapeHtml(item.description || "Budget")}</td><td>${escapeHtml(item.category || "Sonstiges")}</td><td class="num">${money(d.priorBalance)}</td><td class="num">${money(d.reserve)}</td><td class="num">${money(d.cashDeposit)}</td><td class="num">${money(d.transferredIn)}</td><td><input data-budget-usage="${escapeHtml(item.id)}" type="number" min="0" step="0.01" value="${usage}" ${locked ? "disabled" : ""}></td><td>${warning}</td><td class="num">${money(d.transferredOut)}</td><td class="num">${money(d.cashWithdrawal)}</td><td class="num ${valueClass(d.closingBalance)}">${money(d.closingBalance)}</td><td class="actions"><button data-budget-deposit="${escapeHtml(item.id)}" ${locked ? "disabled" : ""}>Aus Guthaben einzahlen</button> <button data-budget-withdraw="${escapeHtml(item.id)}" ${locked ? "disabled" : ""}>Ins Guthaben verschieben</button></td></tr>`;
+  }).join("");
+  document.getElementById("budgetUsageTable").innerHTML = `<table><thead><tr><th>Budget</th><th>Kategorie</th><th class="num">Übertrag</th><th class="num">Rücklage</th><th class="num">Manuell rein</th><th class="num">Intern rein</th><th class="num">Verbrauch</th><th>Überziehung</th><th class="num">Intern raus</th><th class="num">Ins Guthaben</th><th class="num">Endstand</th><th></th></tr></thead><tbody>${rows}<tr class="total"><td>Summe</td><td></td><td></td><td class="num">${money(result.budgetReserve)}</td><td class="num">${money(result.budgetCashDeposits)}</td><td></td><td class="num">${money(result.budgetSpent)}</td><td class="num">${money(result.budgetOverspendCash)}</td><td></td><td class="num">${money(result.budgetCashWithdrawals)}</td><td class="num">${money(result.budgetClosingTotal)}</td><td></td></tr></tbody></table>`;
+}
+function renderBudgetTransactions(monthData, locked) {
+  const rows = (monthData.budgetTransactions || []).map(tx => {
+    const budget = allBudgetItems().find(x => x.id === tx.budgetId);
+    const from = allBudgetItems().find(x => x.id === tx.fromBudgetId), to = allBudgetItems().find(x => x.id === tx.toBudgetId);
+    const label = tx.type === "cash_to_budget" ? `Guthaben → ${budget ? budget.description : tx.budgetId}` : (tx.type === "budget_to_cash" ? `${budget ? budget.description : tx.budgetId} → Guthaben` : `${from ? from.description : tx.fromBudgetId} → ${to ? to.description : tx.toBudgetId}`);
+    return `<tr><td>${escapeHtml(tx.date || "–")}</td><td>${escapeHtml(label)}</td><td class="num">${money(tx.amount)}</td><td>${escapeHtml(tx.note || "")}</td><td class="actions"><button data-delete-budget-tx="${escapeHtml(tx.id)}" class="danger" ${locked ? "disabled" : ""}>Löschen</button></td></tr>`;
+  }).join("");
+  const legacyCount = Object.values(monthData.budgetPayouts || {}).filter(v => asNumber(v) !== 0).length + (monthData.budgetTransfers || []).length;
+  document.getElementById("budgetTransactions").innerHTML = `<h3>Umbuchungen dieses Monats</h3>${legacyCount ? `<div class="notice small">Dieser Monat enthält zusätzlich ${legacyCount} ältere Umbuchungswert(e), die aus einem früheren Datenformat übernommen und weiterhin berechnet werden.</div>` : ""}<div class="table-wrap"><table><thead><tr><th>Datum</th><th>Bewegung</th><th class="num">Betrag</th><th>Notiz</th><th></th></tr></thead><tbody>${rows || emptyRow(5, "Noch keine neuen Umbuchungen in diesem Monat.")}</tbody></table></div>`;
+}
+function renderGoalContributionTable(monthData, result, locked) {
+  const goals = state.savingsGoals;
+  if (!goals.length) { document.getElementById("monthGoalsTable").innerHTML = `<table><tbody>${emptyRow(11, "Noch keine Sparziele angelegt.")}</tbody></table>`; return; }
+  const rows = goals.map(goal => {
+    const before = Math.max(0, asNumber(result.goalBalancesBefore[goal.id]));
+    const planned = Math.max(0, asNumber(result.goalPlannedContributions[goal.id]));
+    const extra = Math.max(0, asNumber(result.goalExtraContributions[goal.id]));
+    const beforeSpend = Math.max(0, asNumber(result.goalBalancesBeforeSpending[goal.id]));
+    const actualSpent = Math.max(0, asNumber(result.goalActualSpendings[goal.id]));
+    const adjustment = asNumber(result.goalCompletionAdjustments[goal.id]);
+    const after = Math.max(0, asNumber(result.goalBalancesAfter[goal.id]));
+    const target = Math.max(0, asNumber(goal.target));
+    const reached = target > 0 && beforeSpend >= target && !goal.closedMonth;
+    const beforeStart = compareMonths(selectedMonth, goal.startMonth) < 0;
+    const afterClosure = Boolean(goal.closedMonth && compareMonths(selectedMonth, goal.closedMonth) > 0);
+    const closesThisMonth = goal.closedMonth === selectedMonth;
+    let status = "Offen";
+    if (beforeStart) status = `Startet ${monthName(goal.startMonth)}`; else if (afterClosure) status = `Abgeschlossen seit ${monthName(goal.closedMonth)}`; else if (closesThisMonth) status = "Tatsächlich abgeschlossen"; else if (reached) status = "Ziel erreicht"; else if (compareMonths(selectedMonth, goal.endMonth) > 0) status = "Zielmonat vorbei";
+    const canExtra = !locked && !beforeStart && !afterClosure;
+    const action = !locked && closesThisMonth ? `<button data-reopen-goal="${escapeHtml(goal.id)}">Abschluss rückgängig</button>` : (!locked && !beforeStart && !afterClosure ? `<button data-close-goal="${escapeHtml(goal.id)}" class="primary">Tatsächlich abschließen</button>` : "");
+    return `<tr><td>${escapeHtml(goal.name || "Sparziel")}</td><td><span class="badge">${escapeHtml(status)}</span></td><td class="num">${money(target)}</td><td class="num">${money(before)}</td><td class="num">${money(planned)}</td><td><input data-goal-extra="${escapeHtml(goal.id)}" type="number" min="0" step="0.01" value="${locked ? extra : Math.max(0, asNumber(monthData.goalExtraContributions[goal.id]))}" ${canExtra ? "" : "disabled"}></td><td class="num">${money(beforeSpend)}</td><td class="num">${closesThisMonth || actualSpent ? money(actualSpent) : "–"}</td><td class="num ${valueClass(adjustment)}">${closesThisMonth || adjustment ? money(adjustment) : "–"}</td><td class="num">${money(after)}</td><td class="actions">${action}</td></tr>`;
+  }).join("");
+  document.getElementById("monthGoalsTable").innerHTML = `<table><thead><tr><th>Sparziel</th><th>Status</th><th class="num">Ziel</th><th class="num">Stand vorher</th><th class="num">Automatische Rate</th><th class="num">Zusätzlich</th><th class="num">Stand vor Ausgabe</th><th class="num">Tatsächlich ausgegeben</th><th class="num">Differenz ins Guthaben</th><th class="num">Stand danach</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function renderTransactionTable(targetId, entries, type, locked) {
+  const bounds = monthDateBounds(selectedMonth), list = type === "income" ? "incomeCategories" : "expenseCategories";
+  const rows = entries.map(entry => `<tr><td><input data-tx-type="${type}" data-id="${escapeHtml(entry.id)}" data-field="date" type="date" min="${bounds.min}" max="${bounds.max}" value="${escapeHtml(entry.date || "")}" ${locked ? "disabled" : ""}></td><td><input class="description" data-tx-type="${type}" data-id="${escapeHtml(entry.id)}" data-field="description" type="text" value="${escapeHtml(entry.description || "")}" ${locked ? "disabled" : ""}></td><td><input data-tx-type="${type}" data-id="${escapeHtml(entry.id)}" data-field="category" type="text" list="${list}" value="${escapeHtml(entry.category || "")}" ${locked ? "disabled" : ""}></td><td><input data-tx-type="${type}" data-id="${escapeHtml(entry.id)}" data-field="amount" type="number" min="0" step="0.01" value="${asNumber(entry.amount)}" ${locked ? "disabled" : ""}></td><td class="actions"><button data-delete-tx="${type}" data-id="${escapeHtml(entry.id)}" class="danger" ${locked ? "disabled" : ""}>Löschen</button></td></tr>`).join("");
+  document.getElementById(targetId).innerHTML = `<table><thead><tr><th>Datum optional</th><th>Beschreibung</th><th>Kategorie / Art</th><th class="num">Betrag</th><th></th></tr></thead><tbody>${rows || emptyRow(5)}</tbody></table>`;
+}
+
+function renderBasics() {
+  for (const input of document.querySelectorAll("[data-setting]")) input.value = state.settings[input.dataset.setting] ?? "";
+  const anchorMode = state.meta.startMonthMode === "anchor", startInput = document.getElementById("planningStartMonth"), anchorInput = document.getElementById("startAnchorDate");
+  startInput.value = state.meta.start;
+  anchorInput.value = state.meta.startAnchorDate || "";
+  const bounds = monthDateBounds(state.meta.start); anchorInput.min = bounds.min; anchorInput.max = bounds.max; anchorInput.disabled = !anchorMode || Boolean(latestLockedMonth());
+  document.getElementById("openingBalanceLabel").textContent = anchorMode ? "Kontostand am finanziellen Stichtag" : "Normales Startguthaben im ersten Planungsmonat (Legacy)";
+  document.getElementById("openingBalance").disabled = Boolean(state.months[state.meta.start] && state.months[state.meta.start].locked);
+  document.getElementById("createdAtReadout").textContent = state.meta.createdAt ? new Date(state.meta.createdAt).toLocaleString("de-AT") : "Unbekannt (älterer Speicherstand)";
+  document.getElementById("startMonthStatisticsRow").classList.toggle("hidden", !anchorMode);
+  document.getElementById("startMonthUseForStatistics").checked = Boolean(state.meta.startMonthUseForStatistics);
+  const notice = document.getElementById("planningStartNotice");
+  const startLockedHint = latestLockedMonth() ? `<br><span class="small">Der Planungsbeginn kann nicht geändert werden, solange abgeschlossene Monate vorhanden sind.</span>` : "";
+  notice.innerHTML = anchorMode ? `<div class="notice"><strong>Start / Teilmonat.</strong> Der erste Monat beginnt am finanziellen Stichtag. Das normale Monatsgehalt wird dort nicht erneut eingerechnet; bereits erledigte automatische Zahlungen werden in der Monatsansicht markiert.${startLockedHint}</div>` : `<div class="notice"><strong>Legacy-Vollmonat.</strong> Dieser ältere Plan behält die bisherige v8-Berechnung des ersten Monats vollständig bei. Es wird keine neue Stichtagslogik rückwirkend angewendet.${startLockedHint}</div>`;
+  document.getElementById("planningStartHelp").textContent = anchorMode ? "Trage beim Kontostand nur das normale Guthaben am Stichtag ein. Budget- und Spar-Startbestände werden separat als Bestände am selben Stichtag erfasst und nicht noch einmal transferiert." : "Der erste Monat wird wie bisher als vollständiger Planungsmonat gerechnet. Alte Werte und historische Ergebnisse bleiben dadurch unverändert.";
+  document.getElementById("raisesTable").innerHTML = `<table><thead><tr><th>Neues Monatsgehalt</th><th>Gültig ab</th><th></th></tr></thead><tbody>${state.salaryRaises.map(item => `<tr><td><input data-collection="salaryRaises" data-id="${escapeHtml(item.id)}" data-field="amount" type="number" min="0" step="0.01" value="${asNumber(item.amount)}"></td><td><input data-collection="salaryRaises" data-id="${escapeHtml(item.id)}" data-field="effectiveMonth" type="month" min="${state.meta.start}" value="${escapeHtml(item.effectiveMonth || "")}"></td><td class="actions"><button data-delete="salaryRaises" data-id="${escapeHtml(item.id)}" class="danger">Löschen</button></td></tr>`).join("") || emptyRow(3)}</tbody></table>`;
+  document.getElementById("specialPayRaisesTable").innerHTML = `<table><thead><tr><th>Sonderzahlung</th><th class="num">Neue Summe</th><th>Gültig ab</th><th></th></tr></thead><tbody>${state.specialPayRaises.map(item => `<tr><td><select data-collection="specialPayRaises" data-id="${escapeHtml(item.id)}" data-field="type"><option value="vacation" ${item.type !== "christmas" ? "selected" : ""}>Urlaubsgeld</option><option value="christmas" ${item.type === "christmas" ? "selected" : ""}>Weihnachtsgeld</option></select></td><td><input data-collection="specialPayRaises" data-id="${escapeHtml(item.id)}" data-field="amount" type="number" min="0" step="0.01" value="${asNumber(item.amount)}"></td><td><input data-collection="specialPayRaises" data-id="${escapeHtml(item.id)}" data-field="effectiveMonth" type="month" min="${state.meta.start}" value="${escapeHtml(item.effectiveMonth || "")}"></td><td class="actions"><button data-delete="specialPayRaises" data-id="${escapeHtml(item.id)}" class="danger">Löschen</button></td></tr>`).join("") || emptyRow(4)}</tbody></table>`;
+  document.getElementById("costsTable").innerHTML = `<table><thead><tr><th>Beschreibung</th><th>Kategorie</th><th class="num">Betrag</th><th>Intervall</th><th>Nächste Fälligkeit</th><th></th></tr></thead><tbody>${state.recurringCosts.map(item => `<tr><td><input class="description" data-collection="recurringCosts" data-id="${escapeHtml(item.id)}" data-field="description" type="text" value="${escapeHtml(item.description || "")}"></td><td><input data-collection="recurringCosts" data-id="${escapeHtml(item.id)}" data-field="category" type="text" list="costCategories" value="${escapeHtml(item.category || "")}"></td><td><input data-collection="recurringCosts" data-id="${escapeHtml(item.id)}" data-field="amount" type="number" min="0" step="0.01" value="${asNumber(item.amount)}"></td><td>${intervalSelect(item.interval, "recurringCosts", item.id)}</td><td><input data-collection="recurringCosts" data-id="${escapeHtml(item.id)}" data-field="nextDue" type="month" value="${escapeHtml(item.nextDue || "")}"></td><td class="actions"><button data-delete="recurringCosts" data-id="${escapeHtml(item.id)}" class="danger">Löschen</button></td></tr>`).join("") || emptyRow(6)}</tbody></table>`;
+  document.getElementById("budgetsTable").innerHTML = `<table><thead><tr><th>Budget</th><th>Kategorie</th><th class="num">Betrag je Zyklus</th><th>Intervall</th><th>Erste / nächste Fälligkeit</th><th class="num">Startbestand</th><th class="num">Rücklage im Startmonat</th><th></th></tr></thead><tbody>${state.variableBudgets.map(item => `<tr><td><input class="description" data-collection="variableBudgets" data-id="${escapeHtml(item.id)}" data-field="description" type="text" value="${escapeHtml(item.description || "")}"></td><td><input data-collection="variableBudgets" data-id="${escapeHtml(item.id)}" data-field="category" type="text" list="budgetCategories" value="${escapeHtml(item.category || "")}"></td><td><input data-collection="variableBudgets" data-id="${escapeHtml(item.id)}" data-field="amount" type="number" min="0" step="0.01" value="${asNumber(item.amount)}"></td><td>${intervalSelect(item.interval, "variableBudgets", item.id)}</td><td><input data-collection="variableBudgets" data-id="${escapeHtml(item.id)}" data-field="nextDue" type="month" min="${state.meta.start}" value="${escapeHtml(item.nextDue || "")}"></td><td><input data-collection="variableBudgets" data-id="${escapeHtml(item.id)}" data-field="startBalance" type="number" min="0" step="0.01" value="${asNumber(item.startBalance)}"></td><td class="num">${money(budgetReserveContribution(item, state.meta.start))}</td><td class="actions"><button data-delete="variableBudgets" data-id="${escapeHtml(item.id)}" class="danger">Löschen</button></td></tr>`).join("") || emptyRow(8)}</tbody></table>`;
+  document.getElementById("loansTable").innerHTML = `<table><thead><tr><th>Kredit / Rate</th><th class="num">Monatliche Rate</th><th>Erste / nächste Abbuchung</th><th>Letzte Zahlung</th><th></th></tr></thead><tbody>${state.loans.map(item => `<tr><td><input class="description" data-collection="loans" data-id="${escapeHtml(item.id)}" data-field="description" type="text" value="${escapeHtml(item.description || "")}"></td><td><input data-collection="loans" data-id="${escapeHtml(item.id)}" data-field="monthlyRate" type="number" min="0" step="0.01" value="${asNumber(item.monthlyRate)}"></td><td><input data-collection="loans" data-id="${escapeHtml(item.id)}" data-field="startMonth" type="month" value="${escapeHtml(item.startMonth || "")}"></td><td><input data-collection="loans" data-id="${escapeHtml(item.id)}" data-field="lastPayment" type="month" value="${escapeHtml(item.lastPayment || "")}"></td><td class="actions"><button data-delete="loans" data-id="${escapeHtml(item.id)}" class="danger">Löschen</button></td></tr>`).join("") || emptyRow(5)}</tbody></table>`;
+  document.getElementById("recurringSavingsTable").innerHTML = `<table><thead><tr><th>Bezeichnung</th><th class="num">Betrag</th><th>Intervall</th><th>Nächste Fälligkeit</th><th>Behandlung</th><th class="num">Startbestand</th><th></th></tr></thead><tbody>${state.recurringSavings.map(item => `<tr><td><input class="description" data-collection="recurringSavings" data-id="${escapeHtml(item.id)}" data-field="description" type="text" value="${escapeHtml(item.description || "")}"></td><td><input data-collection="recurringSavings" data-id="${escapeHtml(item.id)}" data-field="amount" type="number" min="0" step="0.01" value="${asNumber(item.amount)}"></td><td>${intervalSelect(item.interval, "recurringSavings", item.id)}</td><td><input data-collection="recurringSavings" data-id="${escapeHtml(item.id)}" data-field="nextDue" type="month" value="${escapeHtml(item.nextDue || "")}"></td><td><select data-collection="recurringSavings" data-id="${escapeHtml(item.id)}" data-field="mode"><option value="saving" ${item.mode !== "budget" ? "selected" : ""}>als Sparvermögen</option><option value="budget" ${item.mode === "budget" ? "selected" : ""}>als Budget-Topf</option></select></td><td><input data-collection="recurringSavings" data-id="${escapeHtml(item.id)}" data-field="startBalance" type="number" min="0" step="0.01" value="${asNumber(item.startBalance)}"></td><td class="actions"><button data-delete="recurringSavings" data-id="${escapeHtml(item.id)}" class="danger">Löschen</button></td></tr>`).join("") || emptyRow(7)}</tbody></table>`;
+  const results = currentResults();
+  const anchor = latestLockedMonth() || state.meta.start;
+  document.getElementById("goalsTable").innerHTML = `<table><thead><tr><th>Name</th><th class="num">Zielsumme</th><th class="num">Startbestand</th><th>Start</th><th>Zielmonat</th><th class="num">Basisrate</th><th>Dynamisch</th><th>Geplante Ausgabe</th><th>Status</th><th></th></tr></thead><tbody>${state.savingsGoals.map(item => {
+    const r = results[anchor] || {}, current = Math.max(0, asNumber(r.goalBalancesAfter && r.goalBalancesAfter[item.id]));
+    const status = item.closedMonth ? `Abgeschlossen ${monthName(item.closedMonth)}` : (asNumber(item.target) > 0 && current >= asNumber(item.target) ? "Ziel erreicht" : "Offen");
+    return `<tr><td><input class="description" data-collection="savingsGoals" data-id="${escapeHtml(item.id)}" data-field="name" type="text" value="${escapeHtml(item.name || "")}"></td><td><input data-collection="savingsGoals" data-id="${escapeHtml(item.id)}" data-field="target" type="number" min="0" step="0.01" value="${asNumber(item.target)}"></td><td><input data-collection="savingsGoals" data-id="${escapeHtml(item.id)}" data-field="startBalance" type="number" min="0" step="0.01" value="${asNumber(item.startBalance)}"></td><td><input data-collection="savingsGoals" data-id="${escapeHtml(item.id)}" data-field="startMonth" type="month" min="${state.meta.start}" value="${escapeHtml(item.startMonth || "")}"></td><td><input data-collection="savingsGoals" data-id="${escapeHtml(item.id)}" data-field="endMonth" type="month" min="${state.meta.start}" value="${escapeHtml(item.endMonth || "")}"></td><td class="num">${money(goalBaseRate(item))}</td><td><input data-collection="savingsGoals" data-id="${escapeHtml(item.id)}" data-field="dynamicRate" type="checkbox" ${item.dynamicRate ? "checked" : ""}></td><td><input data-collection="savingsGoals" data-id="${escapeHtml(item.id)}" data-field="assumePlannedSpending" type="checkbox" ${item.assumePlannedSpending ? "checked" : ""}></td><td><span class="badge">${escapeHtml(status)}</span></td><td class="actions"><button data-delete="savingsGoals" data-id="${escapeHtml(item.id)}" class="danger">Löschen</button></td></tr>`;
+  }).join("") || emptyRow(10)}</tbody></table>`;
+}
+
+function progressAnchorMonth() {
+  const end = statisticsEndMonth(), latest = latestLockedMonth();
+  if (latest) return compareMonths(latest, end) > 0 ? end : latest;
+  const now = new Date(), current = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  if (compareMonths(current, state.meta.start) < 0) return state.meta.start;
+  if (compareMonths(current, end) > 0) return end;
+  return current;
+}
+function goalTimelineMarkers(results, months) {
+  const markers = [];
+  for (const goal of state.savingsGoals) {
+    const target = Math.max(0, asNumber(goal.target));
+    if (!target) continue;
+    let reached = "";
+    for (const ym of months) {
+      const r = results[ym] || {}, before = Math.max(0, asNumber(r.goalBalancesBeforeSpending && r.goalBalancesBeforeSpending[goal.id]));
+      if (before >= target) { reached = ym; break; }
+    }
+    if (reached) markers.push({ month: reached, label: "Ziel erreicht", detail: `${goal.name || "Sparziel"}: Zielbetrag ${money(target)} erreicht.`, color: "#286c3f", symbol: "✓" });
+    if (goal.closedMonth && months.includes(goal.closedMonth)) markers.push({ month: goal.closedMonth, label: "Tatsächlich abgeschlossen", detail: `${goal.name || "Sparziel"}: tatsächlich abgeschlossen, Ausgabe ${money(goal.actualSpent || 0)}.`, color: "#5f6b76", symbol: "A" });
+  }
+  return markers;
+}
+function renderDashboard() {
+  const end = statisticsEndMonth();
+  ensurePlanningThrough(end);
+  const input = document.getElementById("statisticsEndMonth"); input.min = state.meta.start; input.value = end;
+  const allMonths = statisticsMonths(), windowInfo = statisticsWindow(allMonths), months = windowInfo.months, resolvedGranularity = statisticsGranularity(months);
+  const display = statisticsDisplaySettings();
+  document.getElementById("statisticsGranularity").value = display.granularity;
+  document.getElementById("statisticsVisibleRange").value = String(display.visibleRangeMonths);
+  document.getElementById("statisticsGranularityResolved").textContent = display.granularity === "auto" ? `Automatisch → ${statisticsGranularityLabel(resolvedGranularity)}` : statisticsGranularityLabel(resolvedGranularity);
+  const earlier = document.getElementById("statisticsEarlier"), later = document.getElementById("statisticsLater");
+  earlier.disabled = windowInfo.all || windowInfo.startIndex <= 0; later.disabled = windowInfo.all || windowInfo.endIndex >= allMonths.length - 1;
+  document.getElementById("diagramRangeLabel").textContent = months.length ? `Diagrammausschnitt: ${monthName(months[0])} – ${monthName(months.at(-1))} · ${months.length} Monat${months.length === 1 ? "" : "e"} · KPIs: gesamter Statistikzeitraum` : "Kein Diagrammzeitraum verfügbar.";
+
+  const actualResults = currentResults(), forecast = buildLiquidityForecast(allMonths, actualResults), results = forecast.results;
+  const profile = forecast.profile, forecastBox = document.getElementById("budgetForecastEnabled");
+  forecastBox.disabled = !profile.eligible;
+  forecastBox.checked = profile.eligible && Boolean(state.forecastSettings.budgetForecastEnabled);
+  document.getElementById("budgetForecastHint").textContent = profile.eligible ? `Verbrauchsprognose basiert auf ${profile.months.length} gesperrten Monat(en): ${profile.months.map(monthName).join(", ")}. Verwendet werden maximal die letzten 6 Monate.` : "Für eine Verbrauchsprognose werden mindestens 3 abgeschlossene Monate mit bestätigten Budgetverbräuchen benötigt.";
+
+  const totals = allMonths.reduce((a, ym) => {
+    const r = actualResults[ym];
+    a.income += asNumber(r.totalIncome); a.expenses += asNumber(r.actualExpenses); a.savings += asNumber(r.savingsTransfers); a.reserves += asNumber(r.reservationTransfers); a.transfers += asNumber(r.manualTransferVolume); return a;
+  }, { income:0, expenses:0, savings:0, reserves:0, transfers:0 });
+  const final = results[end];
+  let lowIndex = 0;
+  for (let i = 1; i < forecast.cash.length; i++) if (forecast.cash[i] < forecast.cash[lowIndex]) lowIndex = i;
+  const lowCash = forecast.cash[lowIndex] ?? 0, lowMonth = allMonths[lowIndex] || end, buffer = Math.max(0, asNumber(state.settings.minimumCashBuffer)), bufferGap = roundMoney(lowCash - buffer);
+  document.getElementById("dashboardKpis").innerHTML = [metricCard("Gesamteinnahmen", totals.income), metricCard("Tatsächliche Ausgaben", totals.expenses), metricCard("Sparen / Vermögensverschiebung", totals.savings), metricCard("Budgetrücklagen / Reservierungen", totals.reserves), metricCard("Manuelle Umbuchungen", totals.transfers), metricCard("Normales Guthaben am Ende", final.effectiveEndingBalance, valueClass(final.effectiveEndingBalance)), metricCard("Reserviert in Budgets", final.budgetClosingTotal, valueClass(final.budgetClosingTotal)), metricCard("Sparvermögen", final.savingsAssetsTotal), metricCard("Frei verfügbar nach Mindestpuffer", final.freeAvailable, valueClass(final.freeAvailable)), metricCard("Gesamtvermögen", final.totalAssets, valueClass(final.totalAssets)), metricCard(`Tiefster Prognosestand (${monthName(lowMonth)})`, lowCash, valueClass(lowCash)), metricCard("Abstand zum Mindestpuffer", bufferGap, valueClass(bufferGap))].join("");
+  const bufferWarning = buffer > 0 && lowCash < buffer ? `<div class="notice warn"><strong>Mindestpuffer unterschritten.</strong> Im ${escapeHtml(monthName(lowMonth))} fällt das prognostizierte normale Guthaben auf ${money(lowCash)}. Das liegt ${money(buffer - lowCash)} unter deinem Mindestpuffer von ${money(buffer)}.</div>` : "";
+  const startWarning = state.meta.startMonthMode === "anchor" ? `<div class="notice"><strong>${escapeHtml(monthName(state.meta.start))} ist ein Teilmonat.</strong> Die Statistik beginnt am finanziellen Stichtag ${escapeHtml(formatLocalDate(state.meta.startAnchorDate))}; für die Zeit davor werden keine künstlichen Einnahmen oder Ausgaben rekonstruiert.</div>` : "";
+  document.getElementById("dashboardWarnings").innerHTML = startWarning + bufferWarning;
+
+  const years = [...new Set(allMonths.map(m => m.slice(0, 4)))];
+  document.getElementById("yearTable").innerHTML = `<table><thead><tr><th>Jahr</th><th class="num">Einnahmen</th><th class="num">Tatsächliche Ausgaben</th><th class="num">Sparen</th><th class="num">Rücklagen</th><th class="num">Umbuchungen</th><th class="num">Normales Endguthaben</th><th class="num">Reserviert</th><th class="num">Sparvermögen</th><th class="num">Gesamtvermögen</th></tr></thead><tbody>${years.map(year => {
+    const ys = allMonths.filter(m => m.startsWith(year));
+    const sum = ys.reduce((a, m) => { const r = actualResults[m]; a.i += asNumber(r.totalIncome); a.e += asNumber(r.actualExpenses); a.s += asNumber(r.savingsTransfers); a.r += asNumber(r.reservationTransfers); a.t += asNumber(r.manualTransferVolume); return a; }, {i:0,e:0,s:0,r:0,t:0});
+    const last = results[ys.at(-1)];
+    return `<tr><td>${year}${state.meta.startMonthMode === "anchor" && ys.includes(state.meta.start) ? " · ab Stichtag" : ""}</td><td class="num">${money(sum.i)}</td><td class="num">${money(sum.e)}</td><td class="num">${money(sum.s)}</td><td class="num">${money(sum.r)}</td><td class="num">${money(sum.t)}</td><td class="num">${money(last.effectiveEndingBalance)}</td><td class="num">${money(last.budgetClosingTotal)}</td><td class="num">${money(last.savingsAssetsTotal)}</td><td class="num">${money(last.totalAssets)}</td></tr>`;
+  }).join("")}</tbody></table>`;
+
+  const anchor = progressAnchorMonth(), anchorResult = actualResults[anchor] || {};
+  document.getElementById("goalProgress").innerHTML = state.savingsGoals.length ? state.savingsGoals.map(goal => {
+    const saved = Math.max(0, asNumber(anchorResult.goalBalancesAfter && anchorResult.goalBalancesAfter[goal.id]));
+    const target = Math.max(0, asNumber(goal.target)), pct = target > 0 ? Math.min(100, saved / target * 100) : 0;
+    const status = goal.closedMonth ? `Tatsächlich abgeschlossen ${monthName(goal.closedMonth)}` : (target > 0 && saved >= target ? "Ziel erreicht" : "Offen");
+    return `<div class="progress-row"><div class="progress-head"><strong>${escapeHtml(goal.name || "Sparziel")} · ${escapeHtml(status)}</strong><span>${money(saved)} von ${money(target)} · ${pct.toFixed(1).replace(".", ",")} %</span></div><div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div><div class="small muted">Startbestand ${money(goal.startBalance)} · Basisrate ${money(goalBaseRate(goal))} · ${goal.dynamicRate ? "dynamische Restbetragsrate" : "feste Basisrate"} · geplante Verwendung ${goal.assumePlannedSpending ? "aktiv" : "deaktiviert"}</div></div>`;
+  }).join("") : `<p class="muted">Noch keine Sparziele angelegt.</p>`;
+
+  document.getElementById("dashboardDetail").innerHTML = `<table><thead><tr><th>Monat</th><th>Art</th><th class="num">Einnahmen</th><th class="num">Tatsächliche Ausgaben</th><th class="num">Sparen</th><th class="num">Budgetrücklagen</th><th class="num">Umbuchungen</th><th class="num">Budgetverbrauch</th><th class="num">Reserviert</th><th class="num">Sparvermögen</th><th class="num">Normales Guthaben</th><th class="num">Gesamtvermögen</th></tr></thead><tbody>${allMonths.map(ym => { const r = actualResults[ym]; return `<tr><td>${escapeHtml(monthName(ym))}</td><td>${escapeHtml(planStatusLabel(ym, r.locked))}</td><td class="num">${money(r.totalIncome)}</td><td class="num">${money(r.actualExpenses)}</td><td class="num">${money(r.savingsTransfers)}</td><td class="num">${money(r.reservationTransfers)}</td><td class="num">${money(r.manualTransferVolume)}</td><td class="num">${money(r.budgetSpent)}</td><td class="num">${money(r.budgetClosingTotal)}</td><td class="num">${money(r.savingsAssetsTotal)}</td><td class="num">${money(r.effectiveEndingBalance)}</td><td class="num">${money(r.totalAssets)}</td></tr>`; }).join("")}</tbody></table>`;
+
+  const forecastDisplayResults = {};
+  allMonths.forEach((ym, i) => { forecastDisplayResults[ym] = { ...results[ym], effectiveEndingBalance: forecast.cash[i], savingsAssetsTotal: forecast.savings[i], totalAssets: forecast.total[i] }; });
+  const flowPeriods = aggregateStatisticsPeriods(months, actualResults, resolvedGranularity), stockPeriods = aggregateStatisticsPeriods(months, forecastDisplayResults, resolvedGranularity);
+  requestAnimationFrame(() => {
+    const labels = flowPeriods.map(p => p.label);
+    drawStackedBarChart(document.getElementById("incomeExpenseChart"), labels, [
+      { name: "Einnahmen", values: flowPeriods.map(p => p.data.totalIncome), color: "#2457a7", stack: "income" },
+      { name: "Tatsächliche Ausgaben", values: flowPeriods.map(p => p.data.actualExpenses), color: "#a34a3a", stack: "expense" },
+      { name: "Sparen", values: flowPeriods.map(p => p.data.savingsTransfers), color: "#397a50", stack: "saving" },
+      { name: "Budgetrücklagen", values: flowPeriods.map(p => p.data.reservationTransfers), color: "#8a5a00", stack: "reserve" }
+    ], { periods: flowPeriods, granularity: resolvedGranularity });
+    drawLineChart(document.getElementById("balanceChart"), stockPeriods.map(p => p.label), [{ name: "Normales Guthaben", values: stockPeriods.map(p => p.data.effectiveEndingBalance), color: "#2457a7" }], { periods: stockPeriods, granularity: resolvedGranularity, markers: [...startTimelineMarkers(), ...goalTimelineMarkers(results, months)], zeroLine: true });
+    drawLineChart(document.getElementById("accountRealityChart"), stockPeriods.map(p => p.label), [
+      { name: "Normales Guthaben", values: stockPeriods.map(p => p.data.effectiveEndingBalance), color: "#2457a7" },
+      { name: "Aktive Sparprojekte / Sparvermögen", values: stockPeriods.map(p => p.data.savingsAssetsTotal), color: "#397a50" },
+      { name: "Guthaben + Sparvermögen", values: stockPeriods.map(p => p.data.totalAssets), color: "#1d232a" }
+    ], { periods: stockPeriods, granularity: resolvedGranularity, markers: [...startTimelineMarkers(), ...forecast.markers], zeroLine: true });
+  });
+}
+function prepareCanvas(canvas, options = {}) {
+  const parentWidth = Math.max(280, Math.round((canvas.parentElement && canvas.parentElement.clientWidth) || canvas.getBoundingClientRect().width || 800));
+  const minWidth = Math.max(280, asNumber(options.minWidth) || 500), maxWidth = Math.max(minWidth, asNumber(options.maxWidth) || 1800);
+  const pointWidth = Math.max(0, asNumber(options.pointWidth)), desired = options.scrollable && options.points ? Math.min(maxWidth, Math.max(minWidth, Math.round(options.points * pointWidth), parentWidth)) : Math.max(minWidth, parentWidth);
+  canvas.style.width = options.scrollable && desired > parentWidth ? `${desired}px` : "100%";
+  const rect = canvas.getBoundingClientRect(), width = Math.max(minWidth, Math.round(rect.width || desired)), height = Math.max(asNumber(options.minHeight) || 260, Math.round(rect.height || 285)), ratio = window.devicePixelRatio || 1;
+  canvas.width = width * ratio; canvas.height = height * ratio;
+  const ctx = canvas.getContext("2d"); ctx.setTransform(ratio, 0, 0, ratio, 0, 0); ctx.clearRect(0, 0, width, height);
+  return { ctx, width, height };
+}
+function chartScale(values) {
+  const nums = values.map(asNumber).filter(Number.isFinite); let min = nums.length ? Math.min(...nums, 0) : 0, max = nums.length ? Math.max(...nums, 0) : 0;
+  if (max === min) { max += 1; min -= 1; }
+  const pad = (max - min) * .08; return { min: min - pad, max: max + pad };
+}
+function axisMoney(value) {
+  const abs = Math.abs(asNumber(value));
+  if (abs >= 1000000) return `${new Intl.NumberFormat("de-AT", { maximumFractionDigits: 1 }).format(value / 1000000)} Mio. €`;
+  if (abs >= 10000) return `${new Intl.NumberFormat("de-AT", { maximumFractionDigits: 1 }).format(value / 1000)} Tsd. €`;
+  return `${new Intl.NumberFormat("de-AT", { maximumFractionDigits: 0 }).format(value)} €`;
+}
+function drawAxes(ctx, width, height, margins, scale) {
+  const plotW = width - margins.left - margins.right, plotH = height - margins.top - margins.bottom;
+  ctx.strokeStyle = "#d8dce0"; ctx.fillStyle = "#5f6b76"; ctx.font = "11px system-ui"; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+  for (let i = 0; i <= 5; i++) { const y = margins.top + plotH * i / 5, value = scale.max - (scale.max - scale.min) * i / 5; ctx.beginPath(); ctx.moveTo(margins.left, y); ctx.lineTo(width - margins.right, y); ctx.stroke(); ctx.fillText(axisMoney(value), margins.left - 8, y); }
+  return { plotW, plotH };
+}
+function drawLegend(ctx, series, width) {
+  ctx.font = "12px system-ui"; ctx.textAlign = "left"; ctx.textBaseline = "middle"; let x = 70;
+  for (const s of series) { ctx.fillStyle = s.color; ctx.fillRect(x, 8, 12, 12); ctx.fillStyle = "#1d232a"; ctx.fillText(s.name, x + 17, 14); x += ctx.measureText(s.name).width + 55; if (x > width - 140) break; }
+}
+function chartTooltipElement() {
+  let el = document.getElementById("chartTooltip");
+  if (!el) { el = document.createElement("div"); el.id = "chartTooltip"; el.className = "chart-tooltip hidden"; document.body.appendChild(el); }
+  return el;
+}
+function setCanvasTooltip(canvas, regions) {
+  const tooltip = chartTooltipElement();
+  canvas.onmousemove = event => {
+    const rect = canvas.getBoundingClientRect(), x = event.clientX - rect.left, y = event.clientY - rect.top;
+    const hit = regions.find(r => r.radius ? Math.hypot(x - r.x, y - r.y) <= r.radius : x >= r.x1 && x <= r.x2 && y >= r.y1 && y <= r.y2);
+    if (!hit) { tooltip.classList.add("hidden"); return; }
+    tooltip.textContent = hit.text; tooltip.style.left = `${Math.max(8, Math.min(window.innerWidth - 330, event.clientX + 14))}px`; tooltip.style.top = `${Math.max(8, Math.min(window.innerHeight - 140, event.clientY + 14))}px`; tooltip.classList.remove("hidden");
+  };
+  canvas.onmouseleave = () => tooltip.classList.add("hidden");
+}
+function drawXAxisLabels(ctx, labels, positions, height, margins, granularity) {
+  ctx.fillStyle = "#5f6b76"; ctx.font = "10px system-ui"; ctx.textAlign = "center"; ctx.textBaseline = "top";
+  const every = axisLabelEvery(labels.length, granularity || "monthly");
+  labels.forEach((label, i) => { if (i % every !== 0 && i !== labels.length - 1) return; ctx.fillText(label, positions[i], height - margins.bottom + 8); });
+}
+function drawStackedBarChart(canvas, labels, series, options = {}) {
+  if (!canvas || !labels.length) return;
+  const { ctx, width, height } = prepareCanvas(canvas, { points: labels.length, pointWidth: 31, scrollable: true, minWidth: 500, maxWidth: 1800 }), margins = { left: 78, right: 18, top: 32, bottom: 44 };
+  const stacks = [...new Set(series.map(s => s.stack || s.name))], totals = [];
+  labels.forEach((_, i) => stacks.forEach(stack => totals.push(series.filter(s => (s.stack || s.name) === stack).reduce((sum, s) => sum + Math.max(0, asNumber(s.values[i])), 0))));
+  const scale = chartScale(totals), { plotW, plotH } = drawAxes(ctx, width, height, margins, scale); drawLegend(ctx, series, width);
+  const groupW = plotW / labels.length, barW = Math.max(2, Math.min(18, groupW * .72 / Math.max(1, stacks.length))), yFor = value => margins.top + (scale.max - value) / (scale.max - scale.min) * plotH, regions = [], positions = [];
+  labels.forEach((label, i) => {
+    positions.push(margins.left + i * groupW + groupW / 2);
+    const period = options.periods && options.periods[i];
+    stacks.forEach((stack, si) => {
+      let base = 0; const x = margins.left + i * groupW + groupW / 2 + (si - (stacks.length - 1) / 2) * barW * 1.15;
+      for (const item of series.filter(seriesItem => (seriesItem.stack || seriesItem.name) === stack)) {
+        const value = Math.max(0, asNumber(item.values[i])), y1 = yFor(base), y2 = yFor(base + value), top = Math.min(y1, y2), bottom = Math.max(y1, y2);
+        ctx.save(); ctx.globalAlpha = period && period.status === "forecast" ? .58 : (period && period.status === "mixed" ? .8 : 1); ctx.fillStyle = item.color; ctx.fillRect(x - barW / 2, top, Math.max(1, barW - .5), Math.max(1, bottom - top));
+        if (period && period.status === "mixed") { ctx.strokeStyle = "#8a5a00"; ctx.lineWidth = 1; ctx.strokeRect(x - barW / 2, top, Math.max(1, barW - .5), Math.max(1, bottom - top)); } ctx.restore();
+        const header = period ? periodTooltipHeader(period) : label;
+        regions.push({ x1:x-barW/2-3,x2:x+barW/2+3,y1:top-3,y2:Math.max(top+7,bottom+3),text:`${header}\n${item.name}: ${money(value)}` }); base += value;
+      }
+    });
+  });
+  drawXAxisLabels(ctx, labels, positions, height, margins, options.granularity);
+  setCanvasTooltip(canvas, regions);
+}
+function drawLineChart(canvas, labels, series, options = {}) {
+  if (!canvas || !labels.length) return;
+  const { ctx, width, height } = prepareCanvas(canvas, { points: labels.length, pointWidth: 28, scrollable: true, minWidth: 500, maxWidth: 1800 }), margins = { left: 78, right: 18, top: 32, bottom: 44 }, all = series.flatMap(s => s.values.map(asNumber));
+  const scale = chartScale(all.concat(options.zeroLine ? [0] : [])), { plotW, plotH } = drawAxes(ctx, width, height, margins, scale); drawLegend(ctx, series, width);
+  const stepX = labels.length > 1 ? plotW / (labels.length - 1) : plotW, yFor = value => margins.top + (scale.max - asNumber(value)) / (scale.max - scale.min) * plotH, regions = [], positions = labels.map((_, i) => margins.left + (labels.length > 1 ? i * stepX : plotW / 2));
+  if (options.zeroLine && scale.min <= 0 && scale.max >= 0) { const y = yFor(0); ctx.save(); ctx.strokeStyle = "#a22b2b"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(margins.left, y); ctx.lineTo(width - margins.right, y); ctx.stroke(); ctx.restore(); }
+  for (const item of series) {
+    for (let i = 1; i < item.values.length; i++) {
+      const currentPeriod = options.periods && options.periods[i], previousPeriod = options.periods && options.periods[i - 1];
+      const mixed = (currentPeriod && currentPeriod.status === "mixed") || (previousPeriod && previousPeriod.status === "mixed");
+      const forecast = (currentPeriod && currentPeriod.status === "forecast") || (previousPeriod && previousPeriod.status === "forecast");
+      ctx.save(); ctx.strokeStyle = item.color; ctx.lineWidth = 2; ctx.setLineDash(mixed ? [3,3] : (forecast ? [7,5] : [])); ctx.beginPath(); ctx.moveTo(positions[i-1], yFor(item.values[i-1])); ctx.lineTo(positions[i], yFor(item.values[i])); ctx.stroke(); ctx.restore();
+    }
+    ctx.fillStyle = item.color;
+    item.values.forEach((value, i) => {
+      const period = options.periods && options.periods[i], x = positions[i], y = yFor(value);
+      ctx.beginPath(); ctx.arc(x, y, 2.8, 0, Math.PI * 2); ctx.fill();
+      if (period && period.status === "mixed") { ctx.save(); ctx.strokeStyle = "#8a5a00"; ctx.lineWidth = 1.7; ctx.beginPath(); ctx.arc(x, y, 5.2, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
+      const header = period ? periodTooltipHeader(period) : labels[i], endText = period ? `\n${item.name} am Periodenende (${monthName(period.end)}): ${money(value)}` : `\n${item.name}: ${money(value)}`;
+      regions.push({ x, y, radius: 10, text: `${header}${endText}` });
+    });
+  }
+  const periods = options.periods || [];
+  for (const marker of options.markers || []) {
+    let i = periods.findIndex(p => p.months.includes(marker.month)); if (i < 0) continue;
+    const x = positions[i]; ctx.save(); ctx.strokeStyle = marker.color || "#5f6b76"; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(x, margins.top); ctx.lineTo(x, height - margins.bottom); ctx.stroke(); ctx.restore(); regions.push({ x1:x-7,x2:x+7,y1:margins.top,y2:height-margins.bottom,text:`${marker.label}\n${marker.detail}` });
+  }
+  drawXAxisLabels(ctx, labels, positions, height, margins, options.granularity);
+  setCanvasTooltip(canvas, regions);
+}
+function drawDonutChart(canvas, data) {
+  if (!canvas) return;
+  const tooltip = chartTooltipElement(), { ctx, width, height } = prepareCanvas(canvas, { minWidth: 300, minHeight: 260, scrollable: false }), cx = width / 2, cy = height / 2, outer = Math.max(72, Math.min(width, height) * .36), inner = outer * .59;
+  const segments = data.segments || [];
+  if (!(data.total > 0) || !segments.length) {
+    ctx.fillStyle = "#5f6b76"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = "14px system-ui"; ctx.fillText("Für diesen Monat ist noch keine", cx, cy - 10); ctx.fillText("Geldverwendung eingeplant.", cx, cy + 12); ctx.font = "700 18px system-ui"; ctx.fillStyle = "#1d232a"; ctx.fillText(money(0), cx, cy + 46); canvas.onmousemove = null; canvas.onclick = null; canvas.onmouseleave = () => tooltip.classList.add("hidden"); return;
+  }
+  let hoverIndex = -1;
+  const render = () => {
+    ctx.clearRect(0, 0, width, height); let angle = -Math.PI / 2;
+    segments.forEach((segment, i) => {
+      const span = Math.PI * 2 * segment.amount / data.total, end = angle + span;
+      ctx.save(); ctx.globalAlpha = hoverIndex < 0 || hoverIndex === i ? 1 : .48; ctx.beginPath(); ctx.arc(cx, cy, outer, angle, end); ctx.arc(cx, cy, inner, end, angle, true); ctx.closePath(); ctx.fillStyle = segment.color; ctx.fill(); ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); angle = end;
+    });
+    ctx.fillStyle = "#5f6b76"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = "12px system-ui"; ctx.fillText(data.centerLabel, cx, cy - 24);
+    ctx.fillStyle = "#1d232a"; let amountFont = 22; ctx.font = `700 ${amountFont}px system-ui`; while (amountFont > 14 && ctx.measureText(money(data.total)).width > inner * 1.65) { amountFont -= 1; ctx.font = `700 ${amountFont}px system-ui`; } ctx.fillText(money(data.total), cx, cy);
+    ctx.fillStyle = "#5f6b76"; ctx.font = "11px system-ui"; ctx.fillText(data.centerSubtext, cx, cy + 24);
+  };
+  const hitIndex = (x, y) => {
+    const dx = x - cx, dy = y - cy, radius = Math.hypot(dx, dy); if (radius < inner || radius > outer) return -1;
+    let angle = Math.atan2(dy, dx) + Math.PI / 2; if (angle < 0) angle += Math.PI * 2; let acc = 0;
+    for (let i = 0; i < segments.length; i++) { acc += Math.PI * 2 * segments[i].amount / data.total; if (angle <= acc + 1e-9) return i; } return segments.length - 1;
+  };
+  render();
+  canvas.onmousemove = event => {
+    const rect = canvas.getBoundingClientRect(), x = event.clientX - rect.left, y = event.clientY - rect.top, i = hitIndex(x, y);
+    if (i !== hoverIndex) { hoverIndex = i; render(); }
+    if (i < 0) { tooltip.classList.add("hidden"); return; }
+    const segment = segments[i], pct = donutPercent(segment.amount, data.total).toFixed(1).replace(".", ","), positions = segment.details ? segment.details.length : 0;
+    tooltip.textContent = `${segment.label}\n${money(segment.amount)}\n${pct} % der ${data.mode === "expenses" ? "tatsächlichen Ausgaben" : "geplanten Geldverwendung"}${positions ? `\n${positions} Position${positions === 1 ? "" : "en"}` : ""}`;
+    tooltip.style.left = `${Math.max(8, Math.min(window.innerWidth - 330, event.clientX + 14))}px`; tooltip.style.top = `${Math.max(8, Math.min(window.innerHeight - 140, event.clientY + 14))}px`; tooltip.classList.remove("hidden");
+  };
+  canvas.onmouseleave = () => { hoverIndex = -1; render(); tooltip.classList.add("hidden"); };
+  canvas.onclick = event => { const rect = canvas.getBoundingClientRect(), i = hitIndex(event.clientX - rect.left, event.clientY - rect.top); if (i >= 0) selectDonutCategory(segments[i].key); };
+}
+
+function renderBackup() {
+  const notice = document.getElementById("storageNotice");
+  if (storageAvailable) { notice.className = "notice"; notice.innerHTML = `<strong>Automatische Speicherung ist aktiv.</strong> LocalStorage-Schlüssel: <code>${STORAGE_KEY}</code>. Datenversion: ${CURRENT_DATA_VERSION}.`; }
+  else { notice.className = "notice error"; notice.innerHTML = `<strong>Der Browser hat den lokalen Speicher blockiert.</strong> Änderungen bleiben nur bis zum Schließen der Seite erhalten. Verwende den JSON-Export.`; }
+}
+function renderAll() {
+  const title = `Finanzplanung ab ${monthName(state.meta.start)}`; document.getElementById("appTitle").textContent = title; document.title = `${title} – v10`;
+  renderOverview(); renderMonth(); renderBasics(); renderBackup(); if (activeView === "dashboard") renderDashboard();
+}
+function showView(name) {
+  activeView = name;
+  for (const el of document.querySelectorAll(".view")) el.classList.toggle("active", el.id === `view-${name}`);
+  for (const btn of document.querySelectorAll("nav [data-view]")) btn.classList.toggle("active", btn.dataset.view === name);
+  if (name === "overview") renderOverview(); else if (name === "month") renderMonth(); else if (name === "basics") renderBasics(); else if (name === "dashboard") renderDashboard(); else if (name === "backup") renderBackup();
+  location.hash = name === "month" ? `month=${selectedMonth}` : name;
+}
+function updateAndSave(message = "Automatisch gespeichert") {
+  state = normalizeState(state); saveState(message);
+  if (renderTimer) clearTimeout(renderTimer);
+  renderTimer = setTimeout(() => { renderTimer = 0; renderAll(); }, 0);
+}
+function collectionItem(collection, id) { return Array.isArray(state[collection]) ? state[collection].find(item => item.id === id) : null; }
+function addCollectionItem(collection) {
+  const defaults = {
+    salaryRaises: { id: uid("raise"), amount: 0, effectiveMonth: selectedMonth }, specialPayRaises: { id: uid("special"), type: "vacation", amount: 0, effectiveMonth: selectedMonth }, recurringCosts: { id: uid("cost"), description: "", category: "Sonstiges", amount: 0, interval: "monthly", nextDue: selectedMonth },
+    variableBudgets: { id: uid("budget"), description: "", category: "Sonstiges", amount: 0, interval: "monthly", nextDue: selectedMonth, startBalance: 0 }, loans: { id: uid("loan"), description: "", monthlyRate: 0, startMonth: selectedMonth, lastPayment: "" },
+    recurringSavings: { id: uid("saving"), description: "", amount: 0, interval: "monthly", nextDue: selectedMonth, mode: "saving", startBalance: 0 }, savingsGoals: { id: uid("goal"), name: "", target: 0, startBalance: 0, startMonth: selectedMonth, endMonth: selectedMonth, dynamicRate: false, assumePlannedSpending: true, closedMonth: "", actualSpent: null, actualCompletedAt: null }
+  };
+  if (!defaults[collection] || !Array.isArray(state[collection])) return; state[collection].push(defaults[collection]); updateAndSave();
+}
+function deleteCollectionItem(collection, id) {
+  const item = collectionItem(collection, id), assetDefinition = collection === "variableBudgets" || collection === "savingsGoals" || collection === "recurringSavings";
+  if (assetDefinition && latestLockedMonth()) { alert("Zum Löschen dieses Budget-/Sparobjekts bitte zuerst die gesperrten Monate entsperren. So bleiben historische Snapshots und Übertragsketten nachvollziehbar."); return; }
+  state[collection] = state[collection].filter(entry => entry.id !== id);
+  if (collection === "variableBudgets" || collection === "recurringSavings") for (const data of Object.values(state.months)) { delete data.budgetUsage[id]; delete data.budgetPayouts[id]; data.budgetTransactions = (data.budgetTransactions || []).filter(tx => tx.budgetId !== id && tx.fromBudgetId !== id && tx.toBudgetId !== id); data.budgetTransfers = (data.budgetTransfers || []).filter(tx => tx.fromBudgetId !== id && tx.toBudgetId !== id); }
+  if (collection === "savingsGoals") for (const data of Object.values(state.months)) { delete data.goalExtraContributions[id]; delete data.goalActualSpending[id]; }
+  updateAndSave();
+}
+function addTransaction(type) {
+  const data = state.months[selectedMonth]; if (!data || data.locked) return;
+  (type === "income" ? data.incomes : data.expenses).push({ id: uid(type), date: "", description: "", category: "Sonstiges", amount: 0, type }); updateAndSave();
+}
+function deleteTransaction(type, id) { const data = state.months[selectedMonth]; if (!data || data.locked) return; const key = type === "income" ? "incomes" : "expenses"; data[key] = data[key].filter(item => item.id !== id); updateAndSave(); }
+
+function promptPositiveAmount(message, defaultValue = "0") {
+  const answer = prompt(message, String(defaultValue).replace(".", ","));
+  if (answer === null) return null;
+  const value = Math.max(0, asNumber(answer));
+  if (!(value > 0)) { alert("Bitte einen Betrag größer als 0 eingeben."); return null; }
+  return roundMoney(value);
+}
+function addBudgetCashTransaction(type, budgetId) {
+  const data = state.months[selectedMonth]; if (!data || data.locked) return;
+  const budget = allBudgetItems().find(item => item.id === budgetId); if (!budget) return;
+  const result = currentResults()[selectedMonth], detail = result.budgetDetails[budgetId] || {};
+  const isOut = type === "budget_to_cash";
+  const amount = promptPositiveAmount(isOut ? `Wie viel aus „${budget.description || "Budget"}“ ins normale Guthaben verschieben?\nAktuell verfügbar: ${money(Math.max(0, asNumber(detail.closingBalance)))}` : `Wie viel aus dem normalen Guthaben in „${budget.description || "Budget"}“ einzahlen?`);
+  if (amount === null) return;
+  if (isOut && amount > Math.max(0, asNumber(detail.closingBalance)) + .001) { alert(`Die Auszahlung würde den Budgetstand unter 0 bringen. Maximal verfügbar sind ${money(Math.max(0, asNumber(detail.closingBalance)))}.`); return; }
+  const note = prompt("Optionale Notiz zur Umbuchung:", "") ?? "";
+  data.budgetTransactions.push({ id: uid("budget-tx"), type, budgetId, fromBudgetId: type === "budget_to_cash" ? budgetId : "", toBudgetId: type === "cash_to_budget" ? budgetId : "", amount, date: "", note });
+  updateAndSave("Budget-Umbuchung gespeichert");
+}
+function addBudgetToBudgetTransfer() {
+  const data = state.months[selectedMonth], budgets = allBudgetItems();
+  if (!data || data.locked || budgets.length < 2) { if (budgets.length < 2) alert("Für eine Umbuchung zwischen Budgets werden mindestens zwei Budget-Töpfe benötigt."); return; }
+  const menu = budgets.map((b, i) => `${i + 1}: ${b.description || b.category || b.id}`).join("\n");
+  const fromIndex = Number(prompt(`Quelle auswählen:\n${menu}`, "1")) - 1;
+  if (!Number.isInteger(fromIndex) || !budgets[fromIndex]) return;
+  const toIndex = Number(prompt(`Ziel auswählen:\n${menu}`, String(fromIndex === 0 ? 2 : 1))) - 1;
+  if (!Number.isInteger(toIndex) || !budgets[toIndex] || toIndex === fromIndex) { alert("Quelle und Ziel müssen unterschiedliche Budgets sein."); return; }
+  const result = currentResults()[selectedMonth], available = Math.max(0, asNumber(result.budgetDetails[budgets[fromIndex].id] && result.budgetDetails[budgets[fromIndex].id].closingBalance));
+  const amount = promptPositiveAmount(`Betrag von „${budgets[fromIndex].description || "Budget"}“ nach „${budgets[toIndex].description || "Budget"}“?\nVerfügbar: ${money(available)}`);
+  if (amount === null) return;
+  if (amount > available + .001) { alert(`Die Umbuchung würde das Quellbudget unter 0 bringen. Maximal verfügbar sind ${money(available)}.`); return; }
+  const note = prompt("Optionale Notiz:", "") ?? "";
+  data.budgetTransactions.push({ id: uid("budget-tx"), type: "budget_to_budget", fromBudgetId: budgets[fromIndex].id, toBudgetId: budgets[toIndex].id, budgetId: budgets[toIndex].id, amount, date: "", note });
+  updateAndSave("Budget-Umbuchung gespeichert");
+}
+function deleteBudgetTransaction(id) { const data = state.months[selectedMonth]; if (!data || data.locked) return; data.budgetTransactions = (data.budgetTransactions || []).filter(tx => tx.id !== id); updateAndSave("Budget-Umbuchung gelöscht"); }
+
+function openGoalCloseDialog(id) {
+  const data = state.months[selectedMonth], goal = collectionItem("savingsGoals", id); if (!data || data.locked || !goal) return;
+  if (compareMonths(selectedMonth, goal.startMonth) < 0) { alert(`Das Sparziel startet erst im ${monthName(goal.startMonth)}.`); return; }
+  const r = currentResults()[selectedMonth], saved = Math.max(0, asNumber(r.goalBalancesBeforeSpending[id]));
+  pendingGoalCloseId = id;
+  document.getElementById("goalCloseSummary").innerHTML = `<strong>${escapeHtml(goal.name || "Sparziel")}</strong><br>Aktuell angespart: <strong>${money(saved)}</strong><br>Der tatsächliche Abschluss setzt den Sparprojektbestand auf 0 €.`;
+  const defaultSpend = goal.actualSpent !== null ? goal.actualSpent : Math.min(saved, Math.max(0, asNumber(goal.target)) || saved);
+  const input = document.getElementById("goalCloseAmount"); input.value = roundMoney(defaultSpend); updateGoalCloseDifference();
+  document.getElementById("goalCloseDialog").showModal();
+}
+function updateGoalCloseDifference() {
+  if (!pendingGoalCloseId) return;
+  const r = currentResults()[selectedMonth], saved = Math.max(0, asNumber(r.goalBalancesBeforeSpending[pendingGoalCloseId])), spent = Math.max(0, asNumber(document.getElementById("goalCloseAmount").value)), diff = roundMoney(saved - spent);
+  document.getElementById("goalCloseDifference").innerHTML = `Differenz = angespart ${money(saved)} − tatsächliche Ausgabe ${money(spent)} = <strong class="${valueClass(diff)}">${money(diff)}</strong>. ${diff > 0 ? "Der Überschuss geht ins normale Guthaben." : (diff < 0 ? "Die Mehrkosten werden aus dem normalen Guthaben bezahlt." : "Keine zusätzliche Guthaben-Korrektur.")}`;
+}
+function confirmGoalClose() {
+  const id = pendingGoalCloseId, data = state.months[selectedMonth], goal = collectionItem("savingsGoals", id); if (!id || !data || data.locked || !goal) return;
+  const actualSpent = nullableNumber(document.getElementById("goalCloseAmount").value); if (actualSpent === null || actualSpent < 0) { alert("Bitte einen gültigen tatsächlichen Ausgabebetrag eingeben."); return; }
+  goal.closedMonth = selectedMonth; goal.actualSpent = roundMoney(actualSpent); goal.actualCompletedAt = new Date().toISOString(); data.goalActualSpending[id] = roundMoney(actualSpent);
+  for (const [ym, md] of Object.entries(state.months)) if (compareMonths(ym, selectedMonth) > 0 && !md.locked) delete md.goalExtraContributions[id];
+  pendingGoalCloseId = ""; document.getElementById("goalCloseDialog").close(); updateAndSave("Sparziel tatsächlich abgeschlossen");
+}
+function reopenSavingsGoal(id) {
+  const data = state.months[selectedMonth], goal = collectionItem("savingsGoals", id); if (!data || data.locked || !goal || goal.closedMonth !== selectedMonth) return;
+  if (!confirm(`Tatsächlichen Abschluss von „${goal.name || "Sparziel"}“ rückgängig machen?`)) return;
+  goal.closedMonth = ""; goal.actualSpent = null; goal.actualCompletedAt = null; delete data.goalActualSpending[id]; updateAndSave("Sparziel wieder geöffnet");
+}
+
+function openMonthCloseDialog() {
+  const months = planningMonths(), idx = months.indexOf(selectedMonth), data = state.months[selectedMonth];
+  if (data.locked) {
+    const later = months.slice(idx).filter(ym => state.months[ym].locked), text = later.length > 1 ? `Beim Entsperren werden ${later.length} Monate ab ${monthName(selectedMonth)} entsperrt, damit die Übertragskette korrekt bleibt. Fortfahren?` : `Monat ${monthName(selectedMonth)} entsperren?`;
+    if (!confirm(text)) return;
+    for (const ym of months.slice(idx)) if (state.months[ym].locked) { state.months[ym].locked = false; state.months[ym].snapshot = null; }
+    updateAndSave("Monat entsperrt"); return;
+  }
+  const missing = months.slice(0, idx).find(ym => !state.months[ym].locked);
+  if (missing) { alert(`Bitte zuerst ${monthName(missing)} abschließen. Monate werden der Reihe nach gesperrt.`); return; }
+  const r = currentResults()[selectedMonth]; pendingMonthCloseResult = deepClone(r);
+  document.getElementById("monthCloseSummary").innerHTML = `<strong>${escapeHtml(monthName(selectedMonth))}</strong>${isAnchorStartMonth(selectedMonth) ? `<br><strong>Teilmonat seit ${escapeHtml(formatLocalDate(state.meta.startAnchorDate))}</strong>` : ""}<br>Einnahmen ${money(r.totalIncome)} · tatsächliche Ausgaben ${money(r.actualExpenses)} · Sparen ${money(r.savingsTransfers)} · Budgetrücklagen ${money(r.reservationTransfers)}.`;
+  const startChecks = document.getElementById("startMonthCloseChecks"); startChecks.classList.toggle("hidden", !isAnchorStartMonth(selectedMonth));
+  document.getElementById("closeCheckStartBalance").checked = false; document.getElementById("closeCheckStartHandled").checked = false; document.getElementById("closeCheckStartOutstanding").checked = false;
+  document.getElementById("monthCloseCalculated").textContent = money(r.endingBalance);
+  const bankInput = document.getElementById("monthCloseBankBalance"); bankInput.value = data.actualBankBalance === null ? "" : data.actualBankBalance;
+  document.getElementById("monthCloseUseActual").checked = Boolean(data.actualBankBalanceAccepted);
+  document.getElementById("closeCheckAccount").checked = data.actualBankBalance !== null;
+  document.getElementById("closeCheckBudgets").checked = Boolean(data.budgetUsageConfirmed || allBudgetItems().length === 0 || Object.keys(data.budgetUsage || {}).length > 0);
+  document.getElementById("closeCheckGoals").checked = false;
+  document.getElementById("closeCheckExtras").checked = false;
+  updateMonthCloseDifference(); document.getElementById("monthCloseDialog").showModal();
+}
+function updateMonthCloseDifference() {
+  if (!pendingMonthCloseResult) return;
+  const actual = nullableNumber(document.getElementById("monthCloseBankBalance").value), calculated = asNumber(pendingMonthCloseResult.endingBalance), diff = actual === null ? null : roundMoney(actual - calculated);
+  document.getElementById("monthCloseDifference").innerHTML = diff === null ? "–" : `<span class="${valueClass(diff)}">${money(diff)}</span>`;
+  document.getElementById("monthCloseUseActual").disabled = actual === null;
+  if (actual === null) document.getElementById("monthCloseUseActual").checked = false;
+}
+function confirmMonthClose() {
+  const data = state.months[selectedMonth]; if (!data || data.locked || !pendingMonthCloseResult) return;
+  const actual = nullableNumber(document.getElementById("monthCloseBankBalance").value), accepted = actual !== null && document.getElementById("monthCloseUseActual").checked;
+  data.actualBankBalance = actual; data.actualBankBalanceAccepted = accepted; data.budgetUsageConfirmed = document.getElementById("closeCheckBudgets").checked;
+  if (data.budgetUsageConfirmed) for (const budget of allBudgetItems()) if (!hasOwn(data.budgetUsage, budget.id)) data.budgetUsage[budget.id] = 0;
+  const snap = deepClone(pendingMonthCloseResult); snap.locked = true; snap.actualBankBalance = actual; snap.actualBankBalanceAccepted = accepted; snap.budgetUsageConfirmed = data.budgetUsageConfirmed; snap.budgetTransactions = deepClone(data.budgetTransactions || []); snap.monthDonut = { allocation: buildMonthAllocationData(selectedMonth, pendingMonthCloseResult, { ignoreStored: true, forSnapshot: true }), expenses: buildMonthExpenseData(selectedMonth, pendingMonthCloseResult, { ignoreStored: true, forSnapshot: true }) }; snap.closingChecks = { account: document.getElementById("closeCheckAccount").checked, budgets: document.getElementById("closeCheckBudgets").checked, goals: document.getElementById("closeCheckGoals").checked, extras: document.getElementById("closeCheckExtras").checked, startBalance: isAnchorStartMonth(selectedMonth) ? document.getElementById("closeCheckStartBalance").checked : null, startHandled: isAnchorStartMonth(selectedMonth) ? document.getElementById("closeCheckStartHandled").checked : null, startOutstanding: isAnchorStartMonth(selectedMonth) ? document.getElementById("closeCheckStartOutstanding").checked : null };
+  if (isAnchorStartMonth(selectedMonth)) { const setup = startMonthSetupFor(selectedMonth); snap.startAnchorDate = state.meta.startAnchorDate; snap.startOpeningBalance = asNumber(state.settings.openingBalance); snap.startMonthMode = "anchor"; snap.salarySuppressed = true; snap.startMonthSetup = deepClone(setup); snap.startMonthAutomaticItems = deepClone(startMonthAutomaticItems()); snap.startSpecialPayments = { vacation: { scheduled: selectedMonth.endsWith("-07") ? specialPayForMonth("vacation", selectedMonth) : 0, status: setup.specialPayments.vacation }, christmas: { scheduled: selectedMonth.endsWith("-12") ? specialPayForMonth("christmas", selectedMonth) : 0, status: setup.specialPayments.christmas } }; }
+  snap.effectiveEndingBalance = accepted ? roundMoney(actual) : roundMoney(snap.endingBalance); snap.freeAvailable = roundMoney(snap.effectiveEndingBalance - Math.max(0, asNumber(state.settings.minimumCashBuffer))); snap.totalAssets = roundMoney(snap.effectiveEndingBalance + asNumber(snap.budgetClosingTotal) + asNumber(snap.savingsAssetsTotal)); if (isPlainObject(snap.monthDonut)) { if (isPlainObject(snap.monthDonut.allocation)) snap.monthDonut.allocation.endingBalance = snap.effectiveEndingBalance; if (isPlainObject(snap.monthDonut.expenses)) snap.monthDonut.expenses.endingBalance = snap.effectiveEndingBalance; }
+  data.snapshot = snap; data.locked = true; pendingMonthCloseResult = null; document.getElementById("monthCloseDialog").close(); updateAndSave("Monat abgeschlossen und gesperrt");
+}
+
+function createBackupPayload(currentState = state) {
+  const normalized = normalizeState(currentState);
+  return { app: "Finanzplanung – v10", formatVersion: BACKUP_FORMAT_VERSION, dataVersion: CURRENT_DATA_VERSION, exportedAt: new Date().toISOString(), createdAt: normalized.meta.createdAt, state: normalized };
+}
+function exportJson() { const wrapper = createBackupPayload(state); downloadBlob(JSON.stringify(wrapper, null, 2), `Finanzplanung_Backup_${currentLocalDate()}.json`, "application/json"); }
+function importJsonFile(file) {
+  if (!file) return; const reader = new FileReader();
+  reader.onload = () => { try { const parsed = JSON.parse(String(reader.result || "")), normalized = normalizeState(parsed); if (!confirm("Das eingelesene Backup ersetzt die aktuell gespeicherten Daten. Fortfahren?")) return; state = normalized; selectedMonth = state.meta.start; updateAndSave("JSON-Backup eingelesen und migriert"); showView("overview"); } catch (error) { alert("Die Datei konnte nicht als gültiges Finanzplanungs-Backup gelesen werden."); console.error(error); } };
+  reader.readAsText(file, "utf-8");
+}
+function downloadBlob(content, filename, type) { const blob = new Blob([content], { type }), url = URL.createObjectURL(blob), a = document.createElement("a"); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
+function exportOverviewCsv() {
+  const results = currentResults(), headers = ["Monat","Ist/Plan","Einnahmen","Tatsächliche Ausgaben","Sparen","Budgetrücklagen","Manuelle Umbuchungen","Budgetverbrauch","Budget-Überziehung aus Guthaben","Reserviert am Monatsende","Sparvermögen am Monatsende","Normales Guthaben","Frei verfügbar","Gesamtvermögen","Ist-Kontostand","Ist übernommen"];
+  const rows = planningMonths().map(ym => { const r = results[ym]; return [ym,planStatusLabel(ym,r.locked),r.totalIncome,r.actualExpenses,r.savingsTransfers,r.reservationTransfers,r.manualTransferVolume,r.budgetSpent,r.budgetOverspendCash,r.budgetClosingTotal,r.savingsAssetsTotal,r.effectiveEndingBalance,r.freeAvailable,r.totalAssets,r.actualBankBalance ?? "",r.actualBankBalanceAccepted?"ja":"nein"]; });
+  const csv = [headers, ...rows].map(row => row.map(value => { const text = typeof value === "number" ? value.toFixed(2).replace(".", ",") : String(value); return `"${text.replaceAll('"', '""')}"`; }).join(";")).join("\r\n"); downloadBlob("\uFEFF" + csv, `Finanzplanung_Monatsuebersicht_${currentLocalDate()}.csv`, "text/csv;charset=utf-8");
+}
+function resetToDefaults() { if (!confirm("Alle Änderungen, Monatsbuchungen und Sperren werden gelöscht. Wirklich zurücksetzen?")) return; state = createNewState(); selectedMonth = state.meta.start; updateAndSave("Auf leere Ausgangsdaten zurückgesetzt"); showView("overview"); }
+function routeFromHash() {
+  const hash = location.hash.slice(1);
+  if (hash.startsWith("month=")) { const ym = hash.slice(6); if (isValidMonth(ym) && compareMonths(ym, state.meta.start) >= 0) { selectedMonth = ym; if (ensurePlanningThrough(ym)) saveState("Planung erweitert"); } showView("month"); }
+  else if (["overview","month","basics","dashboard","backup"].includes(hash)) showView(hash);
+}
+
+document.addEventListener("click", event => {
+  const viewButton = event.target.closest("[data-view]"); if (viewButton) { showView(viewButton.dataset.view); return; }
+  const monthRow = event.target.closest("[data-open-month]"); if (monthRow) { selectedMonth = monthRow.dataset.openMonth; showView("month"); return; }
+  const addButton = event.target.closest("[data-add]"); if (addButton) { addCollectionItem(addButton.dataset.add); return; }
+  const deleteButton = event.target.closest("[data-delete]"); if (deleteButton) { deleteCollectionItem(deleteButton.dataset.delete, deleteButton.dataset.id); return; }
+  const deleteTx = event.target.closest("[data-delete-tx]"); if (deleteTx) { deleteTransaction(deleteTx.dataset.deleteTx, deleteTx.dataset.id); return; }
+  const deposit = event.target.closest("[data-budget-deposit]"); if (deposit) { addBudgetCashTransaction("cash_to_budget", deposit.dataset.budgetDeposit); return; }
+  const withdraw = event.target.closest("[data-budget-withdraw]"); if (withdraw) { addBudgetCashTransaction("budget_to_cash", withdraw.dataset.budgetWithdraw); return; }
+  const deleteBudgetTx = event.target.closest("[data-delete-budget-tx]"); if (deleteBudgetTx) { deleteBudgetTransaction(deleteBudgetTx.dataset.deleteBudgetTx); return; }
+  const closeGoal = event.target.closest("[data-close-goal]"); if (closeGoal) { openGoalCloseDialog(closeGoal.dataset.closeGoal); return; }
+  const reopenGoal = event.target.closest("[data-reopen-goal]"); if (reopenGoal) { reopenSavingsGoal(reopenGoal.dataset.reopenGoal); return; }
+  const donutCategory = event.target.closest("[data-donut-category]"); if (donutCategory) { selectDonutCategory(donutCategory.dataset.donutCategory); return; }
+});
+
+document.addEventListener("change", event => {
+  const input = event.target;
+  if (input.id === "planningStartMonth") { if (!changePlanningStart(input.value)) renderBasics(); return; }
+  if (input.id === "startAnchorDate") { if (!isAnchorStartMonth(state.meta.start) || latestLockedMonth()) { renderBasics(); return; } const bounds = monthDateBounds(state.meta.start); if (input.value < bounds.min || input.value > bounds.max) { alert("Der finanzielle Stichtag muss innerhalb des gewählten Startmonats liegen."); renderBasics(); return; } state.meta.startAnchorDate = input.value; updateAndSave("Finanzieller Stichtag gespeichert"); return; }
+  if (input.id === "startMonthUseForStatistics") { state.meta.startMonthUseForStatistics = input.checked; updateAndSave("Statistik-Einstellung gespeichert"); return; }
+  if (input.id === "statisticsGranularity") { statisticsDisplaySettings().granularity = STATISTICS_GRANULARITIES.has(input.value) ? input.value : "auto"; updateAndSave("Statistik-Darstellung gespeichert"); return; }
+  if (input.id === "statisticsVisibleRange") { const value = input.value === "all" ? "all" : Number(input.value); statisticsDisplaySettings().visibleRangeMonths = value === "all" || [12,24,36,60].includes(value) ? value : 24; const windowInfo = statisticsWindow(statisticsMonths()); if (windowInfo.months.length) state.statisticsDisplay.windowStart = windowInfo.months[0]; updateAndSave("Sichtbarer Statistikzeitraum gespeichert"); return; }
+  if (input.id === "donutMode") { statisticsDisplaySettings().donutMode = DONUT_MODES.has(input.value) ? input.value : "allocation"; selectedDonutCategory = ""; updateAndSave("Donut-Ansicht gespeichert"); return; }
+  if (input.matches("[data-start-handled]")) { const data = state.months[state.meta.start]; if (!data || data.locked || state.meta.startMonthMode !== "anchor") return; data.startMonthSetup = normalizeStartMonthSetup(data.startMonthSetup); data.startMonthSetup.handled[input.dataset.startHandled] = input.checked; updateAndSave("Startmonat-Status gespeichert"); return; }
+  if (input.matches("[data-special-pay-status]")) { const data = state.months[state.meta.start]; if (!data || data.locked || state.meta.startMonthMode !== "anchor") return; data.startMonthSetup = normalizeStartMonthSetup(data.startMonthSetup); data.startMonthSetup.specialPayments[input.dataset.specialPayStatus] = input.value === "outstanding" ? "outstanding" : "included"; updateAndSave("Sonderzahlung im Startmonat gespeichert"); return; }
+  if (input.matches("[data-setting]")) { state.settings[input.dataset.setting] = input.value === "" ? "" : asNumber(input.value); updateAndSave(); return; }
+  if (input.matches("[data-collection]")) {
+    const item = collectionItem(input.dataset.collection, input.dataset.id); if (!item) return;
+    if (input.dataset.collection === "recurringSavings" && input.dataset.field === "mode" && latestLockedMonth()) { alert("Die Behandlung eines bestehenden Sparpostens kann mit gesperrten Monaten nicht zwischen Sparvermögen und Budget gewechselt werden. Bitte zuerst die betroffenen Monate entsperren."); renderBasics(); return; }
+    const numeric = new Set(["amount","monthlyRate","target","startBalance"]), bool = new Set(["dynamicRate","assumePlannedSpending"]);
+    item[input.dataset.field] = bool.has(input.dataset.field) ? input.checked : (numeric.has(input.dataset.field) ? asNumber(input.value) : input.value);
+    if (input.type === "month" && isValidMonth(input.value)) ensurePlanningThrough(input.value); updateAndSave(); return;
+  }
+  if (input.matches("[data-budget-usage]")) {
+    const data = state.months[selectedMonth]; if (!data || data.locked) return; data.budgetUsage[input.dataset.budgetUsage] = Math.max(0, asNumber(input.value)); updateAndSave(); return;
+  }
+  if (input.matches("[data-goal-extra]")) {
+    const data = state.months[selectedMonth], goal = collectionItem("savingsGoals", input.dataset.goalExtra); if (!data || data.locked || !goal || !goalAcceptsExtraInMonth(goal, selectedMonth)) return; data.goalExtraContributions[goal.id] = Math.max(0, asNumber(input.value)); updateAndSave(); return;
+  }
+  if (input.matches("[data-tx-type]")) {
+    const data = state.months[selectedMonth]; if (!data || data.locked) return; const key = input.dataset.txType === "income" ? "incomes" : "expenses", item = data[key].find(x => x.id === input.dataset.id); if (!item) return; item[input.dataset.field] = input.dataset.field === "amount" ? Math.max(0, asNumber(input.value)) : input.value; updateAndSave(); return;
+  }
+});
+
+document.getElementById("monthSelect").addEventListener("change", event => { selectedDonutCategory = ""; selectedMonth = event.target.value; ensurePlanningThrough(selectedMonth); renderMonth(); location.hash = `month=${selectedMonth}`; });
+document.getElementById("prevMonth").addEventListener("click", () => { selectedDonutCategory = ""; selectedMonth = addMonths(selectedMonth, -1); renderMonth(); location.hash = `month=${selectedMonth}`; });
+document.getElementById("nextMonth").addEventListener("click", () => { selectedDonutCategory = ""; selectedMonth = addMonths(selectedMonth, 1); if (ensurePlanningThrough(selectedMonth)) saveState("Planung erweitert"); renderMonth(); location.hash = `month=${selectedMonth}`; });
+document.getElementById("addIncome").addEventListener("click", () => addTransaction("income"));
+document.getElementById("addExpense").addEventListener("click", () => addTransaction("expense"));
+document.getElementById("addBudgetTransfer").addEventListener("click", addBudgetToBudgetTransfer);
+document.getElementById("toggleMonthLock").addEventListener("click", openMonthCloseDialog);
+document.getElementById("quickExport").addEventListener("click", exportJson);
+document.getElementById("exportBackup").addEventListener("click", exportJson);
+document.getElementById("overviewCsv").addEventListener("click", exportOverviewCsv);
+document.getElementById("resetData").addEventListener("click", resetToDefaults);
+document.getElementById("statisticsEarlier").addEventListener("click", () => shiftStatisticsWindow(-12));
+document.getElementById("statisticsLater").addEventListener("click", () => shiftStatisticsWindow(12));
+document.getElementById("statisticsEndMonth").addEventListener("change", event => { const value = event.target.value; if (!isValidMonth(value) || compareMonths(value, state.meta.start) < 0) { alert(`Der Statistik-Endmonat muss ${monthName(state.meta.start)} oder später sein.`); renderDashboard(); return; } state.meta.statisticsEnd = value; ensurePlanningThrough(value); updateAndSave("Statistik-Zeitraum gespeichert"); });
+document.getElementById("budgetForecastEnabled").addEventListener("change", event => { const profile = budgetForecastProfile(); if (!profile.eligible) { event.target.checked = false; state.forecastSettings.budgetForecastEnabled = false; alert("Für eine Verbrauchsprognose werden mindestens 3 abgeschlossene Monate mit bestätigten Budgetverbräuchen benötigt."); } else state.forecastSettings.budgetForecastEnabled = event.target.checked; updateAndSave("Prognose-Einstellung gespeichert"); });
+document.getElementById("goalCloseAmount").addEventListener("input", updateGoalCloseDifference);
+document.getElementById("goalCloseConfirm").addEventListener("click", event => { event.preventDefault(); confirmGoalClose(); });
+document.getElementById("monthCloseBankBalance").addEventListener("input", updateMonthCloseDifference);
+document.getElementById("monthCloseConfirm").addEventListener("click", event => { event.preventDefault(); confirmMonthClose(); });
+for (const [inputId, buttonId] of [["quickImport","quickImportButton"],["importBackup","importBackupButton"]]) { const input = document.getElementById(inputId); document.getElementById(buttonId).addEventListener("click", () => input.click()); input.addEventListener("change", () => { importJsonFile(input.files && input.files[0]); input.value = ""; }); }
+window.addEventListener("hashchange", routeFromHash);
+window.addEventListener("resize", () => { if (activeView === "dashboard") renderDashboard(); else if (activeView === "month") renderMonth(); });
+
+renderAll();
+if (storageAvailable) saveState("Automatisch gespeichert"); else setSaveStatus("Lokaler Speicher blockiert – JSON-Backup verwenden", true);
+if (location.hash) routeFromHash();
+
+</script>
+
+<!-- Mobile companion sync adapter (FP1) -->
+<script src="./qrcode.min.js"></script>
+<script src="./mobile-sync-addon.js"></script>
+</body>
+</html>
