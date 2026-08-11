@@ -1,4 +1,4 @@
-const CACHE='finanzmonat-v1.3.0';
+const CACHE='finanzmonat-v1.4.0';
 const VENDOR_CACHE='finanzmonat-vendor-v1';
 const JSQR_CDN='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
 const CORE=[

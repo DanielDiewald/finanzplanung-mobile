@@ -19,7 +19,7 @@ function makeContext(){
   };
   const budgets=[{id:'budget-food',description:'Lebensmittel',category:'Lebensmittel',amount:350,interval:'monthly'}];
   const ctx={
-    console, TextEncoder, TextDecoder, crypto:webcrypto,
+    console, TextEncoder, TextDecoder, CompressionStream, DecompressionStream, Blob, Response, crypto:webcrypto,
     btoa:s=>Buffer.from(s,'binary').toString('base64'),
     atob:s=>Buffer.from(s,'base64').toString('binary'),
     __FP1_ENABLE_TEST_HOOKS__:true,
@@ -98,6 +98,7 @@ test('Desktop FP1-P wird vom Mobile-Decoder identisch verstanden',async()=>{
   const {api}=makeContext();
   const payload=api.fp1PlanPayload('2026-08');
   const code=await api.fp1Encode('P',payload);
+  assert.match(code,/^FP1-P-C-/);
   const decoded=await decodeFP1(code,{expectedType:'P'});
   assert.equal(decoded.planId,'plan-1');
   assert.equal(decoded.budgets[0].id,'budget-food');
@@ -111,7 +112,8 @@ test('Mobile FP1-T wird vom Desktop-Decoder verstanden',async()=>{
   const plan={planId:'plan-1',revision:4,month:'2026-08'};
   const mobileTx={id:'cross-1',recordRevision:1,createdAt:'2026-08-11T17:00:00.000Z',updatedAt:'2026-08-11T17:00:00.000Z',date:'2026-08-11',month:'2026-08',kind:'budget_expense',amountCents:2990,budgetId:'budget-food',category:'Lebensmittel',description:'Billa',note:''};
   const payload=buildTransactionPayload({plan,transactions:[mobileTx],settings:{deviceId:'dev-1',deviceName:'Test'},exportId:'exp-cross'});
-  const code=await encodeFP1('T',payload,{forceEncoding:'N'});
+  const code=await encodeFP1('T',payload,{forceEncoding:'C'});
+  assert.match(code,/^FP1-T-C-/);
   const decoded=await api.fp1Decode(code,'T');
   assert.equal(decoded.exportId,'exp-cross');
   assert.equal(decoded.transactions[0].id,'cross-1');

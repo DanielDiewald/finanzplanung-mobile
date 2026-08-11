@@ -24,15 +24,16 @@ FP1-<TYPE>-<ENCODING>-<CRC32>-<BASE64URL_PAYLOAD>
 
 ### ENCODING
 
-- `Z` = DEFLATE-komprimierte UTF-8-JSON-Bytes
-- `N` = unkomprimierte UTF-8-JSON-Bytes
+- `C` = **Compact**: fachliches FP1-Objekt wird in ein kurzes, positionsbasiertes Transport-Schema ueberfuehrt und danach mit DEFLATE komprimiert. Dies ist die bevorzugte Kodierung fuer QR-Codes.
+- `Z` = Legacy-kompatibel: normales FP1-JSON wird direkt mit DEFLATE komprimiert.
+- `N` = unkomprimierte UTF-8-JSON-Bytes.
 
-Die Implementierung bevorzugt `Z`, falls `CompressionStream('deflate')` verfuegbar ist. `N` ist ein kompatibler Fallback.
+Die Implementierung bevorzugt `C`, falls `CompressionStream('deflate')` verfuegbar ist. `Z` und `N` werden weiterhin gelesen, damit bereits erzeugte FP1-Codes kompatibel bleiben. Beim mitgelieferten Beispielplan sinkt der PLAN-Code von etwa 1.140 Zeichen (`Z`) auf etwa 770 Zeichen (`C`).
 
 ### CRC32
 
 - 8 hexadezimale Zeichen, Gross-/Kleinschreibung beim Einlesen egal
-- CRC32 wird ueber die **transportierten Bytes** berechnet, also bei `Z` ueber die komprimierten Bytes
+- CRC32 wird ueber die **transportierten Bytes** berechnet, also bei `C` und `Z` ueber die komprimierten Bytes
 - Polynom: Standard CRC-32/ISO-HDLC (`0xEDB88320` in reflektierter Darstellung)
 
 ### Base64URL
@@ -42,6 +43,12 @@ RFC-4648-artiges URL-safe Base64:
 - `+` -> `-`
 - `/` -> `_`
 - Padding `=` wird entfernt
+
+### Compact-Transport `C`
+
+`C` veraendert **nicht** das fachliche FP1-Datenmodell. Vor der Komprimierung werden lediglich lange JSON-Feldnamen und wiederholte Objektstrukturen durch ein internes kompaktes Schema ersetzt. Listen wie Budgets, Sparziele, Donut-Segmente und Transaktionen werden positionsbasiert transportiert. Nach dem Dekomprimieren stellt der Decoder wieder das vollstaendige fachliche FP1-P- beziehungsweise FP1-T-Objekt her und fuehrt erst danach die normale Validierung aus.
+
+Damit bleiben die dokumentierten Felder in den folgenden Tabellen die verbindliche API. Das Compact-Schema ist nur eine Transportoptimierung. Ein `C`-Decoder muss die `C`-Struktur expandieren; ein alter Decoder, der `C` nicht kennt, soll den Code als unbekannte Kodierung ablehnen statt ihn falsch zu interpretieren.
 
 ## 3. JSON-Grundregeln
 

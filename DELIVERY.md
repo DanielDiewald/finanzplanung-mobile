@@ -30,7 +30,7 @@
 - [x] versionierter Prefix
 - [x] UTF-8 JSON
 - [x] kanonische Serialisierung
-- [x] DEFLATE wenn verfuegbar, sonst unkomprimiert
+- [x] kompaktes `C`-Transportformat + DEFLATE wenn verfuegbar; `Z`/`N` bleiben rueckwaertskompatibel
 - [x] CRC32
 - [x] Base64URL
 - [x] Textcode
@@ -77,7 +77,7 @@
 
 ## Tests
 
-- [x] 31 automatisierte Tests gruen
+- [x] 32 automatisierte Tests gruen
 - [x] statische PWA-/Manifest-/Service-Worker-Pruefung gruen
 - [x] JavaScript-Syntaxpruefung gruen
 - [x] Cross-Kompatibilitaet Desktop `FP1-P` -> Mobile

@@ -11,7 +11,8 @@ npm run check
 
 Aktuell abgedeckte Kernfaelle:
 
-- FP1-P Encode -> Decode mit DEFLATE
+- FP1-P Encode -> Decode mit Legacy-DEFLATE (`Z`)
+- FP1-P Compact (`C`) -> Decode inklusive Laengenvergleich gegen `Z`
 - FP1-P Encode -> Decode ohne Komprimierung
 - beschaedigter Code / CRC32
 - falsche externe FP-Version

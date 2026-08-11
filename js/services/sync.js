@@ -39,13 +39,54 @@ function canonicalStringify(value) {
   return `{${Object.keys(value).sort().map(k=>`${JSON.stringify(k)}:${canonicalStringify(value[k])}`).join(',')}}`;
 }
 
+function compactDonutForTransport(d={}) {
+  return [String(d.title||''),String(d.centerLabel||''),String(d.centerSubtext||''),Number(d.totalCents)||0,(Array.isArray(d.segments)?d.segments:[]).map(s=>[String(s.key||''),String(s.label||''),Number(s.amountCents)||0,String(s.group||'cost'),String(s.color||''),(Array.isArray(s.details)?s.details:[]).map(x=>[String(x.label||''),Number(x.amountCents)||0])])];
+}
+function expandDonutFromTransport(a=[], mode='planned') {
+  return {mode,title:a[0]||'',centerLabel:a[1]||'',centerSubtext:a[2]||'',totalCents:a[3]||0,segments:(Array.isArray(a[4])?a[4]:[]).map(s=>({key:s[0]||'',label:s[1]||'',amountCents:s[2]||0,group:s[3]||'cost',color:s[4]||'',details:(Array.isArray(s[5])?s[5]:[]).map(d=>({label:d[0]||'',amountCents:d[1]||0}))}))};
+}
+function compactPayloadForTransport(type,payload) {
+  if(type==='P') return {
+    v:1,t:'P',p:payload.planId,n:payload.planName||'',r:payload.revision,m:payload.month,c:payload.createdAt,
+    s:[payload.source?.app||'',payload.source?.dataVersion??null],
+    a:payload.accountBalanceCents,q:payload.normalBalanceCents,f:payload.freeAvailableCents,x:payload.minimumCashBufferCents,
+    b:payload.budgetAssetsCents,y:payload.savingsAssetsCents,z:payload.totalAssetsCents,
+    B:(payload.budgets||[]).map(b=>[b.id,b.name,b.category,b.interval||'',b.plannedCents,b.reserveCents,b.spentCents,b.availableCents,b.color||'']),
+    G:(payload.savingsGoals||[]).map(g=>[g.id,g.name,g.balanceCents,g.targetCents]),
+    D:[compactDonutForTransport(payload.donuts?.planned),compactDonutForTransport(payload.donuts?.actual)],
+    A:(payload.acknowledgedTransactions||[]).map(a=>[a.id,a.recordRevision]),
+    I:payload.acknowledgedTransactionIds||[],E:payload.acknowledgedExportIds||[],L:payload.lastSync??null
+  };
+  return {
+    v:1,t:'T',p:payload.planId,b:payload.basePlanRevision,m:payload.month,e:payload.exportId,g:payload.generatedAt,d:payload.deviceId,n:payload.deviceName||'',
+    T:(payload.transactions||[]).map(x=>[x.id,x.recordRevision,x.op,x.createdAt,x.updatedAt,x.date,x.month,x.kind,x.amountCents,x.budgetId||'',x.category,x.description||'',x.note||''])
+  };
+}
+function expandCompactPayload(type,x) {
+  if(!x||typeof x!=='object'||Array.isArray(x)) throw new Error('Kompakte FP1-Nutzdaten sind ungültig.');
+  if(type==='P') return {
+    protocolVersion:x.v,type:'P',planId:x.p,planName:x.n||'',revision:x.r,month:x.m,createdAt:x.c,source:{app:x.s?.[0]||'',dataVersion:x.s?.[1]??null},
+    accountBalanceCents:x.a,normalBalanceCents:x.q,freeAvailableCents:x.f,minimumCashBufferCents:x.x,budgetAssetsCents:x.b,savingsAssetsCents:x.y,totalAssetsCents:x.z,
+    budgets:(Array.isArray(x.B)?x.B:[]).map(b=>({id:b[0],name:b[1],category:b[2],interval:b[3]||'monthly',plannedCents:b[4],reserveCents:b[5],spentCents:b[6],availableCents:b[7],color:b[8]||''})),
+    savingsGoals:(Array.isArray(x.G)?x.G:[]).map(g=>({id:g[0],name:g[1],balanceCents:g[2],targetCents:g[3]})),
+    donuts:{planned:expandDonutFromTransport(x.D?.[0]||[],'planned'),actual:expandDonutFromTransport(x.D?.[1]||[],'actual')},
+    acknowledgedTransactions:(Array.isArray(x.A)?x.A:[]).map(a=>({id:a[0],recordRevision:a[1]})),acknowledgedTransactionIds:Array.isArray(x.I)?x.I:[],acknowledgedExportIds:Array.isArray(x.E)?x.E:[],lastSync:x.L??null
+  };
+  return {
+    protocolVersion:x.v,type:'T',planId:x.p,basePlanRevision:x.b,month:x.m,exportId:x.e,generatedAt:x.g,deviceId:x.d,deviceName:x.n||'',
+    transactions:(Array.isArray(x.T)?x.T:[]).map(t=>({id:t[0],recordRevision:t[1],op:t[2],createdAt:t[3],updatedAt:t[4],date:t[5],month:t[6],kind:t[7],amountCents:t[8],budgetId:t[9]||'',category:t[10],description:t[11]||'',note:t[12]||''}))
+  };
+}
+
 export async function encodeFP1(type, payload, { forceEncoding='' }={}) {
   if (!['P','T'].includes(type)) throw new Error('Unbekannter FP1-Code-Typ.');
   const normalized={...deepClone(payload),protocolVersion:FP_VERSION,type};
-  const json=canonicalStringify(normalized); const raw=te.encode(json);
-  let encoding=forceEncoding || (globalThis.CompressionStream ? 'Z' : 'N');
+  let encoding=forceEncoding || (globalThis.CompressionStream ? 'C' : 'N');
+  let transport=normalized;
+  if(encoding==='C') transport=compactPayloadForTransport(type,normalized);
+  const raw=te.encode(canonicalStringify(transport));
   let body;
-  if (encoding==='Z') body=await compressBytes(raw); else if (encoding==='N') body=raw; else throw new Error('Unbekannte FP1-Kodierung.');
+  if (encoding==='C'||encoding==='Z') body=await compressBytes(raw); else if (encoding==='N') body=raw; else throw new Error('Unbekannte FP1-Kodierung.');
   return `${PREFIX}-${type}-${encoding}-${crcHex(body)}-${bytesToBase64Url(body)}`;
 }
 
@@ -55,7 +96,7 @@ export function inspectCodePrefix(code) {
   const [prefix,type,encoding,checksum,...rest]=parts;
   if (prefix !== PREFIX) { if (/^FP\d+$/.test(prefix)) throw new Error(`Nicht unterstützte Protokollversion: ${prefix}.`); throw new Error('Ungültiges Synchronisationspräfix.'); }
   if (!['P','T'].includes(type)) throw new Error(`Unbekannter FP1-Code-Typ: ${type || '–'}.`);
-  if (!['Z','N'].includes(encoding)) throw new Error(`Unbekannte FP1-Kodierung: ${encoding || '–'}.`);
+  if (!['C','Z','N'].includes(encoding)) throw new Error(`Unbekannte FP1-Kodierung: ${encoding || '–'}.`);
   if (!/^[0-9A-Fa-f]{8}$/.test(checksum)) throw new Error('Ungültige FP1-Prüfsumme.');
   return { cleaned,prefix,type,encoding,checksum:checksum.toUpperCase(),payloadText:rest.join('-') };
 }
@@ -63,8 +104,9 @@ export function inspectCodePrefix(code) {
 export async function decodeFP1(code, { expectedType='' }={}) {
   const header=inspectCodePrefix(code); if (expectedType && header.type!==expectedType) throw new Error(`Falscher Code-Typ. Erwartet: FP1-${expectedType}.`);
   const body=base64UrlToBytes(header.payloadText); if (crcHex(body)!==header.checksum) throw new Error('Prüfsummenfehler: Der Synchronisationscode ist beschädigt oder unvollständig.');
-  let raw; try { raw=header.encoding==='Z'?await decompressBytes(body):body; } catch (err) { throw new Error(`FP1-Daten konnten nicht dekomprimiert werden: ${err.message}`); }
+  let raw; try { raw=(header.encoding==='C'||header.encoding==='Z')?await decompressBytes(body):body; } catch (err) { throw new Error(`FP1-Daten konnten nicht dekomprimiert werden: ${err.message}`); }
   let payload; try { payload=JSON.parse(td.decode(raw)); } catch { throw new Error('FP1-Nutzdaten sind kein gültiges JSON.'); }
+  if(header.encoding==='C') payload=expandCompactPayload(header.type,payload);
   if (payload.protocolVersion!==FP_VERSION) throw new Error(`Nicht unterstützte interne Protokollversion: ${payload.protocolVersion}.`);
   if (payload.type!==header.type) throw new Error('Code-Typ und Nutzdaten-Typ stimmen nicht überein.');
   return header.type==='P' ? validatePlanPayload(payload) : validateTransactionPayload(payload);

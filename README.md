@@ -21,7 +21,7 @@ Mobile, offline-faehige Begleit-PWA fuer `Finanzplanung_v10.html`.
 - Schnellerfassung von Budgetausgaben, sonstigen Ausgaben und zusaetzlichen Einnahmen
 - Transaktionsliste mit Filtern und Synchronisationsstatus
 - IndexedDB-Persistenz
-- FP1 Plan-/Transaktionscodes mit CRC32 und Base64URL, optional DEFLATE
+- FP1 Plan-/Transaktionscodes mit CRC32 und Base64URL; `C` nutzt ein kompaktes Transport-Schema plus DEFLATE für deutlich kleinere QR-Codes
 - lokales QR-Code-Rendering ohne Online-API
 - Kamera-QR-Scan mit nativem `BarcodeDetector` oder Safari-kompatiblem `jsQR`-Fallback
 - QR-Foto-Import als zusaetzlicher Safari/iOS-Fallback

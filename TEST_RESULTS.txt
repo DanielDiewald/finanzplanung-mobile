@@ -1,26 +1,27 @@
-Finanzplanung Mobile v1.1.0 - Testergebnis
+Finanzplanung Mobile v1.4.0 - Testergebnis
 Datum: 2026-08-11
 
 Automatisierte Tests:
-- npm test: 31/31 bestanden
+- npm test: 32/32 bestanden
 - npm run check: bestanden
-- JavaScript-Syntaxcheck aller eigenen JS-Dateien: bestanden
+- JavaScript-Syntaxcheck der geaenderten Sync-/Desktop-Dateien: bestanden
 
-Neu in v1.1.0 geprueft:
-- jsQR-Fallback-Service liefert decodierten Text an die App weiter
-- fehlender JS-Decoder wird kontrolliert behandelt
-- index.html bindet assets/vendor/jsQR.js ein
-- Service Worker cached den lokalen jsQR-Decoder
-- GitHub-Pages-Workflow fuer lokales Vendoring vorhanden
-- QR-Foto-Import ist im QR-Service vorhanden
+Neu in v1.4.0 geprueft:
+- FP1-P-C Compact Encode -> Decode verlustfrei
+- Compact PLAN-Code ist im Referenzfall deutlich kuerzer als Legacy FP1-P-Z
+- Referenzplan: 1140 Zeichen (Z) -> 772 Zeichen (C), Reduktion ca. 32 %
+- Desktop erzeugt FP1-P-C und Mobile dekodiert ihn identisch
+- Mobile erzeugt FP1-T-C und Desktop dekodiert ihn identisch
+- Legacy FP1-P-Z und FP1-N bleiben weiterhin dekodierbar
+- Desktop-QR wurde von 260x260 auf 640x640 px vergroessert und erhaelt einen deutlichen weissen Sicherheitsrand
 
 Bestehende Kernpruefungen weiterhin gruen:
-- FP1-P / FP1-T Encode-Decode
 - CRC32 / falsche Version / falscher Typ
 - Duplikatschutz / recordRevision / Tombstones
 - Desktop-Mobile Cross-Kompatibilitaet
 - Budget-/Donut-Overlay
+- Safari jsQR-/Foto-Fallback-Codepfad
 - Manifest-/PWA-/Service-Worker-Pfade
 
 Hinweis:
-Ein echter iOS-Safari-Hardwaretest kann in dieser Container-Umgebung nicht automatisiert ausgefuehrt werden. Der Safari-Pfad verwendet WebKit-kompatibles getUserMedia fuer den Kamerastream und jsQR fuer die lokale Bilddecodierung; der native BarcodeDetector ist dafuer nicht erforderlich.
+Ein echter iOS-Safari-Hardwaretest kann in dieser Container-Umgebung nicht automatisiert ausgefuehrt werden. Fuer GitHub Pages sollte weiterhin der mitgelieferte GitHub-Actions-Workflow verwendet werden, damit jsQR beim Deployment lokal in die PWA eingebunden wird.
