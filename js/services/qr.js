@@ -4,7 +4,7 @@ const JSQR_CDN='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
 const SCAN_INTERVAL_MS=120;
 const MAX_SCAN_DIMENSION=1600;
 const SCAN_CROP_DIMENSION=1200;
-const MAX_IMAGE_DIMENSION=1600;
+const IMAGE_SCAN_DIMENSIONS=[1200,1800,2400,3200];
 
 export function qrGeneratorAvailable() { return typeof globalThis.QRCode === 'function'; }
 export function renderQr(target,text,{size=280}={}) {
@@ -157,15 +157,39 @@ function loadImage(file){
 }
 
 export async function decodeQrImageFile(file,{canvas,onStatus}={}){
-  if(!file) throw new Error('Bitte ein QR-Code-Bild auswählen.'); if(!canvas) throw new Error('Scanner-Canvas fehlt.');
-  await ensureJsQr(onStatus); onStatus?.('QR-Code im Bild wird gelesen …');
+  if(!file) throw new Error('Bitte ein QR-Code-Bild aufnehmen oder auswählen.'); if(!canvas) throw new Error('Scanner-Canvas fehlt.');
+  await ensureJsQr(onStatus); onStatus?.('QR-Code im Foto wird analysiert …');
   const {image,url}=await loadImage(file);
   try {
-    const sourceWidth=image.naturalWidth||image.width,sourceHeight=image.naturalHeight||image.height;
-    const scale=Math.min(1,MAX_IMAGE_DIMENSION/Math.max(sourceWidth,sourceHeight)); const width=Math.max(1,Math.round(sourceWidth*scale)),height=Math.max(1,Math.round(sourceHeight*scale));
-    canvas.width=width;canvas.height=height;const context=canvas.getContext('2d',{willReadFrequently:true});if(!context)throw new Error('Bild-Canvas konnte nicht initialisiert werden.');
-    context.drawImage(image,0,0,width,height);const data=context.getImageData(0,0,width,height);
-    const value=decodeImageDataWithJsQr(data.data,width,height,{inversionAttempts:'attemptBoth'}); if(!value)throw new Error('Auf dem Bild wurde kein lesbarer QR-Code gefunden.'); return value;
+    const sourceWidth=image.naturalWidth||image.width, sourceHeight=image.naturalHeight||image.height;
+    if(!sourceWidth||!sourceHeight) throw new Error('Das Foto hat keine lesbare Bildgröße.');
+    const context=canvas.getContext('2d',{willReadFrequently:true}); if(!context) throw new Error('Bild-Canvas konnte nicht initialisiert werden.');
+    const crops=[
+      {x:0,y:0,w:1,h:1,label:'gesamtes Foto'},
+      {x:.04,y:.04,w:.92,h:.92,label:'großer Mittelausschnitt'},
+      {x:.12,y:.12,w:.76,h:.76,label:'Mittelausschnitt'}
+    ];
+    let attempt=0;
+    for(const crop of crops){
+      const sx=Math.round(sourceWidth*crop.x), sy=Math.round(sourceHeight*crop.y);
+      const sw=Math.max(1,Math.round(sourceWidth*crop.w)), sh=Math.max(1,Math.round(sourceHeight*crop.h));
+      for(const maxDimension of IMAGE_SCAN_DIMENSIONS){
+        attempt+=1;
+        const scale=Math.min(1,maxDimension/Math.max(sw,sh));
+        const width=Math.max(1,Math.round(sw*scale)), height=Math.max(1,Math.round(sh*scale));
+        canvas.width=width; canvas.height=height;
+        context.imageSmoothingEnabled=true; context.imageSmoothingQuality='high';
+        context.clearRect(0,0,width,height); context.drawImage(image,sx,sy,sw,sh,0,0,width,height);
+        const data=context.getImageData(0,0,width,height);
+        let value=decodeImageDataWithJsQr(data.data,width,height,{inversionAttempts:'dontInvert'});
+        if(!value) value=decodeImageDataWithJsQr(data.data,width,height,{inversionAttempts:'attemptBoth'});
+        if(value) return value;
+        onStatus?.(`Foto wird analysiert … Versuch ${attempt}`);
+        if(scale===1) break;
+        await new Promise(resolve=>setTimeout(resolve,0));
+      }
+    }
+    throw new Error('QR-Code im Foto nicht erkannt. Bitte QR möglichst groß, gerade, scharf und vollständig fotografieren; Bildschirmhelligkeit erhöhen und Spiegelungen vermeiden.');
   } finally { URL.revokeObjectURL(url); }
 }
 

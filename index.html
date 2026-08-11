@@ -325,10 +325,10 @@
       <div id="scannerStatus" class="notice">Kamera wird erst nach deiner Freigabe verwendet.</div>
       <div class="button-grid">
         <button id="startScanner" class="primary" type="button">Kamera starten</button>
-        <button id="scannerPhotoButton" type="button">QR-Foto auswählen</button>
+        <button id="scannerPhotoButton" type="button">QR fotografieren</button>
         <button id="scannerPasteFallback" type="button">Stattdessen Code eingeben</button>
       </div>
-      <input id="scannerPhotoInput" class="hidden" type="file" accept="image/*">
+      <input id="scannerPhotoInput" class="hidden" type="file" accept="image/*" capture="environment">
     </div>
   </dialog>
 
