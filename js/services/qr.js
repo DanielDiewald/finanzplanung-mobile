@@ -2,7 +2,8 @@ let scannerStream=null, scannerTimer=0, detector=null, decoderLoadPromise=null;
 
 const JSQR_CDN='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
 const SCAN_INTERVAL_MS=120;
-const MAX_SCAN_DIMENSION=960;
+const MAX_SCAN_DIMENSION=1600;
+const SCAN_CROP_DIMENSION=1200;
 const MAX_IMAGE_DIMENSION=1600;
 
 export function qrGeneratorAvailable() { return typeof globalThis.QRCode === 'function'; }
@@ -62,16 +63,47 @@ export function decodeImageDataWithJsQr(imageData,width,height,{inversionAttempt
   return String(result?.data||'');
 }
 
-function drawVideoFrame(video,canvas,maxDimension=MAX_SCAN_DIMENSION){
+function drawVideoFrame(video,canvas,maxDimension=MAX_SCAN_DIMENSION,crop=null){
   const sourceWidth=video.videoWidth||0, sourceHeight=video.videoHeight||0;
   if(!sourceWidth||!sourceHeight) return null;
-  const scale=Math.min(1,maxDimension/Math.max(sourceWidth,sourceHeight));
-  const width=Math.max(1,Math.round(sourceWidth*scale)),height=Math.max(1,Math.round(sourceHeight*scale));
+  let sx=0,sy=0,sw=sourceWidth,sh=sourceHeight;
+  if(crop){
+    sw=Math.max(1,Math.round(sourceWidth*crop.w)); sh=Math.max(1,Math.round(sourceHeight*crop.h));
+    sx=Math.max(0,Math.round((sourceWidth-sw)*crop.x)); sy=Math.max(0,Math.round((sourceHeight-sh)*crop.y));
+  }
+  const scale=Math.min(1,maxDimension/Math.max(sw,sh));
+  const width=Math.max(1,Math.round(sw*scale)),height=Math.max(1,Math.round(sh*scale));
   if(canvas.width!==width) canvas.width=width; if(canvas.height!==height) canvas.height=height;
   const context=canvas.getContext('2d',{willReadFrequently:true}); if(!context) return null;
-  context.drawImage(video,0,0,width,height);
+  context.drawImage(video,sx,sy,sw,sh,0,0,width,height);
   return {context,width,height,imageData:context.getImageData(0,0,width,height)};
 }
+
+function decodeFrameCandidates(video,canvas,frameCount){
+  const candidates=[
+    drawVideoFrame(video,canvas,MAX_SCAN_DIMENSION),
+    drawVideoFrame(video,canvas,SCAN_CROP_DIMENSION,{x:.5,y:.5,w:.72,h:.72})
+  ].filter(Boolean);
+  for(const frame of candidates){
+    let value=decodeImageDataWithJsQr(frame.imageData.data,frame.width,frame.height,{inversionAttempts:'dontInvert'});
+    if(!value && frameCount%4===0) value=decodeImageDataWithJsQr(frame.imageData.data,frame.width,frame.height,{inversionAttempts:'attemptBoth'});
+    if(value) return value;
+  }
+  return '';
+}
+
+async function improveCameraForQr(stream){
+  const track=stream?.getVideoTracks?.()[0]; if(!track?.applyConstraints) return;
+  try {
+    const caps=track.getCapabilities?.()||{}; const advanced=[];
+    if(Array.isArray(caps.focusMode)&&caps.focusMode.includes('continuous')) advanced.push({focusMode:'continuous'});
+    if(caps.zoom&&Number.isFinite(caps.zoom.min)&&Number.isFinite(caps.zoom.max)){
+      const z=Math.min(caps.zoom.max,Math.max(caps.zoom.min,1)); if(z>1) advanced.push({zoom:z});
+    }
+    if(advanced.length) await track.applyConstraints({advanced});
+  } catch {}
+}
+
 
 function finishScan(video,onResult,value){
   if(!value) return false;
@@ -82,7 +114,8 @@ export async function startQrScanner({video,canvas,onResult,onStatus}) {
   if(!canUseCamera()) throw new Error('Kamerazugriff ist in diesem Browser nicht verfügbar. GitHub Pages muss über HTTPS geöffnet werden.');
   if(!canvas) throw new Error('Scanner-Canvas fehlt.');
   stopQrScanner(video); onStatus?.('Kamerazugriff wird angefordert …');
-  scannerStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:1280}},audio:false});
+  scannerStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1440}},audio:false});
+  await improveCameraForQr(scannerStream);
   video.setAttribute('playsinline',''); video.muted=true; video.srcObject=scannerStream; await video.play();
 
   const useNative=await nativeQrSupported();
@@ -99,17 +132,16 @@ export async function startQrScanner({video,canvas,onResult,onStatus}) {
 
   await ensureJsQr(onStatus);
   onStatus?.('QR-Code in den Rahmen halten. Safari-kompatibler JS-Scanner aktiv.');
-  let frameCount=0;
+  let frameCount=0, lastHint=0;
   const tick=()=>{
     if(!scannerStream) return;
     try {
       if(video.readyState>=2){
-        const frame=drawVideoFrame(video,canvas); frameCount+=1;
-        if(frame){
-          let value=decodeImageDataWithJsQr(frame.imageData.data,frame.width,frame.height,{inversionAttempts:'dontInvert'});
-          if(!value && frameCount%8===0) value=decodeImageDataWithJsQr(frame.imageData.data,frame.width,frame.height,{inversionAttempts:'attemptBoth'});
-          if(finishScan(video,onResult,value)) return;
-        }
+        frameCount+=1;
+        const value=decodeFrameCandidates(video,canvas,frameCount);
+        if(finishScan(video,onResult,value)) return;
+        const now=Date.now();
+        if(now-lastHint>3500){ onStatus?.('QR-Code vollständig sichtbar halten, etwa 15–25 cm Abstand. Bildschirmhelligkeit am PC erhöhen und Spiegelungen vermeiden.'); lastHint=now; }
       }
     } catch(err){ onStatus?.(`Scannerfehler: ${err.message}`); }
     scannerTimer=setTimeout(tick,SCAN_INTERVAL_MS);
