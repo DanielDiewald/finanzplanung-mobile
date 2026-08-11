@@ -23,7 +23,8 @@ Mobile, offline-faehige Begleit-PWA fuer `Finanzplanung_v10.html`.
 - IndexedDB-Persistenz
 - FP1 Plan-/Transaktionscodes mit CRC32 und Base64URL, optional DEFLATE
 - lokales QR-Code-Rendering ohne Online-API
-- Kamera-QR-Scan, wenn `BarcodeDetector` vom Browser bereitgestellt wird
+- Kamera-QR-Scan mit nativem `BarcodeDetector` oder Safari-kompatiblem `jsQR`-Fallback
+- QR-Foto-Import als zusaetzlicher Safari/iOS-Fallback
 - manueller Code-Import als universeller Fallback
 - Service Worker / Offline Cache
 - PWA Manifest und App-Icons
@@ -57,6 +58,7 @@ finanzplanung-mobile/
   assets/
     icons/
     vendor/qrcode.min.js
+    vendor/jsQR.js
   desktop-integration/
     Finanzplanung_v10_mobile-sync.html
     mobile-sync-addon.js
@@ -120,10 +122,17 @@ Details: `docs/DESKTOP_INTEGRATION.md`.
 
 ## Wichtiger Safari/iOS-Hinweis
 
-Die App fordert Kamerazugriff nur beim aktiven QR-Scan an. Wenn der Browser keine native `BarcodeDetector`-QR-Erkennung anbietet, bleibt der Textcode-Import voll funktionsfaehig. Damit ist der Datenaustausch nicht von Kamera-Support abhaengig.
+Safari/iOS stellt `BarcodeDetector` weiterhin nicht verlaesslich standardmaessig bereit. Die App faellt deshalb automatisch auf einen `getUserMedia()`-Kamerastream plus den reinen JavaScript-Decoder **jsQR 1.4.0** zurueck. Alternativ kann ein QR-Foto ausgewaehlt oder der FP1-Textcode eingefuegt werden.
+
+Bei der mitgelieferten GitHub-Pages-Action wird jsQR waehrend des Builds fest in `assets/vendor/jsQR.js` kopiert. Dadurch arbeitet der Scanner auf der veroeffentlichten PWA auch offline ohne externe QR-API. Bei direktem Branch-Hosting ohne Action bleibt ein gepinnter jsDelivr-Fallback fuer den ersten Decoder-Ladevorgang vorhanden.
 
 Bekannte Grenzen: `docs/KNOWN_LIMITATIONS.md`.
 
 ## Datenschutz
 
 Die App enthaelt keine Analytics-, Tracking-, Werbe-, Cloud- oder Bank-API. Plan und Transaktionen werden lokal in IndexedDB gespeichert. Ein FP1-Code ist **kodiert/komprimiert, aber nicht verschluesselt**.
+
+
+## GitHub Pages mit Safari-QR-Scan
+
+Fuer GitHub Pages **Settings -> Pages -> Source: GitHub Actions** auswaehlen. Die Datei `.github/workflows/pages.yml` testet die App, laedt die fest gepinnte jsQR-Version 1.4.0 aus dem offiziellen npm-Paket, prueft deren SHA-512-Integritaet und veroeffentlicht danach die vollstaendige PWA.

@@ -325,14 +325,17 @@
       <div id="scannerStatus" class="notice">Kamera wird erst nach deiner Freigabe verwendet.</div>
       <div class="button-grid">
         <button id="startScanner" class="primary" type="button">Kamera starten</button>
+        <button id="scannerPhotoButton" type="button">QR-Foto auswählen</button>
         <button id="scannerPasteFallback" type="button">Stattdessen Code eingeben</button>
       </div>
+      <input id="scannerPhotoInput" class="hidden" type="file" accept="image/*">
     </div>
   </dialog>
 
   <div id="toastRegion" class="toast-region" role="status" aria-live="polite"></div>
 
   <script src="./assets/vendor/qrcode.min.js"></script>
+  <script src="./assets/vendor/jsQR.js"></script>
   <script type="module" src="./js/app.js"></script>
 </body>
 </html>

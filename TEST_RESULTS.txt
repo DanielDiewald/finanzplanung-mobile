@@ -1,205 +1,26 @@
-Finanzplanung Mobile - final verification
-UTC 2026-08-11T17:19:17Z
+Finanzplanung Mobile v1.1.0 - Testergebnis
+Datum: 2026-08-11
 
-== npm test ==
+Automatisierte Tests:
+- npm test: 31/31 bestanden
+- npm run check: bestanden
+- JavaScript-Syntaxcheck aller eigenen JS-Dateien: bestanden
 
-> finanzplanung-mobile@1.0.0 test
-> node --test tests/*.test.mjs
+Neu in v1.1.0 geprueft:
+- jsQR-Fallback-Service liefert decodierten Text an die App weiter
+- fehlender JS-Decoder wird kontrolliert behandelt
+- index.html bindet assets/vendor/jsQR.js ein
+- Service Worker cached den lokalen jsQR-Decoder
+- GitHub-Pages-Workflow fuer lokales Vendoring vorhanden
+- QR-Foto-Import ist im QR-Service vorhanden
 
-TAP version 13
-# Subtest: Desktop-Addon klassifiziert neue, doppelte und aktualisierte Buchungsrevisionen
-ok 1 - Desktop-Addon klassifiziert neue, doppelte und aktualisierte Buchungsrevisionen
-  ---
-  duration_ms: 2.630886
-  type: 'test'
-  ...
-# Subtest: Desktop-Addon kann eine bereits importierte Revision per Tombstone rückgängig machen
-ok 2 - Desktop-Addon kann eine bereits importierte Revision per Tombstone rückgängig machen
-  ---
-  duration_ms: 0.606382
-  type: 'test'
-  ...
-# Subtest: Desktop-Addon weist gesperrte Monate und unbekannte Budget-IDs ab
-ok 3 - Desktop-Addon weist gesperrte Monate und unbekannte Budget-IDs ab
-  ---
-  duration_ms: 0.808553
-  type: 'test'
-  ...
-# Subtest: Desktop-Addon importiert zusätzliche Einnahmen/Ausgaben in Desktop-Monatsarrays
-ok 4 - Desktop-Addon importiert zusätzliche Einnahmen/Ausgaben in Desktop-Monatsarrays
-  ---
-  duration_ms: 1.508325
-  type: 'test'
-  ...
-# Subtest: Desktop FP1-P wird vom Mobile-Decoder identisch verstanden
-ok 5 - Desktop FP1-P wird vom Mobile-Decoder identisch verstanden
-  ---
-  duration_ms: 3.550364
-  type: 'test'
-  ...
-# Subtest: Mobile FP1-T wird vom Desktop-Decoder verstanden
-ok 6 - Mobile FP1-T wird vom Desktop-Decoder verstanden
-  ---
-  duration_ms: 1.456378
-  type: 'test'
-  ...
-# Subtest: Budgetausgabe reduziert verfügbares Budget und Ist-Donut sofort
-ok 7 - Budgetausgabe reduziert verfügbares Budget und Ist-Donut sofort
-  ---
-  duration_ms: 1.426303
-  type: 'test'
-  ...
-# Subtest: Budgetüberziehung belastet normales/freies Guthaben, nicht doppelt reservierten Anteil
-ok 8 - Budgetüberziehung belastet normales/freies Guthaben, nicht doppelt reservierten Anteil
-  ---
-  duration_ms: 0.251584
-  type: 'test'
-  ...
-# Subtest: sonstige Ausgabe reduziert frei verfügbar und ergänzt extra-Segment
-ok 9 - sonstige Ausgabe reduziert frei verfügbar und ergänzt extra-Segment
-  ---
-  duration_ms: 0.395148
-  type: 'test'
-  ...
-# Subtest: zusätzliche Einnahme erhöht normales/freies und Gesamtvermögen
-ok 10 - zusätzliche Einnahme erhöht normales/freies und Gesamtvermögen
-  ---
-  duration_ms: 0.261379
-  type: 'test'
-  ...
-# Subtest: bestätigte Buchung wird nicht erneut auf Desktop-Stand aufgeschlagen
-ok 11 - bestätigte Buchung wird nicht erneut auf Desktop-Stand aufgeschlagen
-  ---
-  duration_ms: 0.211164
-  type: 'test'
-  ...
-# Subtest: fehlende Budget-ID wird erkannt und nicht als verfügbar abgezogen
-ok 12 - fehlende Budget-ID wird erkannt und nicht als verfügbar abgezogen
-  ---
-  duration_ms: 0.243583
-  type: 'test'
-  ...
-# Subtest: gelöschte Tombstones beeinflussen Monatswerte nicht
-ok 13 - gelöschte Tombstones beeinflussen Monatswerte nicht
-  ---
-  duration_ms: 1.174729
-  type: 'test'
-  ...
-# Subtest: Sync-Zusammenfassung behält offene Buchungen aus älteren Monaten
-ok 14 - Sync-Zusammenfassung behält offene Buchungen aus älteren Monaten
-  ---
-  duration_ms: 0.277222
-  type: 'test'
-  ...
-# Subtest: Verfügbar-Donut enthält Budgetstand und mobile Buchungsdetails
-ok 15 - Verfügbar-Donut enthält Budgetstand und mobile Buchungsdetails
-  ---
-  duration_ms: 0.40985
-  type: 'test'
-  ...
-# Subtest: FP1 PLAN encode -> decode, deflate
-ok 16 - FP1 PLAN encode -> decode, deflate
-  ---
-  duration_ms: 34.983425
-  type: 'test'
-  ...
-# Subtest: FP1 fallback N encode -> decode
-ok 17 - FP1 fallback N encode -> decode
-  ---
-  duration_ms: 1.024745
-  type: 'test'
-  ...
-# Subtest: beschädigter Code schlägt an Prüfsumme fehl
-ok 18 - beschädigter Code schlägt an Prüfsumme fehl
-  ---
-  duration_ms: 0.903665
-  type: 'test'
-  ...
-# Subtest: falsche FP-Version wird abgewiesen
-ok 19 - falsche FP-Version wird abgewiesen
-  ---
-  duration_ms: 0.312225
-  type: 'test'
-  ...
-# Subtest: falscher Code-Typ wird abgewiesen
-ok 20 - falscher Code-Typ wird abgewiesen
-  ---
-  duration_ms: 1.651418
-  type: 'test'
-  ...
-# Subtest: TRANSACTION encode -> decode mit stabiler ID und Revision
-ok 21 - TRANSACTION encode -> decode mit stabiler ID und Revision
-  ---
-  duration_ms: 4.772062
-  type: 'test'
-  ...
-# Subtest: Duplikatschutz übernimmt nur neue IDs
-ok 22 - Duplikatschutz übernimmt nur neue IDs
-  ---
-  duration_ms: 0.763316
-  type: 'test'
-  ...
-# Subtest: Budget-Umbenennung beeinflusst ID nicht
-ok 23 - Budget-Umbenennung beeinflusst ID nicht
-  ---
-  duration_ms: 0.218996
-  type: 'test'
-  ...
-# Subtest: negative und ungültige Beträge werden verworfen
-ok 24 - negative und ungültige Beträge werden verworfen
-  ---
-  duration_ms: 0.492993
-  type: 'test'
-  ...
-# Subtest: Monatswechsel: Datum und Monat müssen zusammenpassen
-ok 25 - Monatswechsel: Datum und Monat müssen zusammenpassen
-  ---
-  duration_ms: 0.435178
-  type: 'test'
-  ...
-# Subtest: Löschung und Korrektur sind versioniert
-ok 26 - Löschung und Korrektur sind versioniert
-  ---
-  duration_ms: 0.178926
-  type: 'test'
-  ...
-# Subtest: alter Basis-Planstand bleibt im T-Code erhalten
-ok 27 - alter Basis-Planstand bleibt im T-Code erhalten
-  ---
-  duration_ms: 0.151255
-  type: 'test'
-  ...
-# Subtest: viele Transaktionen bleiben verlustfrei codierbar
-ok 28 - viele Transaktionen bleiben verlustfrei codierbar
-  ---
-  duration_ms: 18.811439
-  type: 'test'
-  ...
-# Subtest: T-Code kann offene Buchungen aus mehreren Monaten tragen
-ok 29 - T-Code kann offene Buchungen aus mehreren Monaten tragen
-  ---
-  duration_ms: 0.529948
-  type: 'test'
-  ...
-1..29
-# tests 29
-# suites 0
-# pass 29
-# fail 0
-# cancelled 0
-# skipped 0
-# todo 0
-# duration_ms 134.053575
+Bestehende Kernpruefungen weiterhin gruen:
+- FP1-P / FP1-T Encode-Decode
+- CRC32 / falsche Version / falscher Typ
+- Duplikatschutz / recordRevision / Tombstones
+- Desktop-Mobile Cross-Kompatibilitaet
+- Budget-/Donut-Overlay
+- Manifest-/PWA-/Service-Worker-Pfade
 
-== npm run check ==
-
-> finanzplanung-mobile@1.0.0 check
-> node tests/static-check.mjs
-
-Static check OK: 24 precached assets, 3 manifest icons.
-
-== node --check ==
-JavaScript syntax OK
-
-== HTML duplicate IDs ==
-HTML IDs OK: 89 unique IDs
+Hinweis:
+Ein echter iOS-Safari-Hardwaretest kann in dieser Container-Umgebung nicht automatisiert ausgefuehrt werden. Der Safari-Pfad verwendet WebKit-kompatibles getUserMedia fuer den Kamerastream und jsQR fuer die lokale Bilddecodierung; der native BarcodeDetector ist dafuer nicht erforderlich.

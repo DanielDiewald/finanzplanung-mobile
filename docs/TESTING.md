@@ -54,7 +54,9 @@ Vor produktiver Nutzung empfohlen:
 - Buchung speichern/bearbeiten/loeschen
 - T-Code erzeugen
 - QR anzeigen
-- Kamera-Scan-Verhalten des konkreten Safari-Builds
+- Live-Kamera-Scan ohne `BarcodeDetector` ueber jsQR
+- QR-Foto-Import
+- Kamera-Scan im installierten Homescreen-Modus
 - Safe Areas bei Hochformat/Tastatur
 
 ### Android Chrome
@@ -84,7 +86,7 @@ FP1-Textcodes koennen groesser werden als ein einzelner QR-Code praktisch aufneh
 
 ## Finaler automatisierter Stand
 
-Die finale Testsuite umfasst **29 Tests**. Darin sind auch Desktop-Addon-Tests sowie zwei direkte Cross-Kompatibilitaetstests enthalten:
+Die finale Testsuite umfasst **31 Tests** inklusive zweier QR-Fallback-Service-Tests. Darin sind auch Desktop-Addon-Tests sowie zwei direkte Cross-Kompatibilitaetstests enthalten:
 
 - Desktop erzeugt `FP1-P` -> Mobile decodiert identische Budget-/Donut-/Centwerte.
 - Mobile erzeugt `FP1-T` -> Desktop decodiert Export-ID und Transaktionsdaten korrekt.

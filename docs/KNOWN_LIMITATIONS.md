@@ -2,13 +2,11 @@
 
 ## 1. iOS/Safari Kamera-QR-Erkennung
 
-Die App implementiert direkten Kamera-Scan ueber die native Web-API `BarcodeDetector`, falls der Browser `qr_code` tatsaechlich meldet.
+Safari/iOS stellt die native Shape-Detection-/`BarcodeDetector`-API weiterhin nicht verlaesslich standardmaessig bereit. Version 1.1 verwendet deshalb automatisch einen Fallback aus `getUserMedia()` + Canvas + **jsQR 1.4.0**.
 
-Safari/iOS stellt diese API derzeit nicht standardmaessig bereit. Deshalb ist dort der **manuelle FP1-Code-Import** der zuverlaessige Offline-Fallback. Der Desktop zeigt unter jedem QR immer denselben vollstaendigen Textcode, damit kein Datenweg von Kamera-Support abhaengt.
+Beim empfohlenen GitHub-Pages-Deployment ueber `.github/workflows/pages.yml` wird jsQR fest in die veroeffentlichte App eingebunden und vom Service Worker gecacht. Der Live-Scan und der QR-Foto-Import funktionieren dadurch ohne `BarcodeDetector`. Der manuelle FP1-Textcode bleibt als letzter, browserunabhaengiger Fallback bestehen.
 
-Damit ist der Datenaustausch auf iOS funktionsfaehig, aber der in der Aufgabenbeschreibung gewuenschte vollstaendig integrierte Kamera-QR-Scan mit lokal gebundeltem Decoder ist in dieser Version nicht enthalten.
-
-Fuer eine spaetere Version kann `js/services/qr.js` um einen lokal mitgelieferten reinen JavaScript-/WASM-QR-Decoder erweitert werden, ohne FP1 oder die Datenmodelle zu aendern.
+Wird die App dagegen direkt aus einem Git-Branch veroeffentlicht, enthaelt das Repository nur einen kleinen jsQR-Platzhalter; beim ersten Safari-Scan wird dann die fest gepinnte jsDelivr-Version nachgeladen und anschliessend im Vendor-Cache gespeichert. Fuer strikten Offline-Betrieb von Anfang an daher GitHub Actions verwenden oder `assets/vendor/jsQR.js` lokal durch jsQR 1.4.0 ersetzen.
 
 ## 2. Automatisierter Browser-E2E-Test
 

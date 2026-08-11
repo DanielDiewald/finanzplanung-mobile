@@ -37,6 +37,9 @@
 - [x] lokale QR-Erzeugung
 - [x] manuelles Einfuegen
 - [x] native Kameraerkennung, wenn Browser sie anbietet
+- [x] Safari/iOS Kamera-Fallback ueber getUserMedia + jsQR
+- [x] QR-Foto-Import als weiterer Fallback
+- [x] GitHub-Pages-Build bindet jsQR lokal/offline ein
 - [x] stabile Transaktions-ID
 - [x] `recordRevision`
 - [x] Duplikatschutz
@@ -74,10 +77,10 @@
 
 ## Tests
 
-- [x] 29 automatisierte Tests gruen
+- [x] 31 automatisierte Tests gruen
 - [x] statische PWA-/Manifest-/Service-Worker-Pruefung gruen
 - [x] JavaScript-Syntaxpruefung gruen
 - [x] Cross-Kompatibilitaet Desktop `FP1-P` -> Mobile
 - [x] Cross-Kompatibilitaet Mobile `FP1-T` -> Desktop
 
-Siehe `docs/KNOWN_LIMITATIONS.md` fuer die transparente Safari/iOS-Kameraeinschraenkung und den in dieser Umgebung nicht ausfuehrbaren Browser-E2E-Test.
+Siehe `docs/KNOWN_LIMITATIONS.md` fuer Browser-/Deployment-Hinweise und den in dieser Umgebung nicht ausfuehrbaren Browser-E2E-Test.

@@ -1,0 +1,61 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Vendor jsQR for Safari-compatible offline scanning
+        shell: bash
+        run: |
+          set -euo pipefail
+          JSQR_VERSION="1.4.0"
+          JSQR_INTEGRITY="dxLob7q65Xg2DvstYkRpkYtmKm2sPJ9oFhrhmudT1dZvNFFTlroai3AWSpLey/w5vMcLBXRgOJsbXpdN9HzU/A=="
+          curl --fail --location --retry 3 \
+            "https://registry.npmjs.org/jsqr/-/jsqr-${JSQR_VERSION}.tgz" \
+            --output /tmp/jsqr.tgz
+          ACTUAL_INTEGRITY="$(openssl dgst -sha512 -binary /tmp/jsqr.tgz | openssl base64 -A)"
+          test "$ACTUAL_INTEGRITY" = "$JSQR_INTEGRITY"
+          rm -rf /tmp/jsqr-package
+          mkdir -p /tmp/jsqr-package
+          tar -xzf /tmp/jsqr.tgz -C /tmp/jsqr-package
+          cp /tmp/jsqr-package/package/dist/jsQR.js assets/vendor/jsQR.js
+          cp /tmp/jsqr-package/package/LICENSE assets/vendor/jsQR-LICENSE.txt
+
+      - name: Run tests
+        run: npm test && npm run check
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

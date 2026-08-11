@@ -3,7 +3,7 @@ import { createRouter } from './router.js';
 import { addSyncHistory, deleteTransaction, exportAllData, getCurrentPlan, getSettings, getTransaction, listTransactions, markAcknowledged, putManyTransactions, resetAllData, savePlan, saveSettings, saveTransaction } from './services/storage.js';
 import { buildTransactionPayload, decodeFP1, encodeFP1 } from './services/sync.js';
 import { buildDisplayState, pendingSummary } from './services/finance.js';
-import { nativeQrSupported, renderQr, startQrScanner, stopQrScanner } from './services/qr.js';
+import { decodeQrImageFile, qrScannerCapability, renderQr, startQrScanner, stopQrScanner } from './services/qr.js';
 import { renderMonth } from './views/month.js';
 import { renderTransactions } from './views/transactions.js';
 import { renderSync } from './views/sync-view.js';
@@ -91,7 +91,8 @@ async function shareTransactionCode(){ const code=$('transactionCodeText').value
 
 async function openScanner(){ $('scannerStatus').textContent='Kamera wird erst nach deiner Freigabe verwendet.';$('scannerDialog').showModal(); }
 function stopScanner(){stopQrScanner($('scannerVideo'));if($('scannerDialog').open)$('scannerDialog').close();}
-async function startScannerAction(){ try{await startQrScanner({video:$('scannerVideo'),onStatus:s=>$('scannerStatus').textContent=s,onResult:async code=>{try{await previewPlanCode(code);}catch(err){toast(err.message,{error:true});}}});}catch(err){$('scannerStatus').textContent=`${err.message} Du kannst den Code jederzeit manuell einfügen.`;toast('QR-Scanner nicht verfügbar – Textcode verwenden.',{error:true});} }
+async function startScannerAction(){ try{await startQrScanner({video:$('scannerVideo'),canvas:$('scannerCanvas'),onStatus:s=>$('scannerStatus').textContent=s,onResult:async code=>{try{await previewPlanCode(code);}catch(err){toast(err.message,{error:true});}}});}catch(err){$('scannerStatus').textContent=`${err.message} Du kannst alternativ ein QR-Foto auswählen oder den Code manuell einfügen.`;toast('Kamera-QR-Scan konnte nicht gestartet werden.',{error:true});} }
+async function scanQrPhoto(file){ if(!file)return; try{const code=await decodeQrImageFile(file,{canvas:$('scannerCanvas'),onStatus:s=>$('scannerStatus').textContent=s});await previewPlanCode(code);}catch(err){$('scannerStatus').textContent=err.message;toast(err.message,{error:true});}finally{$('scannerPhotoInput').value='';} }
 
 async function exportLocalBackup(){const data=await exportAllData();downloadText(`finanzmonat-backup-${todayLocal()}.json`,JSON.stringify(data,null,2));toast('Lokales Backup erstellt.');}
 async function resetData(){if(!confirm('Alle lokalen Pläne, Buchungen und Sync-Stände auf diesem Gerät löschen?'))return;await resetAllData();state.pendingPlan=null;state.lastTransactionCode='';await loadState();renderAll();toast('Lokale Daten gelöscht.');}
@@ -103,14 +104,14 @@ function setupEvents(){
   document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{state.transactionFilter=b.dataset.filter;renderAll();})); $('transactionBudgetFilter').addEventListener('change',e=>{state.transactionBudgetFilter=e.target.value;renderAll();});
   $('fabExpense').addEventListener('click',()=>openTransaction({kind:'budget_expense'}));$('addIncomeButton').addEventListener('click',()=>openTransaction({kind:'income'})); document.querySelectorAll('[data-expense-kind]').forEach(b=>b.addEventListener('click',()=>{setExpenseKind(b.dataset.expenseKind);fillTransactionSelectors();setExpenseKind(b.dataset.expenseKind);}));
   $('transactionForm').addEventListener('submit',e=>{e.preventDefault();saveTransactionFromForm().catch(err=>toast(err.message,{error:true}));}); $('deleteTransactionButton').addEventListener('click',deleteCurrentTransaction);
-  $('scanPlanButton').addEventListener('click',openScanner);$('pastePlanButton').addEventListener('click',openCodeDialog);$('scannerPasteFallback').addEventListener('click',()=>{stopScanner();openCodeDialog();});$('closeScanner').addEventListener('click',stopScanner);$('startScanner').addEventListener('click',startScannerAction);
+  $('scanPlanButton').addEventListener('click',openScanner);$('pastePlanButton').addEventListener('click',openCodeDialog);$('scannerPasteFallback').addEventListener('click',()=>{stopScanner();openCodeDialog();});$('closeScanner').addEventListener('click',stopScanner);$('startScanner').addEventListener('click',startScannerAction);$('scannerPhotoButton').addEventListener('click',()=>$('scannerPhotoInput').click());$('scannerPhotoInput').addEventListener('change',e=>scanQrPhoto(e.target.files?.[0]));
   $('codeForm').addEventListener('submit',e=>{e.preventDefault();previewPlanCode($('planCodeInput').value).catch(err=>toast(err.message,{error:true}));});$('generateTransactionCode').addEventListener('click',generateTransactionCode);$('copyTransactionCode').addEventListener('click',copyTransactionCode);$('shareTransactionCode').addEventListener('click',shareTransactionCode);
   $('deviceName').addEventListener('change',async e=>{state.settings=await saveSettings({deviceName:e.target.value.trim()});toast('Gerätename gespeichert.');});$('themeSetting').addEventListener('change',async e=>{state.settings=await saveSettings({theme:e.target.value});applyTheme(e.target.value);});$('exportLocalData').addEventListener('click',exportLocalBackup);$('resetLocalData').addEventListener('click',resetData);
   window.addEventListener('online',updateNetworkState);window.addEventListener('offline',updateNetworkState); document.addEventListener('visibilitychange',()=>{if(document.hidden)stopQrScanner($('scannerVideo'));});
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();state.deferredInstall=e;setHidden($('installButton'),false);});$('installButton').addEventListener('click',async()=>{if(!state.deferredInstall)return;state.deferredInstall.prompt();await state.deferredInstall.userChoice;state.deferredInstall=null;setHidden($('installButton'),true);});
 }
 function updateNetworkState(){setHidden($('offlineBadge'),navigator.onLine);}
-async function updateScannerHint(){const supported=await nativeQrSupported();$('cameraSupportHint').textContent=supported?'Kamera-QR-Scan wird von diesem Browser nativ unterstützt.':'Nativer Kamera-QR-Scan ist hier nicht verfügbar. Der Textcode-Import funktioniert immer offline.';}
+async function updateScannerHint(){const capability=await qrScannerCapability();$('cameraSupportHint').textContent=capability.native?'Kamera-QR-Scan wird von diesem Browser nativ unterstützt.':capability.camera?(capability.javascript?'Kamera-QR-Scan nutzt hier den lokalen Safari-kompatiblen JS-Decoder.':'Kamera ist verfügbar; auf Safari wird der JS-QR-Decoder beim Scan geladen.'):'Kamerazugriff ist hier nicht verfügbar. QR-Foto und Textcode bleiben als Importwege verfügbar.';}
 async function registerServiceWorker(){if('serviceWorker'in navigator){try{await navigator.serviceWorker.register('./sw.js',{scope:'./'});}catch(err){console.warn('Service Worker konnte nicht registriert werden.',err);}}}
 
 async function boot(){

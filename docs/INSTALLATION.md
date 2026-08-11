@@ -36,7 +36,7 @@ Die App nutzt `viewport-fit=cover` und Safe-Area Insets fuer Homescreen-/Notch-L
 
 ### QR-Import auf iOS
 
-Kamerazugriff wird nur beim Tippen auf QR-Scan angefordert. Wenn Safari keine native QR-Erkennung fuer Web Apps anbietet, den unter dem Desktop-QR angezeigten FP1-P-Textcode kopieren und in **Code eingeben** einfuegen.
+Kamerazugriff wird nur beim Tippen auf QR-Scan angefordert. Fehlt Safaris native `BarcodeDetector`-API, verwendet die App automatisch den Safari-kompatiblen `jsQR`-Fallback auf dem Kamerastream. Zusaetzlich stehen **QR-Foto auswaehlen** und **Code eingeben** zur Verfuegung.
 
 ## 4. Android / Chrome
 
@@ -46,7 +46,7 @@ Kamerazugriff wird nur beim Tippen auf QR-Scan angefordert. Wenn Safari keine na
 4. App ueber das Icon starten.
 5. PLAN-Code scannen oder einfuegen.
 
-Unterstuetzt der Browser die native Barcode Detection API, kann der PLAN-QR direkt aus der App mit der Kamera gelesen werden.
+Unterstuetzt der Browser die native Barcode Detection API, wird sie verwendet. Andernfalls kann die App denselben PLAN-QR ueber den JavaScript-Fallback lesen.
 
 ## 5. Offline-Verhalten
 
@@ -59,6 +59,8 @@ Nach erfolgreichem ersten Laden ueber den Service Worker funktionieren ohne Inte
 - Transaktionsliste
 - lokaler T-Code-Export
 - QR-Erzeugung
+- Kamera-QR-Scan mit lokal gebundeltem jsQR-Decoder (bei GitHub-Actions-Deployment)
+- QR-Foto-Import
 - manueller PLAN-Code-Import
 - IndexedDB
 
@@ -81,3 +83,15 @@ https://example-b.test/app/
 ist fuer den Browser eine andere Installation mit anderer lokaler Datenbank.
 
 Vor einem Hostingwechsel daher offene Transaktionen zum Desktop synchronisieren oder das lokale JSON-Backup aus den Einstellungen verwenden.
+
+
+## 7. GitHub Pages
+
+Empfohlen ist die mitgelieferte GitHub-Action:
+
+1. Projekt in ein GitHub-Repository pushen.
+2. Unter **Settings -> Pages** als Quelle **GitHub Actions** waehlen.
+3. Auf `main` pushen oder den Workflow **Deploy GitHub Pages** manuell starten.
+4. Die Action bindet jsQR 1.4.0 lokal in das Pages-Artefakt ein und fuehrt vor dem Deployment die Tests aus.
+
+Damit benoetigt Safari zur Laufzeit weder `BarcodeDetector` noch einen externen QR-Dienst.
