@@ -4,9 +4,9 @@ export const DB_VERSION = 1;
 export const INCOME_CATEGORIES = ['Bonus','Prämie','Provision','Rückerstattung','Nebenverdienst','Geldgeschenk','Sonstiges'];
 export const EXPENSE_CATEGORIES = ['Unerwartet','Freizeit','Einkauf','Reparatur','Sonstiges'];
 export const DONUT_COLORS = {
-  fixed:'#4c86af', periodic:'#6f9bb8', loans:'#af4c58', extra:'#c47b84', overspend:'#C10015',
-  reserves:'#71b4a8', savings:'#3f8f73', goals:'#79a989', budgetSpent:'#a96a42', goalSpent:'#806da8',
-  available1:'#4c86af', available2:'#71b4a8', available3:'#3f8f73', available4:'#b18a4d', available5:'#806da8', available6:'#af4c58'
+  fixed:'#2457a7', periodic:'#6079b8', loans:'#a34a3a', extra:'#b76a4d', overspend:'#a22b2b',
+  reserves:'#8a5a00', savings:'#397a50', goals:'#5f8b68', budgetSpent:'#b7791f', goalSpent:'#6750a4',
+  available1:'#2457a7', available2:'#6079b8', available3:'#397a50', available4:'#8a5a00', available5:'#6750a4', available6:'#b76a4d'
 };
 
 const eur = new Intl.NumberFormat('de-AT', { style:'currency', currency:'EUR' });

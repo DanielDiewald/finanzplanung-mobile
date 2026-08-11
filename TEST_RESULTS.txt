@@ -1,4 +1,4 @@
-Benedikt – dein Finanzplaner v1.4.0 - Testergebnis
+Finanzplanung Mobile v1.4.0 - Testergebnis
 Datum: 2026-08-11
 
 Automatisierte Tests:
@@ -25,15 +25,3 @@ Bestehende Kernpruefungen weiterhin gruen:
 
 Hinweis:
 Ein echter iOS-Safari-Hardwaretest kann in dieser Container-Umgebung nicht automatisiert ausgefuehrt werden. Fuer GitHub Pages sollte weiterhin der mitgelieferte GitHub-Actions-Workflow verwendet werden, damit jsQR beim Deployment lokal in die PWA eingebunden wird.
-
-Redesign-Pruefungen:
-- semantische Light-/Dark-Theme-Tokens fuer Mobile und Desktop vorhanden
-- persistente Desktop-Auswahl System/Hell/Dunkel implementiert
-- PWA-Auswahl System/Hell/Dunkel bleibt ueber bestehende Settings persistent
-- responsive Regeln fuer 320/600/900/1200/1440+ px definiert
-- keine neuen UI-Frameworks oder externen Fonts hinzugefuegt
-- Headless-Chromium-Screenshotlauf war in dieser Container-Umgebung wegen Chromium/DBus-Hang nicht ausfuehrbar; Syntax-, HTML-/CSS- und automatisierte Logiktests wurden stattdessen lokal geprueft.
-- HTML-Check: keine doppelten IDs in Mobile, Desktop oder Offline-Seite
-- CSS-Parsercheck: keine Syntaxfehler in Mobile- und Desktop-Styles
-- Accessibility-Static-Check: keine unbenannten Buttons oder unbeschrifteten sichtbaren Formularfelder in den statischen Oberflaechen
-- Kontrast-Stichprobe: Primary-Button ca. 4.54:1, Light-/Dark-Body-Text deutlich ueber 7:1
