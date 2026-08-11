@@ -30,6 +30,8 @@
 
   /* Utility colors */
   --color-on-brand: #FFFFFF;
+  --color-on-negative: #FFF8FB;
+  --color-on-negative-soft: rgba(255,248,251,0.92);
   --color-on-dark: #FFFFFF;
   --color-qr-background: #FFFFFF;
   --color-scanner-background: #05060B;
@@ -150,6 +152,8 @@
 
   /* Utility colors */
   --color-on-brand: #FFFFFF;
+  --color-on-negative: #FFFFFF;
+  --color-on-negative-soft: rgba(255,255,255,0.92);
   --color-on-dark: #FFFFFF;
   --color-qr-background: #FFFFFF;
   --color-scanner-background: #05060B;

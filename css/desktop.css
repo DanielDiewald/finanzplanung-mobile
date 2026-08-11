@@ -320,12 +320,26 @@ td.actions button { margin: .06rem; }
 .donut-chart-box canvas { width: 100%; height: 300px; display: block; }
 .donut-legend { display: grid; gap: .3rem; }
 .donut-group-title { margin-top: .52rem; margin-bottom: .12rem; color: var(--muted); font-size: .68rem; font-weight: 740; text-transform: uppercase; letter-spacing: .05em; }
-.donut-legend-row { width: 100%; display: grid; grid-template-columns: auto minmax(0,1fr) auto auto; gap: .48rem; align-items: center; padding: .43rem .48rem; text-align: left; background: var(--surface); box-shadow: none; }
+.donut-legend-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr) max-content;
+  grid-template-areas:
+    "swatch name amount"
+    "swatch name percent";
+  gap: .18rem .48rem;
+  align-items: center;
+  padding: .43rem .48rem;
+  text-align: left;
+  background: var(--surface);
+  box-shadow: none;
+}
 .donut-legend-row.active { border-color: color-mix(in srgb, var(--accent) 42%, var(--line)); background: var(--accent-2); }
-.donut-swatch { width: .68rem; height: .68rem; border-radius: 50%; display: inline-block; }
-.donut-legend-name { min-width: 0; white-space: normal; }
-.donut-legend-amount, .donut-legend-percent { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.donut-legend-percent { min-width: 4rem; text-align: right; color: var(--muted); }
+.donut-swatch { width: .68rem; height: .68rem; border-radius: 50%; display: inline-block; grid-area: swatch; align-self: start; margin-top: .28rem; }
+.donut-legend-name { min-width: 0; grid-area: name; white-space: normal; line-height: 1.28; }
+.donut-legend-amount, .donut-legend-percent { font-variant-numeric: tabular-nums; white-space: nowrap; justify-self: end; }
+.donut-legend-amount { grid-area: amount; }
+.donut-legend-percent { grid-area: percent; text-align: right; color: var(--muted); font-size: .76rem; }
 .donut-details { margin-top: .8rem; padding-top: .72rem; border-top: 1px solid var(--line); }
 .donut-summary-line { display: flex; gap: .7rem 1rem; flex-wrap: wrap; margin-top: .65rem; color: var(--muted); font-size: .78rem; }
 .donut-empty { color: var(--muted); text-align: center; padding: 1rem; }

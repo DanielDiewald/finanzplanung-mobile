@@ -113,7 +113,6 @@ export function renderMonth({ display, donutMode = 'planned', selectedSegment = 
   const freeValue = document.getElementById('freeAvailableValue');
   const hero = freeValue.closest('.hero-card');
   freeValue.textContent = formatCents(p.freeAvailableCents);
-  freeValue.classList.toggle('negative', p.freeAvailableCents < 0);
   hero?.classList.toggle('negative', p.freeAvailableCents < 0);
   document.getElementById('freeAvailableMeta').textContent = p.minimumCashBufferCents ? `nach ${formatCents(p.minimumCashBufferCents)} Mindestpuffer` : 'ohne Mindestpuffer';
   document.getElementById('accountBalanceValue').textContent = p.accountBalanceCents === null ? '–' : formatCents(p.accountBalanceCents);

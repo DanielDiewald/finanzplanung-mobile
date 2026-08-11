@@ -43,8 +43,11 @@ button.primary:hover { box-shadow: var(--shadow-md); }
 button.danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 36%, var(--line)); }
 button.full { width: 100%; }
 input, select, textarea {
+  display: block;
   width: 100%;
+  max-width: 100%;
   min-width: 0;
+  min-inline-size: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface);
@@ -276,7 +279,11 @@ h3 { font-size: 1rem; }
 }
 .hero-card::before { width: 165px; height: 165px; right: -68px; top: -82px; }
 .hero-card::after { width: 90px; height: 90px; right: 54px; bottom: -62px; opacity: .52; }
-.hero-card.negative { background: var(--gradient-negative); }
+.hero-card.negative { color: var(--color-on-negative); background: var(--gradient-negative); }
+.hero-card.negative .hero-label,
+.hero-card.negative .hero-meta { color: var(--color-on-negative-soft); opacity: 1; }
+.hero-card.negative .hero-value,
+.hero-card.negative .hero-value.negative { color: var(--color-on-negative) !important; }
 .hero-label { position: relative; z-index: 1; font-size: .88rem; opacity: .86; }
 .hero-value {
   position: relative;
@@ -449,6 +456,28 @@ h3 { font-size: 1rem; }
 .amount-input input { min-width: 0; min-height: 58px; border: 0; border-radius: 0; box-shadow: none; font-size: clamp(1.4rem, 7vw, 1.7rem); font-weight: 780; text-align: right; }
 .amount-input input:focus-visible { outline: none; }
 .amount-input span { padding-right: 1rem; color: var(--muted); font-size: 1.15rem; font-weight: 700; }
+
+input[type="date"],
+input[type="month"] {
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+input[type="date"]::-webkit-date-and-time-value,
+input[type="month"]::-webkit-date-and-time-value {
+  text-align: left;
+}
+input[type="date"]::-webkit-datetime-edit,
+input[type="month"]::-webkit-datetime-edit {
+  min-width: 0;
+  padding: 0;
+}
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator {
+  margin: 0;
+}
 
 /* 11. Bottom navigation + FAB ------------------------------------------ */
 .bottom-nav {
