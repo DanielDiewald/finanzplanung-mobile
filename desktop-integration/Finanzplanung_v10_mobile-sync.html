@@ -1718,7 +1718,7 @@ function renderBackup() {
   else { notice.className = "notice error"; notice.innerHTML = `<strong>Der Browser hat den lokalen Speicher blockiert.</strong> Änderungen bleiben nur bis zum Schließen der Seite erhalten. Verwende den JSON-Export.`; }
 }
 function renderAll() {
-  const planLabel = `Plan ab ${monthName(state.meta.start)}`;
+  const planLabel = `Bleib entspannt. Capy kümmert sich um dein Geld.`;
   document.getElementById("appTitle").textContent = planLabel;
   const sidebarPlanName = document.getElementById("sidebarPlanName");
   if (sidebarPlanName) sidebarPlanName.textContent = planLabel;
