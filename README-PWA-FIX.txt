@@ -11,7 +11,7 @@ Diese Dateien im Repository mit derselben Ordnerstruktur ersetzen:
 Was sich aendert:
 - Update-Erkennung verlaesst sich nicht mehr nur auf registration.update().
 - version.json wird mit einem einmaligen Cache-Buster und cache:no-store geladen.
-- Der Service Worker wird versionsbezogen registriert, z. B. sw.js?v=2.1.3.
+- Der Service Worker wird versionsbezogen registriert, z. B. sw.js v=2.1.5.
 - version.json wird vom Service Worker niemals aus dem App-Cache geliefert.
 - Check beim Start, pageshow, Fokus, Online-Wechsel und Rueckkehr in die App.
 
