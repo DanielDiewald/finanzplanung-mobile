@@ -1,4 +1,4 @@
-const VERSION='2.1.2';
+const VERSION='2.1.3';
 const CACHE=`capyt-v${VERSION}`;
 const VENDOR_CACHE='capyt-vendor-v1';
 const JSQR_CDN='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
@@ -42,6 +42,9 @@ self.addEventListener('fetch',event=>{
     }));return;
   }
   if(url.origin!==self.location.origin)return;
+  if(url.pathname.endsWith('/version.json')){
+    event.respondWith(fetch(new Request(event.request,{cache:'no-store'})));return;
+  }
   if(event.request.mode==='navigate'){
     event.respondWith(networkFirst(event.request).catch(async()=>{
       const exact=await caches.match(event.request);if(exact)return exact;
