@@ -94,6 +94,76 @@ async function shareTransactionCode(){ const code=$('transactionCodeText').value
 
 async function openScanner(){ $('scannerStatus').textContent='Kamera wird erst nach deiner Freigabe verwendet.';$('scannerDialog').showModal(); }
 function stopScanner(){stopQrScanner($('scannerVideo'));if($('scannerDialog').open)$('scannerDialog').close();}
+
+function setupSheetGestures(){
+  document.querySelectorAll('.sheet-dialog').forEach(dialog=>{
+    const sheet=dialog.querySelector('.sheet');
+    const handle=sheet?.querySelector('.sheet-handle');
+    if(!sheet||!handle)return;
+
+    let pointerId=null,startY=0,dragY=0,startTime=0,dismissing=false;
+    const reset=()=>{
+      pointerId=null;dragY=0;dismissing=false;
+      sheet.classList.remove('is-dragging','is-dismissing');
+      sheet.style.removeProperty('--sheet-drag-y');
+    };
+    const finishClose=()=>{
+      if(dialog.id==='scannerDialog')stopQrScanner($('scannerVideo'));
+      if(dialog.open)dialog.close();
+      reset();
+    };
+    const dismiss=()=>{
+      if(dismissing)return;
+      dismissing=true;
+      sheet.classList.remove('is-dragging');
+      sheet.classList.add('is-dismissing');
+      sheet.style.setProperty('--sheet-drag-y',`${Math.max(48,dragY)}px`);
+      requestAnimationFrame(()=>sheet.style.setProperty('--sheet-drag-y','110dvh'));
+      let closed=false;
+      const complete=()=>{if(closed)return;closed=true;finishClose();};
+      sheet.addEventListener('transitionend',complete,{once:true});
+      setTimeout(complete,280);
+    };
+    const snapBack=()=>{
+      sheet.classList.remove('is-dragging');
+      sheet.style.setProperty('--sheet-drag-y','0px');
+      setTimeout(()=>{if(!dismissing)sheet.style.removeProperty('--sheet-drag-y');},230);
+    };
+
+    handle.addEventListener('pointerdown',event=>{
+      if(event.pointerType==='mouse'&&event.button!==0)return;
+      if(!dialog.open||dismissing)return;
+      pointerId=event.pointerId;startY=event.clientY;dragY=0;startTime=performance.now();
+      sheet.classList.add('is-dragging');
+      handle.setPointerCapture?.(pointerId);
+      event.preventDefault();
+    });
+    handle.addEventListener('pointermove',event=>{
+      if(pointerId===null||event.pointerId!==pointerId)return;
+      dragY=Math.max(0,event.clientY-startY);
+      sheet.style.setProperty('--sheet-drag-y',`${dragY}px`);
+      event.preventDefault();
+    });
+    handle.addEventListener('pointerup',event=>{
+      if(pointerId===null||event.pointerId!==pointerId)return;
+      const elapsed=Math.max(1,performance.now()-startTime);
+      const velocity=dragY/elapsed;
+      const threshold=Math.min(140,Math.max(86,sheet.getBoundingClientRect().height*.16));
+      try{handle.releasePointerCapture?.(pointerId);}catch{}
+      pointerId=null;
+      if(dragY>=threshold||(dragY>=42&&velocity>.55))dismiss();else snapBack();
+    });
+    handle.addEventListener('pointercancel',event=>{
+      if(pointerId===null||event.pointerId!==pointerId)return;
+      try{handle.releasePointerCapture?.(pointerId);}catch{}
+      pointerId=null;snapBack();
+    });
+    dialog.addEventListener('close',()=>{
+      if(dialog.id==='scannerDialog')stopQrScanner($('scannerVideo'));
+      reset();
+    });
+  });
+}
 async function startScannerAction(){ try{await startQrScanner({video:$('scannerVideo'),canvas:$('scannerCanvas'),onStatus:s=>$('scannerStatus').textContent=s,onResult:async code=>{try{await previewPlanCode(code);}catch(err){toast(err.message,{error:true});}}});}catch(err){$('scannerStatus').textContent=`${err.message} Du kannst alternativ ein QR-Foto auswählen oder den Code manuell einfügen.`;toast('Kamera-QR-Scan konnte nicht gestartet werden.',{error:true});} }
 async function scanQrPhoto(file){ if(!file)return; try{const code=await decodeQrImageFile(file,{canvas:$('scannerCanvas'),onStatus:s=>$('scannerStatus').textContent=s});await previewPlanCode(code);}catch(err){$('scannerStatus').textContent=err.message;toast(err.message,{error:true});}finally{$('scannerPhotoInput').value='';} }
 
@@ -103,6 +173,7 @@ async function resetData(){if(!confirm('Alle lokalen Pläne, Buchungen und Sync-
 function setupEvents(){
   document.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click',()=>router.go(b.dataset.nav))); document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{router.go(b.dataset.go);if(b.dataset.syncAction==='scan')openScanner();if(b.dataset.syncAction==='paste')openCodeDialog();}));
   document.querySelectorAll('[data-close-dialog]').forEach(b=>b.addEventListener('click',()=>$(b.dataset.closeDialog)?.close()));
+  setupSheetGestures();
   document.querySelectorAll('[data-month-visual]').forEach(b=>b.addEventListener('click',async()=>{state.monthVisualMode=b.dataset.monthVisual==='donut'?'donut':'buffer';state.selectedSegment='';state.settings=await saveSettings({selectedMonthVisualMode:state.monthVisualMode});renderAll();}));
   document.querySelectorAll('[data-donut-mode]').forEach(b=>b.addEventListener('click',async()=>{state.donutMode=b.dataset.donutMode;state.selectedSegment='';state.settings=await saveSettings({selectedDonutMode:state.donutMode});renderAll();}));
   document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{state.transactionFilter=b.dataset.filter;renderAll();})); $('transactionBudgetFilter').addEventListener('change',e=>{state.transactionBudgetFilter=e.target.value;renderAll();});

@@ -594,6 +594,7 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 }
 .sheet-dialog::backdrop { background: var(--color-backdrop); backdrop-filter: blur(3px); }
 .sheet {
+  --sheet-drag-y: 0px;
   max-height: min(91dvh, 780px);
   overflow: auto;
   overscroll-behavior: contain;
@@ -603,8 +604,41 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   border-radius: 24px 24px 0 0;
   background: var(--surface);
   box-shadow: var(--shadow-lg);
+  transform: translate3d(0, var(--sheet-drag-y), 0);
+  transition: transform var(--transition-medium);
+  will-change: transform;
 }
-.sheet-handle { width: 46px; height: 5px; margin: .1rem auto .8rem; border-radius: var(--radius-pill); background: var(--line); }
+.sheet.is-dragging { transition: none; }
+.sheet.is-dismissing { transition: transform 220ms cubic-bezier(.4,0,1,1); }
+.sheet-handle {
+  position: relative;
+  width: 88px;
+  height: 24px;
+  margin: -.15rem auto .35rem;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.sheet-handle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  width: 46px;
+  height: 5px;
+  transform: translateX(-50%);
+  border-radius: var(--radius-pill);
+  background: var(--line);
+  transition: width var(--transition-fast), background var(--transition-fast);
+}
+.sheet-handle:active { cursor: grabbing; }
+.sheet.is-dragging .sheet-handle::after {
+  width: 54px;
+  background: var(--color-border-strong);
+}
 .sheet .field { margin-top: .8rem; }
 .sheet-actions {
   position: sticky;
@@ -624,19 +658,62 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 .scanner-sheet .button-grid { grid-template-columns: 1fr; }
 .settings-update-button { margin-top: .8rem; }
 .update-dialog {
-  width: min(calc(100% - 2rem), 440px);
+  width: min(calc(100% - 2rem), 420px);
   max-width: none;
+  max-height: calc(100dvh - 2rem);
   padding: 0;
   border: 0;
-  border-radius: var(--radius-xl);
-  background: transparent;
+  border-radius: 28px;
+  outline: none;
+  overflow: hidden;
+  background: var(--surface);
   color: var(--text);
+  box-shadow: var(--shadow-lg);
 }
-.update-dialog::backdrop { background: var(--color-backdrop); backdrop-filter: blur(4px); }
-.update-dialog-card { padding: 1.2rem; border: 1px solid var(--line); border-radius: var(--radius-xl); background: var(--elevated); box-shadow: var(--shadow-lg); }
-.update-dialog-card h2 { margin: .2rem 0 .45rem; font-size: 1.18rem; }
-.update-icon { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: .75rem; border-radius: 50%; color: var(--accent); background: var(--accent-2); font-size: 1.55rem; font-weight: 760; }
-.update-dialog-actions { display: grid; grid-template-columns: 1fr 1.35fr; gap: .55rem; margin-top: 1rem; }
+.update-dialog::backdrop {
+  background: var(--color-backdrop);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.update-dialog-card {
+  position: relative;
+  overflow: hidden;
+  padding: 1.15rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: inherit;
+  background: var(--surface);
+}
+.update-dialog-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--gradient-brand);
+}
+.update-dialog-card .eyebrow { margin-bottom: .3rem; }
+.update-dialog-card .help { margin: .55rem 0 0; }
+.update-dialog-card h2 { margin: .05rem 0 0; font-size: 1.22rem; }
+.update-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  margin-bottom: .8rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
+  border-radius: var(--radius-lg);
+  color: var(--accent);
+  background: var(--accent-2);
+  font-size: 1.35rem;
+  font-weight: 760;
+}
+.update-dialog-actions {
+  display: grid;
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.4fr);
+  gap: .6rem;
+  margin-top: 1rem;
+}
+.update-dialog-actions button { border-radius: var(--radius-lg); }
+#updateLaterButton { background: var(--surface-2); }
 
 /* 13. Toasts ------------------------------------------------------------ */
 .toast-region {

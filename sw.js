@@ -1,4 +1,4 @@
-const VERSION='2.1.1';
+const VERSION='2.1.2';
 const CACHE=`capyt-v${VERSION}`;
 const VENDOR_CACHE='capyt-vendor-v1';
 const JSQR_CDN='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
