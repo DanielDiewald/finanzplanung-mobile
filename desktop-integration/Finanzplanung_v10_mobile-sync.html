@@ -87,17 +87,17 @@
     <div class="panel month-allocation-panel" id="monthAllocationPanel">
       <div class="toolbar month-visual-toolbar">
         <div>
-          <h2 id="monthVisualHeading" style="margin:0">Finanzlage</h2>
-          <p id="monthVisualHelp" class="help" style="margin:.3rem 0 0">Der Tresor zeigt, wie der prognostizierte Monatsendstand im Verhältnis zu deinem gewünschten Mindestpuffer steht.</p>
+          <h2 id="monthVisualHeading" style="margin:0">Geldverwendung</h2>
+          <p id="monthVisualHelp" class="help" style="margin:.3rem 0 0">Die Detailansicht zeigt, wofür normales Guthaben verwendet wird beziehungsweise welche tatsächlichen Ausgaben den Monat belasten.</p>
         </div>
         <span class="spacer"></span>
         <div class="month-visual-tabs" role="tablist" aria-label="Monatsvisualisierung">
-          <button type="button" class="active" data-month-visual-mode="buffer" role="tab" aria-selected="true">Finanzlage</button>
-          <button type="button" data-month-visual-mode="donut" role="tab" aria-selected="false">Geldverwendung</button>
+          <button type="button" data-month-visual-mode="buffer" role="tab" aria-selected="false">Finanzlage</button>
+          <button type="button" class="active" data-month-visual-mode="donut" role="tab" aria-selected="true">Geldverwendung</button>
         </div>
       </div>
 
-      <div id="monthVaultView" class="month-vault-view">
+      <div id="monthVaultView" class="month-vault-view hidden">
         <div class="month-vault-image-shell">
           <img id="monthVaultImage" class="month-vault-image" src="../assets/vault/vault-almost-empty.webp" alt="Tresorstatus">
         </div>
@@ -113,7 +113,7 @@
         </div>
       </div>
 
-      <div id="monthDonutView" class="hidden">
+      <div id="monthDonutView">
         <div class="toolbar donut-mode-toolbar">
           <div>
             <h3 id="donutHeading" style="margin:0">Geplante Geldverwendung</h3>
@@ -393,7 +393,7 @@ const DEFAULT_STATE = {
   meta: { start: LEGACY_DEFAULT_START, end: LEGACY_DEFAULT_HORIZON, horizon: LEGACY_DEFAULT_HORIZON, statisticsEnd: LEGACY_DEFAULT_HORIZON, currency: "EUR", createdAt: null, startAnchorDate: null, startMonthMode: "legacy", startMonthUseForStatistics: false },
   settings: { baseSalary: "", vacationPay: "", christmasPay: "", openingBalance: "", minimumCashBuffer: 0 },
   forecastSettings: { budgetForecastEnabled: false },
-  statisticsDisplay: { granularity: "auto", visibleRangeMonths: 24, windowStart: null, monthVisualMode: "buffer", donutMode: "allocation" },
+  statisticsDisplay: { granularity: "auto", visibleRangeMonths: 24, windowStart: null, monthVisualMode: "donut", monthVisualDefaultVersion: 2, donutMode: "allocation" },
   salaryRaises: [], specialPayRaises: [], recurringCosts: [], loans: [], recurringSavings: [], savingsGoals: [], variableBudgets: [], months: {}
 };
 const INTERVAL_LABELS = { monthly: "monatlich", quarterly: "quartalsweise", yearly: "jährlich" };
@@ -651,7 +651,9 @@ function normalizeState(raw) {
   const granularity = STATISTICS_GRANULARITIES.has(sourceDisplay.granularity) ? sourceDisplay.granularity : "auto";
   const rawVisibleRange = firstDefined(sourceDisplay.visibleRangeMonths, sourceDisplay.visibleMonths, 24);
   const visibleRangeMonths = rawVisibleRange === "all" ? "all" : ([12,24,36,60].includes(Number(rawVisibleRange)) ? Number(rawVisibleRange) : 24);
-  base.statisticsDisplay = { ...deepClone(DEFAULT_STATE.statisticsDisplay), ...deepClone(sourceDisplay), granularity, visibleRangeMonths, windowStart: isValidMonth(sourceDisplay.windowStart) ? sourceDisplay.windowStart : null, monthVisualMode: MONTH_VISUAL_MODES.has(sourceDisplay.monthVisualMode) ? sourceDisplay.monthVisualMode : "buffer", donutMode: DONUT_MODES.has(sourceDisplay.donutMode) ? sourceDisplay.donutMode : "allocation" };
+  const monthVisualDefaultVersion = Math.max(0, asNumber(sourceDisplay.monthVisualDefaultVersion));
+  const monthVisualMode = monthVisualDefaultVersion >= 2 && MONTH_VISUAL_MODES.has(sourceDisplay.monthVisualMode) ? sourceDisplay.monthVisualMode : "donut";
+  base.statisticsDisplay = { ...deepClone(DEFAULT_STATE.statisticsDisplay), ...deepClone(sourceDisplay), granularity, visibleRangeMonths, windowStart: isValidMonth(sourceDisplay.windowStart) ? sourceDisplay.windowStart : null, monthVisualMode, monthVisualDefaultVersion: 2, donutMode: DONUT_MODES.has(sourceDisplay.donutMode) ? sourceDisplay.donutMode : "allocation" };
 
   base.salaryRaises = (Array.isArray(source.salaryRaises) ? source.salaryRaises : []).map((item, index) => {
     const x = isPlainObject(item) ? item : {};
@@ -716,7 +718,8 @@ function statisticsDisplaySettings() {
   if (!STATISTICS_GRANULARITIES.has(state.statisticsDisplay.granularity)) state.statisticsDisplay.granularity = "auto";
   const rawRange = state.statisticsDisplay.visibleRangeMonths;
   state.statisticsDisplay.visibleRangeMonths = rawRange === "all" ? "all" : ([12,24,36,60].includes(Number(rawRange)) ? Number(rawRange) : 24);
-  if (!MONTH_VISUAL_MODES.has(state.statisticsDisplay.monthVisualMode)) state.statisticsDisplay.monthVisualMode = "buffer";
+  if (asNumber(state.statisticsDisplay.monthVisualDefaultVersion) < 2) { state.statisticsDisplay.monthVisualMode = "donut"; state.statisticsDisplay.monthVisualDefaultVersion = 2; }
+  if (!MONTH_VISUAL_MODES.has(state.statisticsDisplay.monthVisualMode)) state.statisticsDisplay.monthVisualMode = "donut";
   if (!DONUT_MODES.has(state.statisticsDisplay.donutMode)) state.statisticsDisplay.donutMode = "allocation";
   if (!isValidMonth(state.statisticsDisplay.windowStart)) state.statisticsDisplay.windowStart = null;
   return state.statisticsDisplay;
@@ -1374,7 +1377,7 @@ function renderMonthVault(result) {
 }
 function selectDonutCategory(key) { selectedDonutCategory = key || ""; const r = currentResults()[selectedMonth]; renderMonthAllocation(r, state.months[selectedMonth]); }
 function renderMonthAllocation(result, monthData) {
-  const display = statisticsDisplaySettings(), visualMode = display.monthVisualMode === "donut" ? "donut" : "buffer";
+  const display = statisticsDisplaySettings(), visualMode = display.monthVisualMode === "buffer" ? "buffer" : "donut";
   document.querySelectorAll("[data-month-visual-mode]").forEach(button => { const active = button.dataset.monthVisualMode === visualMode; button.classList.toggle("active", active); button.setAttribute("aria-selected", String(active)); });
   const vaultView = document.getElementById("monthVaultView"), donutView = document.getElementById("monthDonutView"), visualHeading = document.getElementById("monthVisualHeading"), visualHelp = document.getElementById("monthVisualHelp");
   if (!vaultView || !donutView || !visualHeading || !visualHelp) return;
@@ -1969,7 +1972,7 @@ document.addEventListener("click", event => {
   const deleteBudgetTx = event.target.closest("[data-delete-budget-tx]"); if (deleteBudgetTx) { deleteBudgetTransaction(deleteBudgetTx.dataset.deleteBudgetTx); return; }
   const closeGoal = event.target.closest("[data-close-goal]"); if (closeGoal) { openGoalCloseDialog(closeGoal.dataset.closeGoal); return; }
   const reopenGoal = event.target.closest("[data-reopen-goal]"); if (reopenGoal) { reopenSavingsGoal(reopenGoal.dataset.reopenGoal); return; }
-  const monthVisual = event.target.closest("[data-month-visual-mode]"); if (monthVisual) { statisticsDisplaySettings().monthVisualMode = MONTH_VISUAL_MODES.has(monthVisual.dataset.monthVisualMode) ? monthVisual.dataset.monthVisualMode : "buffer"; selectedDonutCategory = ""; updateAndSave("Monatsvisualisierung gespeichert"); return; }
+  const monthVisual = event.target.closest("[data-month-visual-mode]"); if (monthVisual) { statisticsDisplaySettings().monthVisualMode = MONTH_VISUAL_MODES.has(monthVisual.dataset.monthVisualMode) ? monthVisual.dataset.monthVisualMode : "donut"; selectedDonutCategory = ""; updateAndSave("Monatsvisualisierung gespeichert"); return; }
   const donutCategory = event.target.closest("[data-donut-category]"); if (donutCategory) { selectDonutCategory(donutCategory.dataset.donutCategory); return; }
 });
 

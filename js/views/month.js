@@ -98,7 +98,7 @@ function renderRecentTransactions(plan, transactions, onTransaction) {
   target.querySelectorAll('[data-recent-transaction-id]').forEach(button => button.addEventListener('click', () => onTransaction?.(button.dataset.recentTransactionId)));
 }
 
-export function renderMonth({ display, visualMode = 'buffer', donutMode = 'planned', selectedSegment = '', recentTransactions = [], onSegment, onBudget, onTransaction }) {
+export function renderMonth({ display, visualMode = 'donut', donutMode = 'planned', selectedSegment = '', recentTransactions = [], onSegment, onBudget, onTransaction }) {
   const noPlan = document.getElementById('noPlanState'), content = document.getElementById('monthContent'), fab = document.getElementById('fabExpense');
   setHidden(noPlan, Boolean(display));
   setHidden(content, !display);
@@ -122,7 +122,7 @@ export function renderMonth({ display, visualMode = 'buffer', donutMode = 'plann
   document.getElementById('savingsAssetsValue').textContent = formatCents(p.savingsAssetsCents);
   document.getElementById('totalAssetsValue').textContent = formatCents(p.totalAssetsCents);
 
-  const activeVisualMode = visualMode === 'donut' ? 'donut' : 'buffer';
+  const activeVisualMode = visualMode === 'buffer' ? 'buffer' : 'donut';
   document.querySelectorAll('[data-month-visual]').forEach(button => {
     const active = button.dataset.monthVisual === activeVisualMode;
     button.classList.toggle('active', active);

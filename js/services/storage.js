@@ -28,10 +28,21 @@ export function openDatabase() {
 async function store(name, mode='readonly') { const db=await openDatabase(); const tx=db.transaction(name,mode); return { tx, store:tx.objectStore(name) }; }
 export async function getMeta(key, fallback=null) { const {store:s}=await store('meta'); const row=await req(s.get(key)); return row ? row.value : fallback; }
 export async function setMeta(key,value) { const {tx,store:s}=await store('meta','readwrite'); s.put({key,value}); await txDone(tx); return value; }
+const MONTH_VISUAL_DEFAULT_VERSION = 2;
+
 export async function getSettings() {
   let settings = await getMeta('settings', null);
-  if (!settings) { settings={ deviceId:uuid(), deviceName:'', theme:'system', selectedMonthVisualMode:'buffer', selectedDonutMode:'planned' }; await setMeta('settings',settings); }
-  return { deviceId:settings.deviceId || uuid(), deviceName:String(settings.deviceName||''), theme:['system','light','dark'].includes(settings.theme)?settings.theme:'system', selectedMonthVisualMode:['buffer','donut'].includes(settings.selectedMonthVisualMode)?settings.selectedMonthVisualMode:'buffer', selectedDonutMode:['planned','actual','available'].includes(settings.selectedDonutMode)?settings.selectedDonutMode:'planned' };
+  if (!settings) {
+    settings={ deviceId:uuid(), deviceName:'', theme:'system', selectedMonthVisualMode:'donut', monthVisualDefaultVersion:MONTH_VISUAL_DEFAULT_VERSION, selectedDonutMode:'planned' };
+    await setMeta('settings',settings);
+  }
+  const needsVisualDefaultMigration = Number(settings.monthVisualDefaultVersion || 0) < MONTH_VISUAL_DEFAULT_VERSION;
+  const selectedMonthVisualMode = needsVisualDefaultMigration
+    ? 'donut'
+    : (['buffer','donut'].includes(settings.selectedMonthVisualMode) ? settings.selectedMonthVisualMode : 'donut');
+  const normalized = { deviceId:settings.deviceId || uuid(), deviceName:String(settings.deviceName||''), theme:['system','light','dark'].includes(settings.theme)?settings.theme:'system', selectedMonthVisualMode, monthVisualDefaultVersion:MONTH_VISUAL_DEFAULT_VERSION, selectedDonutMode:['planned','actual','available'].includes(settings.selectedDonutMode)?settings.selectedDonutMode:'planned' };
+  if (needsVisualDefaultMigration || settings.selectedMonthVisualMode !== selectedMonthVisualMode) await setMeta('settings',{...settings,...normalized});
+  return normalized;
 }
 export async function saveSettings(patch) { const current=await getSettings(); const next={...current,...deepClone(patch)}; if (!next.deviceId) next.deviceId=uuid(); await setMeta('settings',next); return next; }
 

@@ -101,15 +101,15 @@
           <div class="section-head">
             <div>
               <p class="eyebrow">Monat</p>
-              <h2 id="financialVisualTitle">Finanzlage</h2>
+              <h2 id="financialVisualTitle">Geldverwendung</h2>
             </div>
           </div>
           <div class="segmented financial-visual-tabs" role="tablist" aria-label="Monatsvisualisierung">
-            <button type="button" class="active" data-month-visual="buffer" role="tab" aria-selected="true" aria-controls="bufferVisualView">Finanzlage</button>
-            <button type="button" data-month-visual="donut" role="tab" aria-selected="false" aria-controls="donutVisualView">Geldverwendung</button>
+            <button type="button" data-month-visual="buffer" role="tab" aria-selected="false" aria-controls="bufferVisualView">Finanzlage</button>
+            <button type="button" class="active" data-month-visual="donut" role="tab" aria-selected="true" aria-controls="donutVisualView">Geldverwendung</button>
           </div>
 
-          <div id="bufferVisualView" class="buffer-visual-view">
+          <div id="bufferVisualView" class="buffer-visual-view hidden">
             <p id="bufferVisualHelp" class="help">Der Tresor zeigt, wie der prognostizierte Monatsendstand im Verhältnis zu deinem gewünschten Mindestpuffer steht.</p>
             <div class="vault-visual">
               <div class="vault-image-shell">
@@ -128,7 +128,7 @@
             </div>
           </div>
 
-          <div id="donutVisualView" class="hidden">
+          <div id="donutVisualView">
             <div class="segmented donut-mode-tabs" role="tablist" aria-label="Geldverwendung">
               <button type="button" class="active" data-donut-mode="planned" role="tab" aria-selected="true">Geplant</button>
               <button type="button" data-donut-mode="actual" role="tab" aria-selected="false">Tatsächlich</button>
@@ -399,7 +399,7 @@
 
   <script src="./assets/vendor/qrcode.min.js"></script>
   <script src="./assets/vendor/jsQR.js"></script>
-  <script src="./js/pwa-update.js?v=2.1.0"></script>
+  <script src="./js/pwa-update.js?v=2.1.1"></script>
   <script type="module" src="./js/app.js"></script>
 </body>
 </html>

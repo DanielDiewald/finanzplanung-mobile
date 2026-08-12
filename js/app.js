@@ -9,7 +9,7 @@ import { renderTransactions } from './views/transactions.js';
 import { renderSync } from './views/sync-view.js';
 import { applyTheme, renderSettings } from './views/settings.js';
 
-const state={ plan:null,transactions:[],settings:null,display:null,pendingPlan:null,monthVisualMode:'buffer',donutMode:'planned',selectedSegment:'',transactionFilter:'all',transactionBudgetFilter:'',lastTransactionCode:'',deferredInstall:null };
+const state={ plan:null,transactions:[],settings:null,display:null,pendingPlan:null,monthVisualMode:'donut',donutMode:'planned',selectedSegment:'',transactionFilter:'all',transactionBudgetFilter:'',lastTransactionCode:'',deferredInstall:null };
 let router;
 const $=id=>document.getElementById(id);
 
@@ -18,7 +18,7 @@ function monthBounds(ym){ const [y,m]=ym.split('-').map(Number);const last=new D
 function activePlanRows(){ return state.plan?state.transactions.filter(t=>t.planId===state.plan.planId):[]; }
 function visibleRows(){ return activePlanRows().filter(t=>!t.deleted); }
 
-async function loadState(){ state.settings=await getSettings(); state.monthVisualMode=state.settings.selectedMonthVisualMode||'buffer'; state.donutMode=state.settings.selectedDonutMode||'planned'; state.plan=await getCurrentPlan(); state.transactions=await listTransactions(); state.display=buildDisplayState(state.plan,state.transactions); }
+async function loadState(){ state.settings=await getSettings(); state.monthVisualMode=state.settings.selectedMonthVisualMode||'donut'; state.donutMode=state.settings.selectedDonutMode||'planned'; state.plan=await getCurrentPlan(); state.transactions=await listTransactions(); state.display=buildDisplayState(state.plan,state.transactions); }
 async function refresh(){ state.plan=await getCurrentPlan(); state.transactions=await listTransactions(); state.display=buildDisplayState(state.plan,state.transactions); renderAll(); }
 function renderAll(){
   const rows=visibleRows();
