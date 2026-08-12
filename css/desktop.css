@@ -220,7 +220,11 @@ main {
 #view-month > .panel { margin-bottom: 0; }
 #view-month > .panel:not(.month-summary-panel):not(.month-allocation-panel), #view-month > .grid { grid-column: 1 / -1; }
 .month-summary-panel { grid-column: 1; }
-.month-allocation-panel { grid-column: 2; position: sticky; top: calc(var(--topbar-height) + 1rem); }
+.month-allocation-panel {
+  grid-column: 2;
+  position: static;
+  align-self: start;
+}
 .month-context-toolbar {
   position: sticky;
   top: calc(var(--topbar-height) + .25rem);
@@ -315,7 +319,14 @@ td.actions button { margin: .06rem; }
 .statistics-resolution { display: inline-block; margin-top: .28rem; color: var(--accent); font-size: .75rem; font-weight: 670; }
 .statistics-window-actions { display: flex; gap: .4rem; align-items: center; flex-wrap: wrap; }
 .statistics-range-label { margin-top: .65rem; padding: .5rem .65rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-2); color: var(--muted); font-size: .78rem; }
-.donut-layout { display: grid; grid-template-columns: minmax(260px,.9fr) minmax(260px,1.1fr); gap: .85rem; align-items: center; }
+.donut-layout {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px,100%),1fr));
+  gap: .85rem;
+  align-items: start;
+}
+.donut-layout > * { min-width: 0; }
 .donut-chart-box { min-height: 320px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .donut-chart-box canvas { width: 100%; height: 300px; display: block; }
 .donut-legend { display: grid; gap: .3rem; }
