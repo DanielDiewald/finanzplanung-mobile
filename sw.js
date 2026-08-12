@@ -3,7 +3,7 @@ const CACHE=`capyt-v${VERSION}`;
 const VENDOR_CACHE='capyt-vendor-v1';
 const JSQR_CDN='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
 const CORE=[
-  './','./index.html','./offline.html','./manifest.webmanifest','./css/capyt-tokens.css','./css/app.css','./css/desktop.css',
+  './','./index.html','./offline.html','./assets/favicons/site.webmanifest','./css/capyt-tokens.css','./css/app.css','./css/desktop.css',
   './js/theme.js','./js/pwa-update.js','./js/app.js','./js/router.js','./js/utils.js','./js/services/storage.js','./js/services/sync.js','./js/services/finance.js','./js/services/qr.js','./js/services/buffer-status.js',
   './js/views/month.js','./js/views/transactions.js','./js/views/sync-view.js','./js/views/settings.js',
   './assets/vendor/qrcode.min.js','./assets/vendor/jsQR.js',

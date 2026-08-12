@@ -1,406 +1,1099 @@
 <!doctype html>
 <html lang="de">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="capyt-version" content="2.1.3">
-  <meta name="theme-color" content="#F4F5FA">
-  <meta name="color-scheme" content="light dark">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Capyt">
-  <meta name="description" content="Capyt · Mobile – Offline-Begleit-App für Monatsstand, Budgets, Buchungen und FP1-Synchronisation.">
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="apple-touch-icon" href="./assets/branding/capyt-180.png">
-  <link rel="icon" href="./assets/branding/capyt-32.png" type="image/png" sizes="32x32">
-  <script src="./js/theme.js"></script>
-  <link rel="stylesheet" href="./css/capyt-tokens.css">
-  <link rel="stylesheet" href="./css/app.css">
-  <title>Capyt · Mobile</title>
-</head>
-<body>
-  <noscript><div class="fatal">Capyt benötigt JavaScript.</div></noscript>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta
+      name="capyt-version"
+      content="2.1.4" />
+    <meta
+      name="theme-color"
+      content="#F4F5FA" />
+    <meta
+      name="color-scheme"
+      content="light dark" />
+    <meta
+      name="apple-mobile-web-app-capable"
+      content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="default" />
+    <meta
+      name="apple-mobile-web-app-title"
+      content="Capyt" />
+    <meta
+      name="description"
+      content="Capyt · Mobile – Offline-Begleit-App für Monatsstand, Budgets, Buchungen und FP1-Synchronisation." />
+    <link
+      rel="icon"
+      type="image/png"
+      href="./assets/favicons/favicon-96x96.png"
+      sizes="96x96" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="./assets/favicons/favicon.svg" />
+    <link
+      rel="shortcut icon"
+      href="./assets/favicons/favicon.ico" />
 
-  <header class="app-header">
-    <div class="brand-lockup">
-      <img class="brand-logo" src="./assets/branding/capyt-192.png" alt="Capyt">
-      <div class="brand-copy">
-        <span class="brand-name">Capyt</span>
-        <span id="headerTitle" class="brand-context">Monat</span>
-      </div>
-    </div>
-    <div class="header-actions">
-      <span id="headerSyncStatus" class="header-sync" aria-live="polite">
-        <span class="status-dot" aria-hidden="true"></span>
-        <span class="status-text">Bereit</span>
-      </span>
-      <span id="offlineBadge" class="status-pill warn hidden">Offline</span>
-      <button id="installButton" class="icon-button hidden" type="button" aria-label="Capyt installieren" title="Capyt installieren">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 15v4h14v-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-    </div>
-  </header>
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="./assets/favicons/apple-touch-icon.png" />
+    <meta
+      name="apple-mobile-web-app-title"
+      content="Capyt" />
 
-  <main id="appMain" class="app-main" tabindex="-1">
-    <section id="view-month" class="view active" data-view="month" aria-labelledby="monthHeading">
-      <div id="noPlanState" class="empty-state hidden">
-        <div class="empty-icon"><img src="./assets/branding/capyt-192.png" alt="" aria-hidden="true"></div>
-        <p class="eyebrow">Capyt · Mobile</p>
-        <h2>Noch kein Finanzplan synchronisiert</h2>
-        <p>Deine Planung bleibt am Desktop. Auf dem Smartphone kontrollierst du den Monatsstand und erfasst neue Buchungen.</p>
-        <div class="onboarding-steps" aria-label="Erste Schritte">
-          <div class="onboarding-step"><span class="onboarding-step-number">1</span><span><strong>Plan am Desktop erstellen</strong><span>Capyt · Planung berechnet Budgets, Sparziele und Monatswerte.</span></span></div>
-          <div class="onboarding-step"><span class="onboarding-step-number">2</span><span><strong>Plan importieren</strong><span>QR-Code scannen, QR-Foto auswählen oder FP1-P-Textcode einfügen.</span></span></div>
-          <div class="onboarding-step"><span class="onboarding-step-number">3</span><span><strong>Mobil buchen &amp; zurücksenden</strong><span>Neue Buchungen werden lokal gespeichert und später per FP1-T übertragen.</span></span></div>
+    <link
+      rel="manifest"
+      href="./assets/favicons/site.webmanifest" />
+    <script src="./js/theme.js"></script>
+    <link
+      rel="stylesheet"
+      href="./css/capyt-tokens.css" />
+    <link
+      rel="stylesheet"
+      href="./css/app.css" />
+    <title>Capyt · Mobile</title>
+  </head>
+  <body>
+    <noscript><div class="fatal">Capyt benötigt JavaScript.</div></noscript>
+
+    <header class="app-header">
+      <div class="brand-lockup">
+        <img
+          class="brand-logo"
+          src="./assets/branding/capyt-192.png"
+          alt="Capyt" />
+        <div class="brand-copy">
+          <span class="brand-name">Capyt</span>
+          <span
+            id="headerTitle"
+            class="brand-context"
+            >Monat</span
+          >
         </div>
-        <div class="stack-actions">
-          <button class="primary" type="button" data-go="sync" data-sync-action="scan">QR-Code scannen</button>
-          <button type="button" data-go="sync" data-sync-action="paste">Textcode eingeben</button>
-        </div>
       </div>
+      <div class="header-actions">
+        <span
+          id="headerSyncStatus"
+          class="header-sync"
+          aria-live="polite">
+          <span
+            class="status-dot"
+            aria-hidden="true"></span>
+          <span class="status-text">Bereit</span>
+        </span>
+        <span
+          id="offlineBadge"
+          class="status-pill warn hidden"
+          >Offline</span
+        >
+        <button
+          id="installButton"
+          class="icon-button hidden"
+          type="button"
+          aria-label="Capyt installieren"
+          title="Capyt installieren">
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true">
+            <path
+              d="M12 3v11m0 0 4-4m-4 4-4-4M5 15v4h14v-4"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+    </header>
 
-      <div id="monthContent" class="hidden">
-        <div id="monthWarnings"></div>
-        <div class="month-toolbar">
-          <div>
-            <p class="eyebrow">Aktueller Planstand</p>
-            <h2 id="monthHeading">–</h2>
+    <main
+      id="appMain"
+      class="app-main"
+      tabindex="-1">
+      <section
+        id="view-month"
+        class="view active"
+        data-view="month"
+        aria-labelledby="monthHeading">
+        <div
+          id="noPlanState"
+          class="empty-state hidden">
+          <div class="empty-icon">
+            <img
+              src="./assets/branding/capyt-192.png"
+              alt=""
+              aria-hidden="true" />
           </div>
-          <span id="planRevisionBadge" class="status-pill">Rev. –</span>
-        </div>
-
-        <section class="hero-card" aria-labelledby="freeAvailableLabel">
-          <div class="hero-label" id="freeAvailableLabel">Frei verfügbar</div>
-          <div class="hero-value" id="freeAvailableValue">0,00 €</div>
-          <div class="hero-meta" id="freeAvailableMeta">nach Mindestpuffer</div>
-        </section>
-
-        <section class="metrics-grid" aria-label="Vermögenskennzahlen">
-          <article class="metric-card">
-            <span class="metric-label">Kontostand</span>
-            <strong id="accountBalanceValue">–</strong>
-            <small id="accountBalanceHint">vom Desktop</small>
-          </article>
-          <article class="metric-card">
-            <span class="metric-label">Budgetvermögen</span>
-            <strong id="budgetAssetsValue">0,00 €</strong>
-            <small>reserviert</small>
-          </article>
-          <article class="metric-card">
-            <span class="metric-label">Sparvermögen</span>
-            <strong id="savingsAssetsValue">0,00 €</strong>
-            <small>nicht frei verfügbar</small>
-          </article>
-          <article class="metric-card">
-            <span class="metric-label">Gesamtvermögen</span>
-            <strong id="totalAssetsValue">0,00 €</strong>
-            <small>inkl. Budgets &amp; Sparen</small>
-          </article>
-        </section>
-
-        <section class="card financial-visual-card" aria-labelledby="financialVisualTitle">
-          <div class="section-head">
-            <div>
-              <p class="eyebrow">Monat</p>
-              <h2 id="financialVisualTitle">Geldverwendung</h2>
+          <p class="eyebrow">Capyt · Mobile</p>
+          <h2>Noch kein Finanzplan synchronisiert</h2>
+          <p>
+            Deine Planung bleibt am Desktop. Auf dem Smartphone kontrollierst du
+            den Monatsstand und erfasst neue Buchungen.
+          </p>
+          <div
+            class="onboarding-steps"
+            aria-label="Erste Schritte">
+            <div class="onboarding-step">
+              <span class="onboarding-step-number">1</span
+              ><span
+                ><strong>Plan am Desktop erstellen</strong
+                ><span
+                  >Capyt · Planung berechnet Budgets, Sparziele und
+                  Monatswerte.</span
+                ></span
+              >
+            </div>
+            <div class="onboarding-step">
+              <span class="onboarding-step-number">2</span
+              ><span
+                ><strong>Plan importieren</strong
+                ><span
+                  >QR-Code scannen, QR-Foto auswählen oder FP1-P-Textcode
+                  einfügen.</span
+                ></span
+              >
+            </div>
+            <div class="onboarding-step">
+              <span class="onboarding-step-number">3</span
+              ><span
+                ><strong>Mobil buchen &amp; zurücksenden</strong
+                ><span
+                  >Neue Buchungen werden lokal gespeichert und später per FP1-T
+                  übertragen.</span
+                ></span
+              >
             </div>
           </div>
-          <div class="segmented financial-visual-tabs" role="tablist" aria-label="Monatsvisualisierung">
-            <button type="button" data-month-visual="buffer" role="tab" aria-selected="false" aria-controls="bufferVisualView">Finanzlage</button>
-            <button type="button" class="active" data-month-visual="donut" role="tab" aria-selected="true" aria-controls="donutVisualView">Geldverwendung</button>
+          <div class="stack-actions">
+            <button
+              class="primary"
+              type="button"
+              data-go="sync"
+              data-sync-action="scan">
+              QR-Code scannen
+            </button>
+            <button
+              type="button"
+              data-go="sync"
+              data-sync-action="paste">
+              Textcode eingeben
+            </button>
+          </div>
+        </div>
+
+        <div
+          id="monthContent"
+          class="hidden">
+          <div id="monthWarnings"></div>
+          <div class="month-toolbar">
+            <div>
+              <p class="eyebrow">Aktueller Planstand</p>
+              <h2 id="monthHeading">–</h2>
+            </div>
+            <span
+              id="planRevisionBadge"
+              class="status-pill"
+              >Rev. –</span
+            >
           </div>
 
-          <div id="bufferVisualView" class="buffer-visual-view hidden">
-            <p id="bufferVisualHelp" class="help">Der Tresor zeigt, wie der prognostizierte Monatsendstand im Verhältnis zu deinem gewünschten Mindestpuffer steht.</p>
-            <div class="vault-visual">
-              <div class="vault-image-shell">
-                <img id="vaultImage" class="vault-image" src="./assets/vault/vault-almost-empty.webp" alt="Tresorstatus">
+          <section
+            class="hero-card"
+            aria-labelledby="freeAvailableLabel">
+            <div
+              class="hero-label"
+              id="freeAvailableLabel">
+              Frei verfügbar
+            </div>
+            <div
+              class="hero-value"
+              id="freeAvailableValue">
+              0,00 €
+            </div>
+            <div
+              class="hero-meta"
+              id="freeAvailableMeta">
+              nach Mindestpuffer
+            </div>
+          </section>
+
+          <section
+            class="metrics-grid"
+            aria-label="Vermögenskennzahlen">
+            <article class="metric-card">
+              <span class="metric-label">Kontostand</span>
+              <strong id="accountBalanceValue">–</strong>
+              <small id="accountBalanceHint">vom Desktop</small>
+            </article>
+            <article class="metric-card">
+              <span class="metric-label">Budgetvermögen</span>
+              <strong id="budgetAssetsValue">0,00 €</strong>
+              <small>reserviert</small>
+            </article>
+            <article class="metric-card">
+              <span class="metric-label">Sparvermögen</span>
+              <strong id="savingsAssetsValue">0,00 €</strong>
+              <small>nicht frei verfügbar</small>
+            </article>
+            <article class="metric-card">
+              <span class="metric-label">Gesamtvermögen</span>
+              <strong id="totalAssetsValue">0,00 €</strong>
+              <small>inkl. Budgets &amp; Sparen</small>
+            </article>
+          </section>
+
+          <section
+            class="card financial-visual-card"
+            aria-labelledby="financialVisualTitle">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Monat</p>
+                <h2 id="financialVisualTitle">Geldverwendung</h2>
               </div>
-              <div class="vault-status-copy">
-                <strong id="vaultStatusLabel" class="vault-status-label">Puffer wird berechnet</strong>
-                <div id="vaultPercentValue" class="vault-percent">–</div>
-                <div class="vault-progress" role="progressbar" aria-label="Mindestpuffer-Füllstand" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="vaultProgressBar"></span></div>
-                <div class="vault-key-values">
-                  <div><span>Prognose Monatsende</span><strong id="vaultBalanceValue">0,00 €</strong></div>
-                  <div><span>Mindestpuffer</span><strong id="vaultBufferValue">0,00 €</strong></div>
-                  <div><span>Abstand zum Puffer</span><strong id="vaultDeltaValue">0,00 €</strong></div>
+            </div>
+            <div
+              class="segmented financial-visual-tabs"
+              role="tablist"
+              aria-label="Monatsvisualisierung">
+              <button
+                type="button"
+                data-month-visual="buffer"
+                role="tab"
+                aria-selected="false"
+                aria-controls="bufferVisualView">
+                Finanzlage
+              </button>
+              <button
+                type="button"
+                class="active"
+                data-month-visual="donut"
+                role="tab"
+                aria-selected="true"
+                aria-controls="donutVisualView">
+                Geldverwendung
+              </button>
+            </div>
+
+            <div
+              id="bufferVisualView"
+              class="buffer-visual-view hidden">
+              <p
+                id="bufferVisualHelp"
+                class="help">
+                Der Tresor zeigt, wie der prognostizierte Monatsendstand im
+                Verhältnis zu deinem gewünschten Mindestpuffer steht.
+              </p>
+              <div class="vault-visual">
+                <div class="vault-image-shell">
+                  <img
+                    id="vaultImage"
+                    class="vault-image"
+                    src="./assets/vault/vault-almost-empty.webp"
+                    alt="Tresorstatus" />
+                </div>
+                <div class="vault-status-copy">
+                  <strong
+                    id="vaultStatusLabel"
+                    class="vault-status-label"
+                    >Puffer wird berechnet</strong
+                  >
+                  <div
+                    id="vaultPercentValue"
+                    class="vault-percent">
+                    –
+                  </div>
+                  <div
+                    class="vault-progress"
+                    role="progressbar"
+                    aria-label="Mindestpuffer-Füllstand"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="0">
+                    <span id="vaultProgressBar"></span>
+                  </div>
+                  <div class="vault-key-values">
+                    <div>
+                      <span>Prognose Monatsende</span
+                      ><strong id="vaultBalanceValue">0,00 €</strong>
+                    </div>
+                    <div>
+                      <span>Mindestpuffer</span
+                      ><strong id="vaultBufferValue">0,00 €</strong>
+                    </div>
+                    <div>
+                      <span>Abstand zum Puffer</span
+                      ><strong id="vaultDeltaValue">0,00 €</strong>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div id="donutVisualView">
-            <div class="segmented donut-mode-tabs" role="tablist" aria-label="Geldverwendung">
-              <button type="button" class="active" data-donut-mode="planned" role="tab" aria-selected="true">Geplant</button>
-              <button type="button" data-donut-mode="actual" role="tab" aria-selected="false">Tatsächlich</button>
-              <button type="button" data-donut-mode="available" role="tab" aria-selected="false">Verfügbar</button>
-            </div>
-            <h3 id="donutTitle" class="visual-subtitle">Geldverwendung</h3>
-            <p id="donutHelp" class="help"></p>
-            <div class="donut-wrap">
-              <canvas id="donutCanvas" width="320" height="320" role="img" aria-label="Geldverwendung als Donut-Diagramm" aria-describedby="donutHelp"></canvas>
-              <div class="donut-center" aria-hidden="true">
-                <span id="donutCenterLabel">Geplant</span>
-                <strong id="donutCenterValue">0,00 €</strong>
+            <div id="donutVisualView">
+              <div
+                class="segmented donut-mode-tabs"
+                role="tablist"
+                aria-label="Geldverwendung">
+                <button
+                  type="button"
+                  class="active"
+                  data-donut-mode="planned"
+                  role="tab"
+                  aria-selected="true">
+                  Geplant
+                </button>
+                <button
+                  type="button"
+                  data-donut-mode="actual"
+                  role="tab"
+                  aria-selected="false">
+                  Tatsächlich
+                </button>
+                <button
+                  type="button"
+                  data-donut-mode="available"
+                  role="tab"
+                  aria-selected="false">
+                  Verfügbar
+                </button>
               </div>
+              <h3
+                id="donutTitle"
+                class="visual-subtitle">
+                Geldverwendung
+              </h3>
+              <p
+                id="donutHelp"
+                class="help"></p>
+              <div class="donut-wrap">
+                <canvas
+                  id="donutCanvas"
+                  width="320"
+                  height="320"
+                  role="img"
+                  aria-label="Geldverwendung als Donut-Diagramm"
+                  aria-describedby="donutHelp"></canvas>
+                <div
+                  class="donut-center"
+                  aria-hidden="true">
+                  <span id="donutCenterLabel">Geplant</span>
+                  <strong id="donutCenterValue">0,00 €</strong>
+                </div>
+              </div>
+              <div
+                id="donutLegend"
+                class="donut-legend"></div>
+              <div
+                id="donutDetails"
+                class="donut-details hidden"></div>
             </div>
-            <div id="donutLegend" class="donut-legend"></div>
-            <div id="donutDetails" class="donut-details hidden"></div>
-          </div>
-        </section>
+          </section>
 
-        <section class="card" aria-labelledby="budgetHeading">
-          <div class="section-head">
-            <div>
-              <p class="eyebrow">Für den Alltag</p>
-              <h2 id="budgetHeading">Budgets</h2>
+          <section
+            class="card"
+            aria-labelledby="budgetHeading">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Für den Alltag</p>
+                <h2 id="budgetHeading">Budgets</h2>
+              </div>
+              <span
+                id="budgetCount"
+                class="status-pill"
+                >0</span
+              >
             </div>
-            <span id="budgetCount" class="status-pill">0</span>
-          </div>
-          <div id="budgetList" class="budget-list"></div>
-        </section>
+            <div
+              id="budgetList"
+              class="budget-list"></div>
+          </section>
 
-        <section class="card" aria-labelledby="recentTransactionsHeading">
-          <div class="section-head">
-            <div>
-              <p class="eyebrow">Zuletzt erfasst</p>
-              <h2 id="recentTransactionsHeading">Letzte Buchungen</h2>
+          <section
+            class="card"
+            aria-labelledby="recentTransactionsHeading">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Zuletzt erfasst</p>
+                <h2 id="recentTransactionsHeading">Letzte Buchungen</h2>
+              </div>
+              <button
+                type="button"
+                data-go="transactions">
+                Alle
+              </button>
             </div>
-            <button type="button" data-go="transactions">Alle</button>
-          </div>
-          <div id="recentTransactionList" class="recent-transaction-list"></div>
-          <button id="monthAddTransactionButton" class="primary full month-quick-action" type="button">Buchung erfassen</button>
-        </section>
-      </div>
-    </section>
-
-    <section id="view-transactions" class="view" data-view="transactions" aria-labelledby="transactionsHeading">
-      <div class="section-head page-head">
-        <div>
-          <p class="eyebrow">Lokal erfasst</p>
-          <h2 id="transactionsHeading">Buchungen</h2>
+            <div
+              id="recentTransactionList"
+              class="recent-transaction-list"></div>
+            <button
+              id="monthAddTransactionButton"
+              class="primary full month-quick-action"
+              type="button">
+              Buchung erfassen
+            </button>
+          </section>
         </div>
-        <button id="addIncomeButton" type="button">Einnahme</button>
-      </div>
-      <div class="filter-row" role="group" aria-label="Buchungen filtern">
-        <button type="button" class="chip active" data-filter="all">Alle</button>
-        <button type="button" class="chip" data-filter="expense">Ausgaben</button>
-        <button type="button" class="chip" data-filter="income">Einnahmen</button>
-        <button type="button" class="chip" data-filter="pending">Nicht bestätigt</button>
-      </div>
-      <label class="field compact-field">
-        <span>Budget / Kategorie</span>
-        <select id="transactionBudgetFilter"><option value="">Alle</option></select>
-      </label>
-      <div id="transactionsSummary" class="notice"></div>
-      <div id="transactionList" class="transaction-list"></div>
-    </section>
-
-    <section id="view-sync" class="view" data-view="sync" aria-labelledby="syncHeading">
-      <div class="section-head page-head">
-        <div>
-          <p class="eyebrow">FP1 · lokal &amp; offlinefähig</p>
-          <h2 id="syncHeading">Synchronisieren</h2>
-        </div>
-      </div>
-
-      <section class="card">
-        <p class="eyebrow">Schritt 1</p>
-        <h3>Plan vom Desktop übernehmen</h3>
-        <p class="help">Capyt · Planung bleibt die maßgebliche Quelle. Du siehst immer zuerst eine Vorschau; bestehende lokale Daten werden nicht still überschrieben.</p>
-        <div class="button-grid">
-          <button id="scanPlanButton" class="primary" type="button">QR-Code scannen</button>
-          <button id="pastePlanButton" type="button">Textcode eingeben</button>
-        </div>
-        <div id="cameraSupportHint" class="small muted"></div>
-        <div id="planImportPreview" class="sync-preview hidden"></div>
       </section>
 
-      <section class="card">
-        <div class="section-head">
+      <section
+        id="view-transactions"
+        class="view"
+        data-view="transactions"
+        aria-labelledby="transactionsHeading">
+        <div class="section-head page-head">
           <div>
-            <p class="eyebrow">Schritt 2</p>
-            <h3>Mobile Änderungen übertragen</h3>
-            <p class="help">Beim Export werden offene Buchungen als „vorbereitet“ markiert. Bestätigt sind sie erst, wenn ein neuer Planstand vom Desktop zurückkommt.</p>
+            <p class="eyebrow">Lokal erfasst</p>
+            <h2 id="transactionsHeading">Buchungen</h2>
           </div>
+          <button
+            id="addIncomeButton"
+            type="button">
+            Einnahme
+          </button>
         </div>
-        <div id="pendingSyncSummary" class="sync-stats"></div>
-        <button id="generateTransactionCode" class="primary full" type="button">Synchronisationscode erzeugen</button>
-        <div id="transactionExport" class="export-box hidden">
-          <div id="qrOutput" class="qr-output" aria-label="QR-Code für mobile Änderungen"></div>
-          <div id="qrTooLarge" class="notice warn hidden"></div>
-          <label class="field">
-            <span>Textcode</span>
-            <textarea id="transactionCodeText" rows="6" readonly spellcheck="false"></textarea>
-          </label>
-          <div class="button-grid">
-            <button id="copyTransactionCode" type="button">Code kopieren</button>
-            <button id="shareTransactionCode" type="button">Teilen</button>
-          </div>
+        <div
+          class="filter-row"
+          role="group"
+          aria-label="Buchungen filtern">
+          <button
+            type="button"
+            class="chip active"
+            data-filter="all">
+            Alle
+          </button>
+          <button
+            type="button"
+            class="chip"
+            data-filter="expense">
+            Ausgaben
+          </button>
+          <button
+            type="button"
+            class="chip"
+            data-filter="income">
+            Einnahmen
+          </button>
+          <button
+            type="button"
+            class="chip"
+            data-filter="pending">
+            Nicht bestätigt
+          </button>
         </div>
-      </section>
-
-      <section class="card compact-card">
-        <h3>Letzter Planstand</h3>
-        <div id="syncPlanMeta" class="key-values"></div>
-      </section>
-    </section>
-
-    <section id="view-settings" class="view" data-view="settings" aria-labelledby="settingsHeading">
-      <div class="section-head page-head">
-        <div>
-          <p class="eyebrow">Lokal auf diesem Gerät</p>
-          <h2 id="settingsHeading">Einstellungen</h2>
-        </div>
-      </div>
-
-      <section class="card form-stack">
-        <label class="field">
-          <span>Gerätename</span>
-          <input id="deviceName" maxlength="60" autocomplete="off" placeholder="z. B. iPhone">
-        </label>
-        <label class="field">
-          <span>Darstellung</span>
-          <select id="themeSetting">
-            <option value="system">System</option>
-            <option value="light">Hell</option>
-            <option value="dark">Dunkel</option>
+        <label class="field compact-field">
+          <span>Budget / Kategorie</span>
+          <select id="transactionBudgetFilter">
+            <option value="">Alle</option>
           </select>
         </label>
+        <div
+          id="transactionsSummary"
+          class="notice"></div>
+        <div
+          id="transactionList"
+          class="transaction-list"></div>
       </section>
 
-      <section class="card compact-card">
-        <h3>Datenschutz &amp; Speicherung</h3>
-        <p class="help">Plan und Buchungen liegen in IndexedDB auf diesem Gerät. Capyt enthält keine Analytics, kein Konto, keine Cloud-Synchronisierung und keine Bankanbindung.</p>
+      <section
+        id="view-sync"
+        class="view"
+        data-view="sync"
+        aria-labelledby="syncHeading">
+        <div class="section-head page-head">
+          <div>
+            <p class="eyebrow">FP1 · lokal &amp; offlinefähig</p>
+            <h2 id="syncHeading">Synchronisieren</h2>
+          </div>
+        </div>
+
+        <section class="card">
+          <p class="eyebrow">Schritt 1</p>
+          <h3>Plan vom Desktop übernehmen</h3>
+          <p class="help">
+            Capyt · Planung bleibt die maßgebliche Quelle. Du siehst immer
+            zuerst eine Vorschau; bestehende lokale Daten werden nicht still
+            überschrieben.
+          </p>
+          <div class="button-grid">
+            <button
+              id="scanPlanButton"
+              class="primary"
+              type="button">
+              QR-Code scannen
+            </button>
+            <button
+              id="pastePlanButton"
+              type="button">
+              Textcode eingeben
+            </button>
+          </div>
+          <div
+            id="cameraSupportHint"
+            class="small muted"></div>
+          <div
+            id="planImportPreview"
+            class="sync-preview hidden"></div>
+        </section>
+
+        <section class="card">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Schritt 2</p>
+              <h3>Mobile Änderungen übertragen</h3>
+              <p class="help">
+                Beim Export werden offene Buchungen als „vorbereitet“ markiert.
+                Bestätigt sind sie erst, wenn ein neuer Planstand vom Desktop
+                zurückkommt.
+              </p>
+            </div>
+          </div>
+          <div
+            id="pendingSyncSummary"
+            class="sync-stats"></div>
+          <button
+            id="generateTransactionCode"
+            class="primary full"
+            type="button">
+            Synchronisationscode erzeugen
+          </button>
+          <div
+            id="transactionExport"
+            class="export-box hidden">
+            <div
+              id="qrOutput"
+              class="qr-output"
+              aria-label="QR-Code für mobile Änderungen"></div>
+            <div
+              id="qrTooLarge"
+              class="notice warn hidden"></div>
+            <label class="field">
+              <span>Textcode</span>
+              <textarea
+                id="transactionCodeText"
+                rows="6"
+                readonly
+                spellcheck="false"></textarea>
+            </label>
+            <div class="button-grid">
+              <button
+                id="copyTransactionCode"
+                type="button">
+                Code kopieren
+              </button>
+              <button
+                id="shareTransactionCode"
+                type="button">
+                Teilen
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card compact-card">
+          <h3>Letzter Planstand</h3>
+          <div
+            id="syncPlanMeta"
+            class="key-values"></div>
+        </section>
+      </section>
+
+      <section
+        id="view-settings"
+        class="view"
+        data-view="settings"
+        aria-labelledby="settingsHeading">
+        <div class="section-head page-head">
+          <div>
+            <p class="eyebrow">Lokal auf diesem Gerät</p>
+            <h2 id="settingsHeading">Einstellungen</h2>
+          </div>
+        </div>
+
+        <section class="card form-stack">
+          <label class="field">
+            <span>Gerätename</span>
+            <input
+              id="deviceName"
+              maxlength="60"
+              autocomplete="off"
+              placeholder="z. B. iPhone" />
+          </label>
+          <label class="field">
+            <span>Darstellung</span>
+            <select id="themeSetting">
+              <option value="system">System</option>
+              <option value="light">Hell</option>
+              <option value="dark">Dunkel</option>
+            </select>
+          </label>
+        </section>
+
+        <section class="card compact-card">
+          <h3>Datenschutz &amp; Speicherung</h3>
+          <p class="help">
+            Plan und Buchungen liegen in IndexedDB auf diesem Gerät. Capyt
+            enthält keine Analytics, kein Konto, keine Cloud-Synchronisierung
+            und keine Bankanbindung.
+          </p>
+          <div class="button-grid">
+            <button
+              id="exportLocalData"
+              type="button">
+              Lokales Backup
+            </button>
+            <button
+              id="resetLocalData"
+              type="button"
+              class="danger">
+              Lokale Daten löschen
+            </button>
+          </div>
+        </section>
+
+        <section class="card compact-card">
+          <h3>Capyt · Mobile</h3>
+          <div class="key-values">
+            <div><span>Version</span><strong id="appVersion">–</strong></div>
+            <div>
+              <span>Updates</span
+              ><strong
+                id="pwaUpdateStatus"
+                aria-live="polite"
+                >Automatisch</strong
+              >
+            </div>
+            <div><span>Protokoll</span><strong>FP1</strong></div>
+            <div><span>Speicherung</span><strong>IndexedDB</strong></div>
+          </div>
+          <button
+            id="checkForUpdates"
+            class="full settings-update-button"
+            type="button">
+            Auf Update prüfen
+          </button>
+        </section>
+      </section>
+    </main>
+
+    <button
+      id="fabExpense"
+      class="fab hidden"
+      type="button"
+      aria-label="Ausgabe erfassen">
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true">
+        <path
+          d="M12 5v14M5 12h14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round" />
+      </svg>
+      <span>Ausgabe</span>
+    </button>
+
+    <nav
+      class="bottom-nav"
+      aria-label="Hauptnavigation">
+      <button
+        type="button"
+        class="active"
+        data-nav="month"
+        aria-label="Monat">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true">
+          <path
+            d="M5 4h14v16H5zM8 2v4M16 2v4M5 9h14M8 13h3M13 13h3M8 16h3"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round" /></svg
+        ><span>Monat</span>
+      </button>
+      <button
+        type="button"
+        data-nav="transactions"
+        aria-label="Buchungen">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true">
+          <path
+            d="M6 5h12M6 10h12M6 15h7M6 20h9"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round" /></svg
+        ><span>Buchungen</span>
+      </button>
+      <button
+        type="button"
+        data-nav="sync"
+        aria-label="Synchronisieren">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true">
+          <path
+            d="M7 7h11l-3-3M17 17H6l3 3M18 7l2 2-2 2M6 17l-2-2 2-2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round" /></svg
+        ><span>Sync</span
+        ><span
+          id="syncNavBadge"
+          class="nav-badge hidden"
+          >0</span
+        >
+      </button>
+      <button
+        type="button"
+        data-nav="settings"
+        aria-label="Einstellungen">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true">
+          <path
+            d="M12 8.5A3.5 3.5 0 1 0 12 15.5 3.5 3.5 0 0 0 12 8.5Zm8 3.5-2.1-.8a6.5 6.5 0 0 0-.5-1.2l.9-2-2.3-2.3-2 .9a6.5 6.5 0 0 0-1.2-.5L12 4H8.8L8 6.1a6.5 6.5 0 0 0-1.2.5l-2-.9L2.5 8l.9 2a6.5 6.5 0 0 0-.5 1.2L.8 12v3.2l2.1.8c.1.4.3.8.5 1.2l-.9 2 2.3 2.3 2-.9c.4.2.8.4 1.2.5l.8 2.1H12l.8-2.1c.4-.1.8-.3 1.2-.5l2 .9 2.3-2.3-.9-2c.2-.4.4-.8.5-1.2l2.1-.8V12Z"
+            transform="scale(.9) translate(1.4,-1.1)"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.45"
+            stroke-linecap="round"
+            stroke-linejoin="round" /></svg
+        ><span>Einstellungen</span>
+      </button>
+    </nav>
+
+    <dialog
+      id="transactionDialog"
+      class="sheet-dialog">
+      <form
+        id="transactionForm"
+        method="dialog"
+        class="sheet">
+        <div
+          class="sheet-handle"
+          aria-hidden="true"></div>
+        <div class="section-head">
+          <div>
+            <p
+              class="eyebrow"
+              id="transactionDialogEyebrow">
+              Neue Buchung
+            </p>
+            <h2 id="transactionDialogTitle">Ausgabe erfassen</h2>
+          </div>
+          <button
+            type="button"
+            class="icon-button"
+            data-close-dialog="transactionDialog"
+            aria-label="Schließen">
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true">
+              <path
+                d="M6 6l12 12M18 6 6 18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+        <input
+          id="transactionId"
+          type="hidden" />
+        <input
+          id="transactionKind"
+          type="hidden"
+          value="budget_expense" />
+
+        <label class="field amount-field">
+          <span>Betrag</span>
+          <div class="amount-input">
+            <input
+              id="transactionAmount"
+              inputmode="decimal"
+              autocomplete="off"
+              placeholder="0,00"
+              required /><span>€</span>
+          </div>
+        </label>
+
+        <div
+          id="expenseKindSelector"
+          class="segmented"
+          role="group"
+          aria-label="Ausgabenart">
+          <button
+            type="button"
+            class="active"
+            data-expense-kind="budget_expense">
+            Budget
+          </button>
+          <button
+            type="button"
+            data-expense-kind="expense">
+            Sonstige Ausgabe
+          </button>
+        </div>
+
+        <label
+          id="budgetField"
+          class="field"
+          ><span>Budget</span
+          ><select id="transactionBudget"></select
+        ></label>
+        <label
+          id="categoryField"
+          class="field hidden"
+          ><span>Kategorie</span
+          ><select id="transactionCategory"></select
+        ></label>
+        <label class="field"
+          ><span>Datum</span
+          ><input
+            id="transactionDate"
+            type="date"
+            required
+        /></label>
+        <label class="field"
+          ><span>Beschreibung <small>optional</small></span
+          ><input
+            id="transactionDescription"
+            maxlength="100"
+            autocomplete="off"
+            placeholder="z. B. Einkauf"
+        /></label>
+        <label class="field"
+          ><span>Notiz <small>optional</small></span
+          ><textarea
+            id="transactionNote"
+            rows="2"
+            maxlength="300"
+            placeholder="Kurze Notiz"></textarea>
+        </label>
+        <div
+          id="transactionLockNotice"
+          class="notice warn hidden">
+          Diese Buchung wurde bereits bestätigt und kann nicht mehr geändert
+          werden.
+        </div>
+        <div class="sheet-actions">
+          <button
+            id="deleteTransactionButton"
+            class="danger hidden"
+            type="button">
+            Löschen</button
+          ><span class="spacer"></span
+          ><button
+            type="button"
+            data-close-dialog="transactionDialog">
+            Abbrechen</button
+          ><button
+            id="saveTransactionButton"
+            class="primary"
+            value="default">
+            Speichern
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog
+      id="codeDialog"
+      class="sheet-dialog">
+      <form
+        id="codeForm"
+        method="dialog"
+        class="sheet">
+        <div
+          class="sheet-handle"
+          aria-hidden="true"></div>
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">FP1-P</p>
+            <h2>Plan-Code eingeben</h2>
+          </div>
+          <button
+            type="button"
+            class="icon-button"
+            data-close-dialog="codeDialog"
+            aria-label="Schließen">
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true">
+              <path
+                d="M6 6l12 12M18 6 6 18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+        <label class="field"
+          ><span>Synchronisationscode</span
+          ><textarea
+            id="planCodeInput"
+            rows="8"
+            spellcheck="false"
+            placeholder="FP1-P-C-…"></textarea>
+        </label>
+        <div
+          id="codeDialogError"
+          class="notice error hidden"></div>
+        <div class="sheet-actions">
+          <span class="spacer"></span
+          ><button
+            type="button"
+            data-close-dialog="codeDialog">
+            Abbrechen</button
+          ><button
+            id="decodePlanCode"
+            class="primary"
+            value="default">
+            Prüfen
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog
+      id="scannerDialog"
+      class="sheet-dialog scanner-dialog">
+      <div class="sheet scanner-sheet">
+        <div
+          class="sheet-handle"
+          aria-hidden="true"></div>
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Kamera / Foto</p>
+            <h2>Plan-QR importieren</h2>
+          </div>
+          <button
+            type="button"
+            class="icon-button"
+            id="closeScanner"
+            aria-label="Scanner schließen">
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true">
+              <path
+                d="M6 6l12 12M18 6 6 18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+        <div class="scanner-frame">
+          <video
+            id="scannerVideo"
+            playsinline
+            muted></video>
+          <div
+            class="scanner-guide"
+            aria-hidden="true"></div>
+        </div>
+        <canvas
+          id="scannerCanvas"
+          class="hidden"></canvas>
+        <div
+          id="scannerStatus"
+          class="notice">
+          Kamera wird erst nach deiner Freigabe verwendet.
+        </div>
         <div class="button-grid">
-          <button id="exportLocalData" type="button">Lokales Backup</button>
-          <button id="resetLocalData" type="button" class="danger">Lokale Daten löschen</button>
+          <button
+            id="startScanner"
+            class="primary"
+            type="button">
+            Kamera starten
+          </button>
+          <button
+            id="scannerPhotoButton"
+            type="button">
+            QR-Foto auswählen
+          </button>
+          <button
+            id="scannerPasteFallback"
+            type="button">
+            Textcode eingeben
+          </button>
         </div>
-      </section>
+        <input
+          id="scannerPhotoInput"
+          class="hidden"
+          type="file"
+          accept="image/*"
+          capture="environment" />
+      </div>
+    </dialog>
 
-      <section class="card compact-card">
-        <h3>Capyt · Mobile</h3>
-        <div class="key-values">
-          <div><span>Version</span><strong id="appVersion">–</strong></div>
-          <div><span>Updates</span><strong id="pwaUpdateStatus" aria-live="polite">Automatisch</strong></div>
-          <div><span>Protokoll</span><strong>FP1</strong></div>
-          <div><span>Speicherung</span><strong>IndexedDB</strong></div>
+    <dialog
+      id="updateDialog"
+      class="update-dialog"
+      aria-labelledby="updateDialogTitle"
+      aria-describedby="updateDialogText">
+      <div class="update-dialog-card">
+        <div
+          class="update-icon"
+          aria-hidden="true">
+          ↻
         </div>
-        <button id="checkForUpdates" class="full settings-update-button" type="button">Auf Update prüfen</button>
-      </section>
-    </section>
-  </main>
-
-  <button id="fabExpense" class="fab hidden" type="button" aria-label="Ausgabe erfassen">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    <span>Ausgabe</span>
-  </button>
-
-  <nav class="bottom-nav" aria-label="Hauptnavigation">
-    <button type="button" class="active" data-nav="month" aria-label="Monat">
-      <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 2v4M16 2v4M5 9h14M8 13h3M13 13h3M8 16h3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Monat</span>
-    </button>
-    <button type="button" data-nav="transactions" aria-label="Buchungen">
-      <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h12M6 10h12M6 15h7M6 20h9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Buchungen</span>
-    </button>
-    <button type="button" data-nav="sync" aria-label="Synchronisieren">
-      <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3M18 7l2 2-2 2M6 17l-2-2 2-2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sync</span><span id="syncNavBadge" class="nav-badge hidden">0</span>
-    </button>
-    <button type="button" data-nav="settings" aria-label="Einstellungen">
-      <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5A3.5 3.5 0 1 0 12 15.5 3.5 3.5 0 0 0 12 8.5Zm8 3.5-2.1-.8a6.5 6.5 0 0 0-.5-1.2l.9-2-2.3-2.3-2 .9a6.5 6.5 0 0 0-1.2-.5L12 4H8.8L8 6.1a6.5 6.5 0 0 0-1.2.5l-2-.9L2.5 8l.9 2a6.5 6.5 0 0 0-.5 1.2L.8 12v3.2l2.1.8c.1.4.3.8.5 1.2l-.9 2 2.3 2.3 2-.9c.4.2.8.4 1.2.5l.8 2.1H12l.8-2.1c.4-.1.8-.3 1.2-.5l2 .9 2.3-2.3-.9-2c.2-.4.4-.8.5-1.2l2.1-.8V12Z" transform="scale(.9) translate(1.4,-1.1)" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Einstellungen</span>
-    </button>
-  </nav>
-
-  <dialog id="transactionDialog" class="sheet-dialog">
-    <form id="transactionForm" method="dialog" class="sheet">
-      <div class="sheet-handle" aria-hidden="true"></div>
-      <div class="section-head">
-        <div>
-          <p class="eyebrow" id="transactionDialogEyebrow">Neue Buchung</p>
-          <h2 id="transactionDialogTitle">Ausgabe erfassen</h2>
+        <p class="eyebrow">Capyt · Mobile</p>
+        <h2 id="updateDialogTitle">Neue Version verfügbar</h2>
+        <p
+          id="updateDialogText"
+          class="help">
+          Das Update wurde bereits heruntergeladen. Deine lokalen Pläne und
+          Buchungen bleiben erhalten. Mit „Jetzt aktualisieren“ wird Capyt
+          einmal neu geladen.
+        </p>
+        <div class="update-dialog-actions">
+          <button
+            id="updateLaterButton"
+            type="button">
+            Später
+          </button>
+          <button
+            id="updateNowButton"
+            class="primary"
+            type="button">
+            Jetzt aktualisieren
+          </button>
         </div>
-        <button type="button" class="icon-button" data-close-dialog="transactionDialog" aria-label="Schließen">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        </button>
       </div>
-      <input id="transactionId" type="hidden">
-      <input id="transactionKind" type="hidden" value="budget_expense">
+    </dialog>
 
-      <label class="field amount-field">
-        <span>Betrag</span>
-        <div class="amount-input"><input id="transactionAmount" inputmode="decimal" autocomplete="off" placeholder="0,00" required><span>€</span></div>
-      </label>
+    <div
+      id="toastRegion"
+      class="toast-region"
+      role="status"
+      aria-live="polite"></div>
 
-      <div id="expenseKindSelector" class="segmented" role="group" aria-label="Ausgabenart">
-        <button type="button" class="active" data-expense-kind="budget_expense">Budget</button>
-        <button type="button" data-expense-kind="expense">Sonstige Ausgabe</button>
-      </div>
-
-      <label id="budgetField" class="field"><span>Budget</span><select id="transactionBudget"></select></label>
-      <label id="categoryField" class="field hidden"><span>Kategorie</span><select id="transactionCategory"></select></label>
-      <label class="field"><span>Datum</span><input id="transactionDate" type="date" required></label>
-      <label class="field"><span>Beschreibung <small>optional</small></span><input id="transactionDescription" maxlength="100" autocomplete="off" placeholder="z. B. Einkauf"></label>
-      <label class="field"><span>Notiz <small>optional</small></span><textarea id="transactionNote" rows="2" maxlength="300" placeholder="Kurze Notiz"></textarea></label>
-      <div id="transactionLockNotice" class="notice warn hidden">Diese Buchung wurde bereits bestätigt und kann nicht mehr geändert werden.</div>
-      <div class="sheet-actions">
-        <button id="deleteTransactionButton" class="danger hidden" type="button">Löschen</button><span class="spacer"></span><button type="button" data-close-dialog="transactionDialog">Abbrechen</button><button id="saveTransactionButton" class="primary" value="default">Speichern</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="codeDialog" class="sheet-dialog">
-    <form id="codeForm" method="dialog" class="sheet">
-      <div class="sheet-handle" aria-hidden="true"></div>
-      <div class="section-head">
-        <div><p class="eyebrow">FP1-P</p><h2>Plan-Code eingeben</h2></div>
-        <button type="button" class="icon-button" data-close-dialog="codeDialog" aria-label="Schließen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
-      </div>
-      <label class="field"><span>Synchronisationscode</span><textarea id="planCodeInput" rows="8" spellcheck="false" placeholder="FP1-P-C-…"></textarea></label>
-      <div id="codeDialogError" class="notice error hidden"></div>
-      <div class="sheet-actions"><span class="spacer"></span><button type="button" data-close-dialog="codeDialog">Abbrechen</button><button id="decodePlanCode" class="primary" value="default">Prüfen</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="scannerDialog" class="sheet-dialog scanner-dialog">
-    <div class="sheet scanner-sheet">
-      <div class="sheet-handle" aria-hidden="true"></div>
-      <div class="section-head">
-        <div><p class="eyebrow">Kamera / Foto</p><h2>Plan-QR importieren</h2></div>
-        <button type="button" class="icon-button" id="closeScanner" aria-label="Scanner schließen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
-      </div>
-      <div class="scanner-frame">
-        <video id="scannerVideo" playsinline muted></video>
-        <div class="scanner-guide" aria-hidden="true"></div>
-      </div>
-      <canvas id="scannerCanvas" class="hidden"></canvas>
-      <div id="scannerStatus" class="notice">Kamera wird erst nach deiner Freigabe verwendet.</div>
-      <div class="button-grid">
-        <button id="startScanner" class="primary" type="button">Kamera starten</button>
-        <button id="scannerPhotoButton" type="button">QR-Foto auswählen</button>
-        <button id="scannerPasteFallback" type="button">Textcode eingeben</button>
-      </div>
-      <input id="scannerPhotoInput" class="hidden" type="file" accept="image/*" capture="environment">
-    </div>
-  </dialog>
-
-  <dialog id="updateDialog" class="update-dialog" aria-labelledby="updateDialogTitle" aria-describedby="updateDialogText">
-    <div class="update-dialog-card">
-      <div class="update-icon" aria-hidden="true">↻</div>
-      <p class="eyebrow">Capyt · Mobile</p>
-      <h2 id="updateDialogTitle">Neue Version verfügbar</h2>
-      <p id="updateDialogText" class="help">Das Update wurde bereits heruntergeladen. Deine lokalen Pläne und Buchungen bleiben erhalten. Mit „Jetzt aktualisieren“ wird Capyt einmal neu geladen.</p>
-      <div class="update-dialog-actions">
-        <button id="updateLaterButton" type="button">Später</button>
-        <button id="updateNowButton" class="primary" type="button">Jetzt aktualisieren</button>
-      </div>
-    </div>
-  </dialog>
-
-  <div id="toastRegion" class="toast-region" role="status" aria-live="polite"></div>
-
-  <script src="./assets/vendor/qrcode.min.js"></script>
-  <script src="./assets/vendor/jsQR.js"></script>
-  <script src="./js/pwa-update.js?v=2.1.3"></script>
-  <script type="module" src="./js/app.js"></script>
-</body>
+    <script src="./assets/vendor/qrcode.min.js"></script>
+    <script src="./assets/vendor/jsQR.js"></script>
+    <script src="./js/pwa-update.js?v=2.1.3"></script>
+    <script
+      type="module"
+      src="./js/app.js"></script>
+  </body>
 </html>
