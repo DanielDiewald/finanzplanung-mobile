@@ -1,25 +1,23 @@
-Capyt 2.0 – Test Results
+Capyt 2.1 – Test Results
 ========================
 
 npm test
 --------
-35 tests, 35 passed, 0 failed, 0 skipped.
+48 tests, 48 passed, 0 failed, 0 skipped.
 
 npm run check
 -------------
-Static check OK: 31 precached assets, 2 manifest icons, Safari QR fallback present.
+Static check OK: 40 precached assets, 2 manifest icons, Safari QR fallback present.
 
-JavaScript syntax
------------------
-node --check fuer Mobile-JS, Services, Views, Service Worker, Desktop-Addon und extrahiertes Desktop-Inline-Script: OK.
+Neue Regressionstests
+---------------------
+- Tresor-Fuellstufen und Mindestpuffer-Logik
+- Mobile Umschaltung Finanzlage / Geldverwendung inkl. persistierter Auswahl
+- Desktop-Umschaltung Finanzlage / Geldverwendung
+- Donut-Layout ohne seitenuebergreifendes Sticky-Overlay
+- PWA-Update-Lifecycle, Update-Popup und manuelle Update-Pruefung
+- Erstinstallation ohne unnoetigen Reload
 
-Responsive
-----------
-Mobile:  320, 360, 390, 430, 768, 1024, 1280, 1440 px -> globaler Overflow jeweils 0 px.
-Desktop: 320, 360, 390, 430, 768, 1024, 1280, 1440 px -> globaler Overflow jeweils 0 px; keine Page-JavaScript-Fehler in der Browserpruefung.
-
-Theme
------
-System (bei Dark-System): data-theme=dark, --color-bg=#05060B
-Light:                    data-theme=light, --color-bg=#F4F5FA
-Dark:                     data-theme=dark, --color-bg=#05060B
+Hinweis Browser-E2E
+-------------------
+Der im Ausfuehrungscontainer vorhandene Headless-Chromium-Prozess beendet selbst eine minimale Screenshot-Seite nicht regulaer. Daher wurde fuer diesen Build keine neue automatisierte Browser-Screenshot-Abnahme als bestanden gewertet; die DOM-, Logik-, Syntax- und Strukturtests laufen erfolgreich.

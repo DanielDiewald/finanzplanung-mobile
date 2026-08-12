@@ -332,6 +332,40 @@ h3 { font-size: 1rem; }
 }
 .segmented button { min-width: 0; min-height: 38px; border: 0; border-radius: 10px; background: transparent; color: var(--muted); padding: .44rem .35rem; font-size: .8rem; box-shadow: none; }
 .segmented button.active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow-xs); }
+.financial-visual-tabs { margin-bottom: .65rem; }
+.visual-subtitle { margin: .2rem 0 .2rem; font-size: 1rem; }
+.donut-mode-tabs { margin-top: .55rem; }
+.buffer-visual-view { min-width: 0; }
+.vault-visual {
+  display: grid;
+  gap: .8rem;
+  align-items: center;
+  margin-top: .35rem;
+  padding: .72rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+}
+.vault-image-shell {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 190px;
+  border-radius: var(--radius-md);
+  background: radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 64%);
+}
+.vault-image { width: min(100%, 245px); height: auto; aspect-ratio: 1; object-fit: contain; display: block; filter: drop-shadow(0 12px 22px color-mix(in srgb, var(--text) 14%, transparent)); }
+.vault-status-copy { min-width: 0; text-align: center; }
+.vault-status-label { display: block; font-size: .95rem; line-height: 1.28; }
+.vault-percent { margin-top: .18rem; font-size: clamp(1.8rem, 11vw, 2.7rem); line-height: 1; font-weight: 820; letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
+.vault-progress { height: 9px; overflow: hidden; margin: .65rem 0 .8rem; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--line) 78%, transparent); }
+.vault-progress > span { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--gradient-brand); transition: width var(--transition-medium); }
+.vault-key-values { display: grid; gap: .42rem; text-align: left; }
+.vault-key-values > div { display: flex; align-items: baseline; justify-content: space-between; gap: .85rem; padding-top: .42rem; border-top: 1px solid var(--line); }
+.vault-key-values span { min-width: 0; color: var(--muted); font-size: .72rem; line-height: 1.25; }
+.vault-key-values strong { text-align: right; font-size: .8rem; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.vault-key-values strong.negative { color: var(--danger); }
+.vault-key-values strong.positive { color: var(--ok); }
 .donut-wrap { position: relative; width: min(100%, 360px); margin: .15rem auto .75rem; aspect-ratio: 1; }
 #donutCanvas { width: 100%; height: 100%; display: block; touch-action: manipulation; }
 .donut-center { position: absolute; inset: 50% auto auto 50%; transform: translate(-50%,-50%); width: 43%; text-align: center; pointer-events: none; }
@@ -588,6 +622,21 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 .scanner-frame video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .scanner-guide { position: absolute; inset: 18% 12%; border: 3px solid var(--color-on-dark); border-radius: var(--radius-lg); box-shadow: 0 0 0 999px color-mix(in srgb, var(--color-scanner-background) 32%, transparent); }
 .scanner-sheet .button-grid { grid-template-columns: 1fr; }
+.settings-update-button { margin-top: .8rem; }
+.update-dialog {
+  width: min(calc(100% - 2rem), 440px);
+  max-width: none;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-xl);
+  background: transparent;
+  color: var(--text);
+}
+.update-dialog::backdrop { background: var(--color-backdrop); backdrop-filter: blur(4px); }
+.update-dialog-card { padding: 1.2rem; border: 1px solid var(--line); border-radius: var(--radius-xl); background: var(--elevated); box-shadow: var(--shadow-lg); }
+.update-dialog-card h2 { margin: .2rem 0 .45rem; font-size: 1.18rem; }
+.update-icon { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: .75rem; border-radius: 50%; color: var(--accent); background: var(--accent-2); font-size: 1.55rem; font-weight: 760; }
+.update-dialog-actions { display: grid; grid-template-columns: 1fr 1.35fr; gap: .55rem; margin-top: 1rem; }
 
 /* 13. Toasts ------------------------------------------------------------ */
 .toast-region {
@@ -618,6 +667,8 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 @media (min-width: 620px) {
   .app-main { padding-top: 1.25rem; }
   .metrics-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
+  .vault-visual { grid-template-columns: minmax(210px, .9fr) minmax(0, 1.1fr); padding: .9rem; }
+  .vault-image { width: min(100%, 285px); }
   .metric-label { min-height: 2.4em; }
   .bottom-nav {
     left: 50%;

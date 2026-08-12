@@ -30,8 +30,8 @@ export async function getMeta(key, fallback=null) { const {store:s}=await store(
 export async function setMeta(key,value) { const {tx,store:s}=await store('meta','readwrite'); s.put({key,value}); await txDone(tx); return value; }
 export async function getSettings() {
   let settings = await getMeta('settings', null);
-  if (!settings) { settings={ deviceId:uuid(), deviceName:'', theme:'system', selectedDonutMode:'planned' }; await setMeta('settings',settings); }
-  return { deviceId:settings.deviceId || uuid(), deviceName:String(settings.deviceName||''), theme:['system','light','dark'].includes(settings.theme)?settings.theme:'system', selectedDonutMode:['planned','actual','available'].includes(settings.selectedDonutMode)?settings.selectedDonutMode:'planned' };
+  if (!settings) { settings={ deviceId:uuid(), deviceName:'', theme:'system', selectedMonthVisualMode:'buffer', selectedDonutMode:'planned' }; await setMeta('settings',settings); }
+  return { deviceId:settings.deviceId || uuid(), deviceName:String(settings.deviceName||''), theme:['system','light','dark'].includes(settings.theme)?settings.theme:'system', selectedMonthVisualMode:['buffer','donut'].includes(settings.selectedMonthVisualMode)?settings.selectedMonthVisualMode:'buffer', selectedDonutMode:['planned','actual','available'].includes(settings.selectedDonutMode)?settings.selectedDonutMode:'planned' };
 }
 export async function saveSettings(patch) { const current=await getSettings(); const next={...current,...deepClone(patch)}; if (!next.deviceId) next.deviceId=uuid(); await setMeta('settings',next); return next; }
 

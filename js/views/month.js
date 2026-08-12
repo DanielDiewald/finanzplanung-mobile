@@ -1,4 +1,5 @@
 import { escapeHtml, formatCents, formatDate, formatMonth, percent, setHidden } from '../utils.js';
+import { getBufferVisualState } from '../services/buffer-status.js';
 
 const SEGMENT_TOKEN_BY_KEY = {
   fixed: '--chart-fixed', periodic: '--chart-periodic', loans: '--chart-loans', extra: '--chart-extra', overspend: '--chart-overspend',
@@ -97,7 +98,7 @@ function renderRecentTransactions(plan, transactions, onTransaction) {
   target.querySelectorAll('[data-recent-transaction-id]').forEach(button => button.addEventListener('click', () => onTransaction?.(button.dataset.recentTransactionId)));
 }
 
-export function renderMonth({ display, donutMode = 'planned', selectedSegment = '', recentTransactions = [], onSegment, onBudget, onTransaction }) {
+export function renderMonth({ display, visualMode = 'buffer', donutMode = 'planned', selectedSegment = '', recentTransactions = [], onSegment, onBudget, onTransaction }) {
   const noPlan = document.getElementById('noPlanState'), content = document.getElementById('monthContent'), fab = document.getElementById('fabExpense');
   setHidden(noPlan, Boolean(display));
   setHidden(content, !display);
@@ -121,40 +122,71 @@ export function renderMonth({ display, donutMode = 'planned', selectedSegment = 
   document.getElementById('savingsAssetsValue').textContent = formatCents(p.savingsAssetsCents);
   document.getElementById('totalAssetsValue').textContent = formatCents(p.totalAssetsCents);
 
-  document.querySelectorAll('[data-donut-mode]').forEach(button => {
-    const active = button.dataset.donutMode === donutMode;
+  const activeVisualMode = visualMode === 'donut' ? 'donut' : 'buffer';
+  document.querySelectorAll('[data-month-visual]').forEach(button => {
+    const active = button.dataset.monthVisual === activeVisualMode;
     button.classList.toggle('active', active);
     button.setAttribute('aria-selected', String(active));
   });
-  const data = donutMode === 'actual' ? p.donuts.actual : donutMode === 'available' ? p.availableDonut : p.donuts.planned;
-  document.getElementById('donutTitle').textContent = data.title;
-  document.getElementById('donutCenterLabel').textContent = data.centerLabel;
-  document.getElementById('donutCenterValue').textContent = formatCents(data.totalCents);
-  document.getElementById('donutHelp').textContent = donutMode === 'planned'
-    ? 'Desktop-Werte für die Geldverwendung; lokale Ist-Buchungen ergänzen nur neue tatsächliche Vorgänge und Überziehungen.'
-    : donutMode === 'actual'
-      ? 'Tatsächlicher Vermögensverbrauch laut Desktop plus noch nicht bestätigte mobile Ausgaben.'
-      : 'Aktuell noch verfügbare Beträge in den Budgets. Neue mobile Budgetausgaben werden sofort abgezogen.';
-  const canvas = document.getElementById('donutCanvas');
-  canvas.setAttribute('aria-label', `${data.title}: ${formatCents(data.totalCents)} in ${data.segments.length} Segment${data.segments.length === 1 ? '' : 'en'}.`);
+  setHidden(document.getElementById('bufferVisualView'), activeVisualMode !== 'buffer');
+  setHidden(document.getElementById('donutVisualView'), activeVisualMode !== 'donut');
+  document.getElementById('financialVisualTitle').textContent = activeVisualMode === 'buffer' ? 'Finanzlage' : 'Geldverwendung';
 
-  const legend = document.getElementById('donutLegend');
-  let lastGroup = '';
-  legend.innerHTML = data.segments.length ? data.segments.map((segment, index) => {
-    const title = segment.group !== lastGroup ? `<div class="donut-group-title">${escapeHtml(groupLabel(segment.group))}</div>` : '';
-    lastGroup = segment.group;
-    return `${title}<button type="button" class="donut-row ${selectedSegment === segment.key ? 'active' : ''}" data-segment="${escapeHtml(segment.key)}"><span class="donut-swatch" style="background:${segmentCssColor(segment, index)}"></span><span class="donut-name">${escapeHtml(segment.label)}</span><span class="donut-value">${formatCents(segment.amountCents)}<small>${percent(segment.amountCents, data.totalCents).toFixed(1).replace('.', ',')} %</small></span></button>`;
-  }).join('') : '<div class="empty-inline">Keine Werte für diese Ansicht.</div>';
-  legend.querySelectorAll('[data-segment]').forEach(button => button.addEventListener('click', () => onSegment?.(button.dataset.segment)));
-  drawDonut(canvas, data, selectedSegment, onSegment);
+  const vault = getBufferVisualState(p.normalBalanceCents, p.minimumCashBufferCents);
+  const vaultImage = document.getElementById('vaultImage');
+  vaultImage.src = vault.asset;
+  vaultImage.alt = vault.alt;
+  vaultImage.dataset.stage = vault.stage;
+  document.getElementById('vaultStatusLabel').textContent = vault.status;
+  document.getElementById('vaultPercentValue').textContent = vault.ratioPercent === null ? '–' : `${Math.max(0, Math.round(vault.ratioPercent))} %`;
+  document.getElementById('vaultBalanceValue').textContent = formatCents(p.normalBalanceCents);
+  document.getElementById('vaultBufferValue').textContent = p.minimumCashBufferCents > 0 ? formatCents(p.minimumCashBufferCents) : 'Nicht festgelegt';
+  const vaultDeltaValue = document.getElementById('vaultDeltaValue');
+  vaultDeltaValue.textContent = p.minimumCashBufferCents > 0 ? formatCents(vault.deltaCents) : '–';
+  vaultDeltaValue.classList.toggle('negative', p.minimumCashBufferCents > 0 && vault.deltaCents < 0);
+  vaultDeltaValue.classList.toggle('positive', p.minimumCashBufferCents > 0 && vault.deltaCents >= 0);
+  const vaultProgress = document.querySelector('.vault-progress');
+  const vaultProgressBar = document.getElementById('vaultProgressBar');
+  vaultProgressBar.style.width = `${vault.progressPercent.toFixed(1)}%`;
+  vaultProgress.setAttribute('aria-valuenow', String(Math.round(vault.progressPercent)));
+  vaultProgress.setAttribute('aria-valuetext', vault.ratioPercent === null ? 'Kein Mindestpuffer festgelegt' : `${Math.max(0, Math.round(vault.ratioPercent))} Prozent des Mindestpuffers`);
 
-  const selected = data.segments.find(s => s.key === selectedSegment), details = document.getElementById('donutDetails');
-  if (!selected) {
-    details.innerHTML = '';
-    setHidden(details, true);
-  } else {
-    details.innerHTML = `<h3>${escapeHtml(selected.label)} · ${formatCents(selected.amountCents)}</h3>${selected.details?.length ? `<div>${selected.details.map(d => `<div class="detail-row"><span>${escapeHtml(d.label)}</span><strong>${formatCents(d.amountCents)}</strong></div>`).join('')}</div>` : '<p class="help">Keine weitere Aufschlüsselung vorhanden.</p>'}`;
-    setHidden(details, false);
+  if (activeVisualMode === 'donut') {
+    document.querySelectorAll('[data-donut-mode]').forEach(button => {
+      const active = button.dataset.donutMode === donutMode;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-selected', String(active));
+    });
+    const data = donutMode === 'actual' ? p.donuts.actual : donutMode === 'available' ? p.availableDonut : p.donuts.planned;
+    document.getElementById('donutTitle').textContent = data.title;
+    document.getElementById('donutCenterLabel').textContent = data.centerLabel;
+    document.getElementById('donutCenterValue').textContent = formatCents(data.totalCents);
+    document.getElementById('donutHelp').textContent = donutMode === 'planned'
+      ? 'Desktop-Werte für die Geldverwendung; lokale Ist-Buchungen ergänzen nur neue tatsächliche Vorgänge und Überziehungen.'
+      : donutMode === 'actual'
+        ? 'Tatsächlicher Vermögensverbrauch laut Desktop plus noch nicht bestätigte mobile Ausgaben.'
+        : 'Aktuell noch verfügbare Beträge in den Budgets. Neue mobile Budgetausgaben werden sofort abgezogen.';
+    const canvas = document.getElementById('donutCanvas');
+    canvas.setAttribute('aria-label', `${data.title}: ${formatCents(data.totalCents)} in ${data.segments.length} Segment${data.segments.length === 1 ? '' : 'en'}.`);
+
+    const legend = document.getElementById('donutLegend');
+    let lastGroup = '';
+    legend.innerHTML = data.segments.length ? data.segments.map((segment, index) => {
+      const title = segment.group !== lastGroup ? `<div class="donut-group-title">${escapeHtml(groupLabel(segment.group))}</div>` : '';
+      lastGroup = segment.group;
+      return `${title}<button type="button" class="donut-row ${selectedSegment === segment.key ? 'active' : ''}" data-segment="${escapeHtml(segment.key)}"><span class="donut-swatch" style="background:${segmentCssColor(segment, index)}"></span><span class="donut-name">${escapeHtml(segment.label)}</span><span class="donut-value">${formatCents(segment.amountCents)}<small>${percent(segment.amountCents, data.totalCents).toFixed(1).replace('.', ',')} %</small></span></button>`;
+    }).join('') : '<div class="empty-inline">Keine Werte für diese Ansicht.</div>';
+    legend.querySelectorAll('[data-segment]').forEach(button => button.addEventListener('click', () => onSegment?.(button.dataset.segment)));
+    drawDonut(canvas, data, selectedSegment, onSegment);
+
+    const selected = data.segments.find(s => s.key === selectedSegment), details = document.getElementById('donutDetails');
+    if (!selected) {
+      details.innerHTML = '';
+      setHidden(details, true);
+    } else {
+      details.innerHTML = `<h3>${escapeHtml(selected.label)} · ${formatCents(selected.amountCents)}</h3>${selected.details?.length ? `<div>${selected.details.map(d => `<div class="detail-row"><span>${escapeHtml(d.label)}</span><strong>${formatCents(d.amountCents)}</strong></div>`).join('')}</div>` : '<p class="help">Keine weitere Aufschlüsselung vorhanden.</p>'}`;
+      setHidden(details, false);
+    }
   }
 
   const budgetList = document.getElementById('budgetList');

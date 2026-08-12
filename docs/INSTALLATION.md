@@ -48,7 +48,19 @@ Kamerazugriff wird nur beim Tippen auf QR-Scan angefordert. Fehlt Safaris native
 
 Unterstuetzt der Browser die native Barcode Detection API, wird sie verwendet. Andernfalls kann die App denselben PLAN-QR ueber den JavaScript-Fallback lesen.
 
-## 5. Offline-Verhalten
+
+## 5. PWA aktualisieren
+
+Neue Capyt-Versionen muessen nicht mehr durch Loeschen und erneutes Hinzufuegen der Homescreen-App installiert werden. Sobald ein neuer Service Worker vollstaendig heruntergeladen wurde, zeigt Capyt in der mobilen App ein Dialogfenster **Neue Version verfuegbar**.
+
+- **Jetzt aktualisieren** aktiviert die neue Version und laedt Capyt einmal neu.
+- **Spaeter** laesst die bereits heruntergeladene Version warten. Sobald die alte App-Instanz geschlossen ist, kann der Browser sie automatisch aktivieren; andernfalls wird sie beim naechsten passenden Update-Zeitpunkt angeboten.
+- Unter **Einstellungen -> Capyt · Mobile -> Auf Update pruefen** kann die Pruefung jederzeit manuell angestossen werden.
+- Lokale Plaene, Buchungen und Einstellungen liegen in IndexedDB und werden durch die Service-Worker-Aktualisierung nicht geloescht.
+
+Die automatische Pruefung erfolgt beim App-Start, beim erneuten Online-Gehen und bei der Rueckkehr in die App in angemessenen Abstaenden.
+
+## 6. Offline-Verhalten
 
 Nach erfolgreichem ersten Laden ueber den Service Worker funktionieren ohne Internet:
 
@@ -66,7 +78,7 @@ Nach erfolgreichem ersten Laden ueber den Service Worker funktionieren ohne Inte
 
 Kamera-Scanning benoetigt keinen Server, aber der Browser kann die Kamera-API an einen sicheren Ursprung/HTTPS binden.
 
-## 6. Daten bleiben pro Origin getrennt
+## 7. Daten bleiben pro Origin getrennt
 
 IndexedDB ist an den Ursprung gebunden. Ein Wechsel von beispielsweise
 
@@ -85,7 +97,7 @@ ist fuer den Browser eine andere Installation mit anderer lokaler Datenbank.
 Vor einem Hostingwechsel daher offene Transaktionen zum Desktop synchronisieren oder das lokale JSON-Backup aus den Einstellungen verwenden.
 
 
-## 7. GitHub Pages
+## 8. GitHub Pages
 
 Empfohlen ist die mitgelieferte GitHub-Action:
 

@@ -29,7 +29,7 @@ Capyt unterstuetzt **Hell**, **Dunkel** und **System**. Die Auswahl wird unter `
 
 ## Enthalten
 
-- Mobile Monatsansicht mit **Frei verfuegbar**, Vermoegenskennzahlen, Donut, Budgets und letzten Buchungen
+- Mobile Monatsansicht mit **Frei verfuegbar**, Vermoegenskennzahlen, visuellem Tresor-Pufferstatus, Donut, Budgets und letzten Buchungen
 - Desktop-Dashboard mit KPIs, Planungs-Workspace, Tabellen, Statistik und Backups
 - Kontostand, Budgetvermoegen, Sparvermoegen und Gesamtvermoegen
 - Donut **Geplant**, **Tatsaechlich** und mobile Zusatzansicht **Verfuegbar**
@@ -40,7 +40,7 @@ Capyt unterstuetzt **Hell**, **Dunkel** und **System**. Die Auswahl wird unter `
 - lokales QR-Code-Rendering ohne Online-API
 - Kamera-QR-Scan mit nativem `BarcodeDetector` oder Safari-kompatiblem `jsQR`-Fallback
 - QR-Foto-Import und manueller Code-Import
-- Service Worker / Offline Cache
+- Service Worker / Offline Cache mit **Update-Hinweis und In-App-Aktualisierung** statt Neuinstallation der PWA
 - PWA Manifest und Capyt-App-Icons
 - Tests und FP1-Protokolldokumentation
 
@@ -62,9 +62,11 @@ finanzplanung-mobile/
     router.js
     utils.js
     services/
+      buffer-status.js
     views/
   assets/
     branding/
+    vault/
     vendor/
   desktop-integration/
     Finanzplanung_v10_mobile-sync.html

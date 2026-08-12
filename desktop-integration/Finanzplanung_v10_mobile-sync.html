@@ -85,22 +85,52 @@
     </div>
 
     <div class="panel month-allocation-panel" id="monthAllocationPanel">
-      <div class="toolbar">
+      <div class="toolbar month-visual-toolbar">
         <div>
-          <h2 id="donutHeading" style="margin:0">Geplante Geldverwendung</h2>
-          <p id="donutHelp" class="help" style="margin:.3rem 0 0">Zeigt, wofür normales Guthaben in diesem Monat vorgesehen ist. Tatsächliche Kosten, Rücklagen und Sparen bleiben getrennt erkennbar.</p>
+          <h2 id="monthVisualHeading" style="margin:0">Finanzlage</h2>
+          <p id="monthVisualHelp" class="help" style="margin:.3rem 0 0">Der Tresor zeigt, wie der prognostizierte Monatsendstand im Verhältnis zu deinem gewünschten Mindestpuffer steht.</p>
         </div>
         <span class="spacer"></span>
-        <div class="field" style="min-width:210px"><label for="donutMode">Ansicht</label><select id="donutMode"><option value="allocation">Geldverwendung</option><option value="expenses">Nur tatsächliche Ausgaben</option></select></div>
-      </div>
-      <div class="donut-layout">
-        <div class="chart-box donut-chart-box"><canvas id="monthAllocationChart" role="img" aria-label="Donut-Diagramm zur Geldverwendung des ausgewählten Monats"></canvas></div>
-        <div>
-          <div id="monthAllocationLegend" class="donut-legend"></div>
-          <div id="monthAllocationSummary" class="donut-summary-line"></div>
+        <div class="month-visual-tabs" role="tablist" aria-label="Monatsvisualisierung">
+          <button type="button" class="active" data-month-visual-mode="buffer" role="tab" aria-selected="true">Finanzlage</button>
+          <button type="button" data-month-visual-mode="donut" role="tab" aria-selected="false">Geldverwendung</button>
         </div>
       </div>
-      <div id="monthAllocationDetails" class="donut-details hidden"></div>
+
+      <div id="monthVaultView" class="month-vault-view">
+        <div class="month-vault-image-shell">
+          <img id="monthVaultImage" class="month-vault-image" src="../assets/vault/vault-almost-empty.webp" alt="Tresorstatus">
+        </div>
+        <div class="month-vault-copy">
+          <strong id="monthVaultStatus" class="month-vault-status">Puffer wird berechnet</strong>
+          <div id="monthVaultPercent" class="month-vault-percent">–</div>
+          <div id="monthVaultProgress" class="progress-track month-vault-progress" role="progressbar" aria-label="Mindestpuffer-Füllstand" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
+          <div class="month-vault-values">
+            <div><span>Prognose Monatsende</span><strong id="monthVaultBalance">€ 0,00</strong></div>
+            <div><span>Mindestpuffer</span><strong id="monthVaultBuffer">€ 0,00</strong></div>
+            <div><span>Abstand zum Puffer</span><strong id="monthVaultDelta">€ 0,00</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="monthDonutView" class="hidden">
+        <div class="toolbar donut-mode-toolbar">
+          <div>
+            <h3 id="donutHeading" style="margin:0">Geplante Geldverwendung</h3>
+            <p id="donutHelp" class="help" style="margin:.3rem 0 0">Zeigt, wofür normales Guthaben in diesem Monat vorgesehen ist. Tatsächliche Kosten, Rücklagen und Sparen bleiben getrennt erkennbar.</p>
+          </div>
+          <span class="spacer"></span>
+          <div class="field" style="min-width:210px"><label for="donutMode">Detailansicht</label><select id="donutMode"><option value="allocation">Geldverwendung</option><option value="expenses">Nur tatsächliche Ausgaben</option></select></div>
+        </div>
+        <div class="donut-layout">
+          <div class="chart-box donut-chart-box"><canvas id="monthAllocationChart" role="img" aria-label="Donut-Diagramm zur Geldverwendung des ausgewählten Monats"></canvas></div>
+          <div>
+            <div id="monthAllocationLegend" class="donut-legend"></div>
+            <div id="monthAllocationSummary" class="donut-summary-line"></div>
+          </div>
+        </div>
+        <div id="monthAllocationDetails" class="donut-details hidden"></div>
+      </div>
     </div>
 
     <div class="panel">
@@ -363,12 +393,13 @@ const DEFAULT_STATE = {
   meta: { start: LEGACY_DEFAULT_START, end: LEGACY_DEFAULT_HORIZON, horizon: LEGACY_DEFAULT_HORIZON, statisticsEnd: LEGACY_DEFAULT_HORIZON, currency: "EUR", createdAt: null, startAnchorDate: null, startMonthMode: "legacy", startMonthUseForStatistics: false },
   settings: { baseSalary: "", vacationPay: "", christmasPay: "", openingBalance: "", minimumCashBuffer: 0 },
   forecastSettings: { budgetForecastEnabled: false },
-  statisticsDisplay: { granularity: "auto", visibleRangeMonths: 24, windowStart: null, donutMode: "allocation" },
+  statisticsDisplay: { granularity: "auto", visibleRangeMonths: 24, windowStart: null, monthVisualMode: "buffer", donutMode: "allocation" },
   salaryRaises: [], specialPayRaises: [], recurringCosts: [], loans: [], recurringSavings: [], savingsGoals: [], variableBudgets: [], months: {}
 };
 const INTERVAL_LABELS = { monthly: "monatlich", quarterly: "quartalsweise", yearly: "jährlich" };
 const BONUS_CATEGORIES = new Set(["bonus", "prämie", "praemie", "provision"]);
 const STATISTICS_GRANULARITIES = new Set(["auto", "monthly", "quarterly", "yearly"]);
+const MONTH_VISUAL_MODES = new Set(["buffer", "donut"]);
 const DONUT_MODES = new Set(["allocation", "expenses"]);
 const DONUT_COLOR_TOKENS = Object.freeze({
   fixed: "--chart-fixed", periodic: "--chart-periodic", loans: "--chart-loans", extra: "--chart-extra", overspend: "--chart-overspend",
@@ -620,7 +651,7 @@ function normalizeState(raw) {
   const granularity = STATISTICS_GRANULARITIES.has(sourceDisplay.granularity) ? sourceDisplay.granularity : "auto";
   const rawVisibleRange = firstDefined(sourceDisplay.visibleRangeMonths, sourceDisplay.visibleMonths, 24);
   const visibleRangeMonths = rawVisibleRange === "all" ? "all" : ([12,24,36,60].includes(Number(rawVisibleRange)) ? Number(rawVisibleRange) : 24);
-  base.statisticsDisplay = { ...deepClone(DEFAULT_STATE.statisticsDisplay), ...deepClone(sourceDisplay), granularity, visibleRangeMonths, windowStart: isValidMonth(sourceDisplay.windowStart) ? sourceDisplay.windowStart : null, donutMode: DONUT_MODES.has(sourceDisplay.donutMode) ? sourceDisplay.donutMode : "allocation" };
+  base.statisticsDisplay = { ...deepClone(DEFAULT_STATE.statisticsDisplay), ...deepClone(sourceDisplay), granularity, visibleRangeMonths, windowStart: isValidMonth(sourceDisplay.windowStart) ? sourceDisplay.windowStart : null, monthVisualMode: MONTH_VISUAL_MODES.has(sourceDisplay.monthVisualMode) ? sourceDisplay.monthVisualMode : "buffer", donutMode: DONUT_MODES.has(sourceDisplay.donutMode) ? sourceDisplay.donutMode : "allocation" };
 
   base.salaryRaises = (Array.isArray(source.salaryRaises) ? source.salaryRaises : []).map((item, index) => {
     const x = isPlainObject(item) ? item : {};
@@ -685,6 +716,7 @@ function statisticsDisplaySettings() {
   if (!STATISTICS_GRANULARITIES.has(state.statisticsDisplay.granularity)) state.statisticsDisplay.granularity = "auto";
   const rawRange = state.statisticsDisplay.visibleRangeMonths;
   state.statisticsDisplay.visibleRangeMonths = rawRange === "all" ? "all" : ([12,24,36,60].includes(Number(rawRange)) ? Number(rawRange) : 24);
+  if (!MONTH_VISUAL_MODES.has(state.statisticsDisplay.monthVisualMode)) state.statisticsDisplay.monthVisualMode = "buffer";
   if (!DONUT_MODES.has(state.statisticsDisplay.donutMode)) state.statisticsDisplay.donutMode = "allocation";
   if (!isValidMonth(state.statisticsDisplay.windowStart)) state.statisticsDisplay.windowStart = null;
   return state.statisticsDisplay;
@@ -1313,9 +1345,46 @@ function buildMonthExpenseData(ym, result, options = {}) {
 }
 function donutPercent(amount, total) { return total > 0 ? asNumber(amount) / total * 100 : 0; }
 function donutGroupLabel(group) { return group === "reserve" ? "Reservierungen" : (group === "saving" ? "Sparen / Vermögensverschiebung" : "Tatsächliche Kosten"); }
+function bufferVisualState(balanceValue, minimumBufferValue) {
+  const balance = asNumber(balanceValue), buffer = Math.max(0, asNumber(minimumBufferValue)), delta = roundMoney(balance - buffer);
+  if (!(buffer > 0)) return { stage:"unset", asset:"../assets/vault/vault-almost-empty.webp", status:"Pufferziel noch nicht festgelegt", ratio:null, progress:0, delta, alt:"Tresor als Hinweis: Es ist noch kein Mindestpuffer festgelegt." };
+  const ratio = balance / buffer * 100, progress = Math.max(0, Math.min(100, ratio));
+  if (balance <= 0) return { stage:"empty", asset:"../assets/vault/vault-0.webp", status:"Puffer aufgebraucht", ratio, progress, delta, alt:"Tresorstatus: Puffer aufgebraucht." };
+  if (ratio < 10) return { stage:"almost-empty", asset:"../assets/vault/vault-almost-empty.webp", status:"Nur noch eine kleine Reserve", ratio, progress, delta, alt:`Tresorstatus: Nur noch eine kleine Reserve. Rund ${Math.max(0, Math.round(ratio))} Prozent des Mindestpuffers.` };
+  if (ratio < 25) return { stage:"10", asset:"../assets/vault/vault-10.webp", status:"Der Puffer ist noch sehr dünn", ratio, progress, delta, alt:`Tresorstatus: Der Puffer ist noch sehr dünn. Rund ${Math.round(ratio)} Prozent des Mindestpuffers.` };
+  if (ratio < 50) return { stage:"25", asset:"../assets/vault/vault-25.webp", status:"Die Reserve wächst", ratio, progress, delta, alt:`Tresorstatus: Die Reserve wächst. Rund ${Math.round(ratio)} Prozent des Mindestpuffers.` };
+  if (ratio < 75) return { stage:"50", asset:"../assets/vault/vault-50.webp", status:"Solider Puffer", ratio, progress, delta, alt:`Tresorstatus: Solider Puffer. Rund ${Math.round(ratio)} Prozent des Mindestpuffers.` };
+  if (ratio < 100) return { stage:"75", asset:"../assets/vault/vault-75.webp", status:"Gut abgesichert", ratio, progress, delta, alt:`Tresorstatus: Gut abgesichert. Rund ${Math.round(ratio)} Prozent des Mindestpuffers.` };
+  return { stage:"full", asset:"../assets/vault/vault-100.webp", status:"Pufferziel erreicht", ratio, progress, delta, alt:`Tresorstatus: Pufferziel erreicht. Rund ${Math.round(ratio)} Prozent des Mindestpuffers.` };
+}
+function renderMonthVault(result) {
+  const visual = bufferVisualState(result.effectiveEndingBalance, state.settings.minimumCashBuffer);
+  const image = document.getElementById("monthVaultImage"), progress = document.getElementById("monthVaultProgress"), progressFill = progress && progress.querySelector("span"), delta = document.getElementById("monthVaultDelta");
+  if (!image || !progress || !progressFill || !delta) return;
+  image.src = visual.asset; image.alt = visual.alt; image.dataset.stage = visual.stage;
+  document.getElementById("monthVaultStatus").textContent = visual.status;
+  document.getElementById("monthVaultPercent").textContent = visual.ratio === null ? "–" : `${Math.max(0, Math.round(visual.ratio))} %`;
+  document.getElementById("monthVaultBalance").textContent = money(result.effectiveEndingBalance);
+  document.getElementById("monthVaultBuffer").textContent = asNumber(state.settings.minimumCashBuffer) > 0 ? money(state.settings.minimumCashBuffer) : "Nicht festgelegt";
+  delta.textContent = asNumber(state.settings.minimumCashBuffer) > 0 ? money(visual.delta) : "–";
+  delta.className = asNumber(state.settings.minimumCashBuffer) > 0 ? valueClass(visual.delta) : "";
+  progressFill.style.width = `${visual.progress.toFixed(1)}%`;
+  progress.setAttribute("aria-valuenow", String(Math.round(visual.progress)));
+  progress.setAttribute("aria-valuetext", visual.ratio === null ? "Kein Mindestpuffer festgelegt" : `${Math.max(0, Math.round(visual.ratio))} Prozent des Mindestpuffers`);
+}
 function selectDonutCategory(key) { selectedDonutCategory = key || ""; const r = currentResults()[selectedMonth]; renderMonthAllocation(r, state.months[selectedMonth]); }
 function renderMonthAllocation(result, monthData) {
-  const mode = statisticsDisplaySettings().donutMode, data = mode === "expenses" ? buildMonthExpenseData(selectedMonth, result) : buildMonthAllocationData(selectedMonth, result);
+  const display = statisticsDisplaySettings(), visualMode = display.monthVisualMode === "donut" ? "donut" : "buffer";
+  document.querySelectorAll("[data-month-visual-mode]").forEach(button => { const active = button.dataset.monthVisualMode === visualMode; button.classList.toggle("active", active); button.setAttribute("aria-selected", String(active)); });
+  const vaultView = document.getElementById("monthVaultView"), donutView = document.getElementById("monthDonutView"), visualHeading = document.getElementById("monthVisualHeading"), visualHelp = document.getElementById("monthVisualHelp");
+  if (!vaultView || !donutView || !visualHeading || !visualHelp) return;
+  vaultView.classList.toggle("hidden", visualMode !== "buffer"); donutView.classList.toggle("hidden", visualMode !== "donut");
+  visualHeading.textContent = visualMode === "buffer" ? "Finanzlage" : "Geldverwendung";
+  visualHelp.textContent = visualMode === "buffer" ? "Der Tresor zeigt, wie der prognostizierte Monatsendstand im Verhältnis zu deinem gewünschten Mindestpuffer steht." : "Die Detailansicht zeigt, wofür normales Guthaben verwendet wird beziehungsweise welche tatsächlichen Ausgaben den Monat belasten.";
+  renderMonthVault(result);
+  if (visualMode !== "donut") return;
+
+  const mode = display.donutMode, data = mode === "expenses" ? buildMonthExpenseData(selectedMonth, result) : buildMonthAllocationData(selectedMonth, result);
   const heading = document.getElementById("donutHeading"), modeSelect = document.getElementById("donutMode");
   if (!heading || !modeSelect) return;
   heading.textContent = data.title; modeSelect.value = mode;
@@ -1900,6 +1969,7 @@ document.addEventListener("click", event => {
   const deleteBudgetTx = event.target.closest("[data-delete-budget-tx]"); if (deleteBudgetTx) { deleteBudgetTransaction(deleteBudgetTx.dataset.deleteBudgetTx); return; }
   const closeGoal = event.target.closest("[data-close-goal]"); if (closeGoal) { openGoalCloseDialog(closeGoal.dataset.closeGoal); return; }
   const reopenGoal = event.target.closest("[data-reopen-goal]"); if (reopenGoal) { reopenSavingsGoal(reopenGoal.dataset.reopenGoal); return; }
+  const monthVisual = event.target.closest("[data-month-visual-mode]"); if (monthVisual) { statisticsDisplaySettings().monthVisualMode = MONTH_VISUAL_MODES.has(monthVisual.dataset.monthVisualMode) ? monthVisual.dataset.monthVisualMode : "buffer"; selectedDonutCategory = ""; updateAndSave("Monatsvisualisierung gespeichert"); return; }
   const donutCategory = event.target.closest("[data-donut-category]"); if (donutCategory) { selectDonutCategory(donutCategory.dataset.donutCategory); return; }
 });
 

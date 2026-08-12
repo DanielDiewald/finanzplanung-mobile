@@ -9,7 +9,7 @@ import { renderTransactions } from './views/transactions.js';
 import { renderSync } from './views/sync-view.js';
 import { applyTheme, renderSettings } from './views/settings.js';
 
-const state={ plan:null,transactions:[],settings:null,display:null,pendingPlan:null,donutMode:'planned',selectedSegment:'',transactionFilter:'all',transactionBudgetFilter:'',lastTransactionCode:'',deferredInstall:null };
+const state={ plan:null,transactions:[],settings:null,display:null,pendingPlan:null,monthVisualMode:'buffer',donutMode:'planned',selectedSegment:'',transactionFilter:'all',transactionBudgetFilter:'',lastTransactionCode:'',deferredInstall:null };
 let router;
 const $=id=>document.getElementById(id);
 
@@ -18,11 +18,11 @@ function monthBounds(ym){ const [y,m]=ym.split('-').map(Number);const last=new D
 function activePlanRows(){ return state.plan?state.transactions.filter(t=>t.planId===state.plan.planId):[]; }
 function visibleRows(){ return activePlanRows().filter(t=>!t.deleted); }
 
-async function loadState(){ state.settings=await getSettings(); state.donutMode=state.settings.selectedDonutMode||'planned'; state.plan=await getCurrentPlan(); state.transactions=await listTransactions(); state.display=buildDisplayState(state.plan,state.transactions); }
+async function loadState(){ state.settings=await getSettings(); state.monthVisualMode=state.settings.selectedMonthVisualMode||'buffer'; state.donutMode=state.settings.selectedDonutMode||'planned'; state.plan=await getCurrentPlan(); state.transactions=await listTransactions(); state.display=buildDisplayState(state.plan,state.transactions); }
 async function refresh(){ state.plan=await getCurrentPlan(); state.transactions=await listTransactions(); state.display=buildDisplayState(state.plan,state.transactions); renderAll(); }
 function renderAll(){
   const rows=visibleRows();
-  renderMonth({display:state.display,donutMode:state.donutMode,selectedSegment:state.selectedSegment,recentTransactions:rows,onSegment:key=>{state.selectedSegment=state.selectedSegment===key?'':key;renderAll();},onBudget:id=>openTransaction({kind:'budget_expense',budgetId:id}),onTransaction:id=>openTransaction({id})});
+  renderMonth({display:state.display,visualMode:state.monthVisualMode,donutMode:state.donutMode,selectedSegment:state.selectedSegment,recentTransactions:rows,onSegment:key=>{state.selectedSegment=state.selectedSegment===key?'':key;renderAll();},onBudget:id=>openTransaction({kind:'budget_expense',budgetId:id}),onTransaction:id=>openTransaction({id})});
   renderTransactions({plan:state.plan,transactions:rows,filter:state.transactionFilter,budgetFilter:state.transactionBudgetFilter,onEdit:id=>openTransaction({id})});
   renderSync({plan:state.plan,transactions:state.transactions,pendingPlan:state.pendingPlan,onAcceptPlan:acceptPendingPlan});
   renderSettings(state.settings);
@@ -103,6 +103,7 @@ async function resetData(){if(!confirm('Alle lokalen Pläne, Buchungen und Sync-
 function setupEvents(){
   document.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click',()=>router.go(b.dataset.nav))); document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{router.go(b.dataset.go);if(b.dataset.syncAction==='scan')openScanner();if(b.dataset.syncAction==='paste')openCodeDialog();}));
   document.querySelectorAll('[data-close-dialog]').forEach(b=>b.addEventListener('click',()=>$(b.dataset.closeDialog)?.close()));
+  document.querySelectorAll('[data-month-visual]').forEach(b=>b.addEventListener('click',async()=>{state.monthVisualMode=b.dataset.monthVisual==='donut'?'donut':'buffer';state.selectedSegment='';state.settings=await saveSettings({selectedMonthVisualMode:state.monthVisualMode});renderAll();}));
   document.querySelectorAll('[data-donut-mode]').forEach(b=>b.addEventListener('click',async()=>{state.donutMode=b.dataset.donutMode;state.selectedSegment='';state.settings=await saveSettings({selectedDonutMode:state.donutMode});renderAll();}));
   document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{state.transactionFilter=b.dataset.filter;renderAll();})); $('transactionBudgetFilter').addEventListener('change',e=>{state.transactionBudgetFilter=e.target.value;renderAll();});
   $('fabExpense').addEventListener('click',()=>openTransaction({kind:'budget_expense'}));$('monthAddTransactionButton').addEventListener('click',()=>openTransaction({kind:'budget_expense'}));$('addIncomeButton').addEventListener('click',()=>openTransaction({kind:'income'})); document.querySelectorAll('[data-expense-kind]').forEach(b=>b.addEventListener('click',()=>{setExpenseKind(b.dataset.expenseKind);fillTransactionSelectors();setExpenseKind(b.dataset.expenseKind);}));
@@ -116,9 +117,7 @@ function setupEvents(){
 function updateHeaderSyncStatus(pendingCount=state.plan?pendingSummary(state.transactions,state.plan).count:0){const el=$('headerSyncStatus');if(!el)return;const offline=!navigator.onLine;el.classList.toggle('offline',offline);el.classList.toggle('pending',!offline&&pendingCount>0);const text=el.querySelector('.status-text');if(text)text.textContent=offline?'Offline':!state.plan?'Plan fehlt':pendingCount?`${pendingCount} offen`:'Synchron';}
 function updateNetworkState(){setHidden($('offlineBadge'),navigator.onLine);updateHeaderSyncStatus();}
 async function updateScannerHint(){const capability=await qrScannerCapability();$('cameraSupportHint').textContent=capability.native?'Kamera-QR-Scan wird von diesem Browser nativ unterstützt.':capability.camera?(capability.javascript?'Kamera-QR-Scan nutzt hier den lokalen Safari-kompatiblen JS-Decoder.':'Kamera ist verfügbar; auf Safari wird der JS-QR-Decoder beim Scan geladen.'):'Kamerazugriff ist hier nicht verfügbar. QR-Foto und Textcode bleiben als Importwege verfügbar.';}
-async function registerServiceWorker(){if('serviceWorker'in navigator){try{await navigator.serviceWorker.register('./sw.js',{scope:'./'});}catch(err){console.warn('Service Worker konnte nicht registriert werden.',err);}}}
-
 async function boot(){
-  $('appVersion').textContent=APP_VERSION;await loadState();applyTheme(state.settings.theme);router=createRouter({onChange:view=>setHidden($('fabExpense'),view!=='month'||!state.plan)});setupEvents();updateNetworkState();updateScannerHint();renderAll();registerServiceWorker();
+  $('appVersion').textContent=APP_VERSION;await loadState();applyTheme(state.settings.theme);router=createRouter({onChange:view=>setHidden($('fabExpense'),view!=='month'||!state.plan)});setupEvents();updateNetworkState();updateScannerHint();renderAll();
 }
 boot().catch(err=>{console.error(err);document.body.insertAdjacentHTML('afterbegin',`<div class="fatal">App konnte nicht gestartet werden: ${escapeHtml(err.message)}</div>`);});
