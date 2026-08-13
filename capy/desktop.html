@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Capy · PC</title>
+  <link rel="stylesheet" href="../css/capyt-tokens.css">
+  <link rel="stylesheet" href="./css/desktop.css">
+</head>
+<body>
+  <main class="capy-pc">
+    <section class="hero">
+      <p class="eyebrow">Capyt · Capy</p>
+      <h1 id="title">Capy Vorrat</h1>
+      <p class="help">Am PC verwaltest du nur Vorrat, Coins und Sparbuch. Pflege, Shop und Interaktionen bleiben auf dem Smartphone.</p>
+    </section>
+
+    <div id="disabledNotice" class="notice hidden">Capy ist deaktiviert. Aktiviere die Funktion unter <strong>Grundlagen → Capy-Begleiter</strong>.</div>
+
+    <div id="content" class="grid">
+      <section class="card">
+        <h2>Vorrat &amp; Coins</h2>
+        <div class="metric"><span>Vorrat</span><strong id="stash">0,00 €</strong></div>
+        <div class="metric"><span>Coins</span><strong class="coin-value"><img id="coinIcon" alt=""><span id="coinFallback" class="coin-fallback">C</span><span id="coins">0</span></strong></div>
+        <div class="metric"><span>Coin-Kurs</span><strong id="coinRate">1 Coin / €</strong></div>
+        <div class="field" style="margin-top:1rem">
+          <label for="topUpAmount">Vorrat aufladen</label>
+          <div class="amount"><input id="topUpAmount" inputmode="decimal" placeholder="z. B. 10,00"><button id="topUp" class="primary" type="button">Aufladen &amp; Coins erhalten</button></div>
+        </div>
+        <p id="topUpHint" class="help" style="margin:.65rem 0 0"></p>
+      </section>
+
+      <section class="card">
+        <h2>Sparbuch</h2>
+        <div class="metric"><span>Aktueller Monat</span><strong id="month">–</strong></div>
+        <div class="metric"><span>Budget</span><strong id="budgetName">Capy Vorrat</strong></div>
+        <button id="openMonth" type="button" style="margin-top:1rem">Budget im Monat öffnen</button>
+        <p class="help" style="margin:.65rem 0 0">Aufladungen sind interne Umbuchungen vom normalen Guthaben in den Capy-Vorrat und keine Ausgabe.</p>
+      </section>
+    </div>
+
+    <section id="historyCard" class="card">
+      <h2>Sparbuch-Verlauf</h2>
+      <div id="history" class="history"></div>
+    </section>
+  </main>
+  <script type="module" src="./js/desktop-page.js"></script>
+</body>
+</html>
