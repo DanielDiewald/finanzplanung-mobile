@@ -14,7 +14,10 @@
       "image": "",
       "orientation": "portrait",
       "order": 10,
-      "tags": ["arcade", "quick"],
+      "tags": [
+        "arcade",
+        "quick"
+      ],
       "rewards": {
         "enabled": true,
         "currency": "coins",
@@ -46,6 +49,53 @@
       ]
     },
     {
+      "id": "capy-pong",
+      "name": "Capy Pong",
+      "description": "Pong-Duell gegen ein Rivalen-Capy. Erster bei 5 Punkten gewinnt.",
+      "status": "available",
+      "enabled": true,
+      "version": "1.0.0",
+      "entry": "./projects/capy-pong/index.html",
+      "icon": "🏓",
+      "image": "",
+      "orientation": "portrait",
+      "order": 15,
+      "tags": [
+        "arcade",
+        "versus",
+        "quick"
+      ],
+      "rewards": {
+        "enabled": true,
+        "currency": "coins",
+        "maxCoinsPerRun": 10,
+        "dailyRewardLimit": 50,
+        "cooldownMs": 0,
+        "strategy": {
+          "type": "score",
+          "scorePerCoin": 75
+        }
+      },
+      "resultValidation": {
+        "minScore": 0,
+        "maxScore": 750,
+        "minDurationMs": 1000,
+        "maxDurationMs": 1800000
+      },
+      "capabilities": [
+        "capy.read",
+        "game.storage",
+        "game.score",
+        "coins.reward",
+        "theme.read"
+      ],
+      "offlineAssets": [
+        "./projects/capy-pong/game.js",
+        "./projects/capy-pong/game.css",
+        "./projects/capy-pong/assets/capy.png"
+      ]
+    },
+    {
       "id": "river-ride",
       "name": "River Ride",
       "description": "Eine kleine Flussfahrt mit Capy.",
@@ -57,8 +107,16 @@
       "image": "",
       "orientation": "portrait",
       "order": 20,
-      "tags": ["arcade"],
-      "rewards": { "enabled": false, "currency": "coins", "maxCoinsPerRun": 0, "dailyRewardLimit": 0, "cooldownMs": 0 },
+      "tags": [
+        "arcade"
+      ],
+      "rewards": {
+        "enabled": false,
+        "currency": "coins",
+        "maxCoinsPerRun": 0,
+        "dailyRewardLimit": 0,
+        "cooldownMs": 0
+      },
       "capabilities": []
     },
     {
@@ -73,8 +131,16 @@
       "image": "",
       "orientation": "portrait",
       "order": 30,
-      "tags": ["skill"],
-      "rewards": { "enabled": false, "currency": "coins", "maxCoinsPerRun": 0, "dailyRewardLimit": 0, "cooldownMs": 0 },
+      "tags": [
+        "skill"
+      ],
+      "rewards": {
+        "enabled": false,
+        "currency": "coins",
+        "maxCoinsPerRun": 0,
+        "dailyRewardLimit": 0,
+        "cooldownMs": 0
+      },
       "capabilities": []
     },
     {
@@ -89,18 +155,39 @@
       "image": "",
       "orientation": "portrait",
       "order": 900,
-      "tags": ["internal", "test"],
+      "tags": [
+        "internal",
+        "test"
+      ],
       "rewards": {
         "enabled": true,
         "currency": "coins",
         "maxCoinsPerRun": 3,
         "dailyRewardLimit": 9,
         "cooldownMs": 0,
-        "strategy": { "type": "score", "scorePerCoin": 10 }
+        "strategy": {
+          "type": "score",
+          "scorePerCoin": 10
+        }
       },
-      "resultValidation": { "minScore": 0, "maxScore": 1000, "minDurationMs": 0, "maxDurationMs": 3600000 },
-      "capabilities": ["capy.read", "game.storage", "game.score", "coins.reward", "theme.read", "app.read"],
-      "offlineAssets": ["./projects/bridge-demo/game.js", "./projects/bridge-demo/game.css"]
+      "resultValidation": {
+        "minScore": 0,
+        "maxScore": 1000,
+        "minDurationMs": 0,
+        "maxDurationMs": 3600000
+      },
+      "capabilities": [
+        "capy.read",
+        "game.storage",
+        "game.score",
+        "coins.reward",
+        "theme.read",
+        "app.read"
+      ],
+      "offlineAssets": [
+        "./projects/bridge-demo/game.js",
+        "./projects/bridge-demo/game.css"
+      ]
     }
   ]
 }

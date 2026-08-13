@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="color-scheme" content="light dark">
+  <title>Capy Pong</title>
+  <link rel="stylesheet" href="./game.css">
+</head>
+<body>
+  <main class="game-shell">
+    <header class="scoreboard" aria-label="Spielstand">
+      <div class="competitor competitor--rival">
+        <img src="./assets/capy.png" alt="" class="capy-avatar capy-avatar--rival">
+        <div class="competitor-copy">
+          <span class="competitor-name">Rivalen-Capy</span>
+          <strong id="rivalScore">0</strong>
+        </div>
+      </div>
+
+      <div class="match-copy">
+        <strong>Capy Pong</strong>
+        <span>Erster bei 5</span>
+      </div>
+
+      <div class="competitor competitor--player">
+        <div class="competitor-copy competitor-copy--player">
+          <span id="playerName" class="competitor-name">Dein Capy</span>
+          <strong id="playerScore">0</strong>
+        </div>
+        <img src="./assets/capy.png" alt="" class="capy-avatar">
+      </div>
+    </header>
+
+    <section class="arena-card" aria-label="Capy-Pong-Spielfeld">
+      <canvas id="arena" aria-label="Pong-Spielfeld"></canvas>
+
+      <div id="intro" class="overlay">
+        <div class="duel" aria-hidden="true">
+          <img src="./assets/capy.png" alt="">
+          <span>VS</span>
+          <img src="./assets/capy.png" alt="" class="duel-rival">
+        </div>
+        <h1>Capy Pong</h1>
+        <p id="introText">Ziehe deinen Schläger nach links und rechts. Schlage das Rivalen-Capy zuerst mit 5 Punkten.</p>
+        <div class="stats-line"><span id="winsCopy">Siege: 0</span><span>🏓 KI-Duell</span></div>
+        <button id="startButton" type="button">Match starten</button>
+      </div>
+
+      <div id="pauseOverlay" class="pause-overlay" hidden>
+        <strong>Pausiert</strong>
+      </div>
+
+      <div id="finishOverlay" class="finish-overlay" hidden>
+        <strong id="finishTitle">Match beendet</strong>
+        <span id="finishCopy">Ergebnis wird geprüft …</span>
+      </div>
+    </section>
+
+    <footer class="hint">Schläger ziehen oder ← → verwenden</footer>
+  </main>
+
+  <script src="../../js/game-sdk.js"></script>
+  <script src="./game.js"></script>
+</body>
+</html>
