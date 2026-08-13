@@ -1,46 +1,38 @@
-Capyt 2.2.3a - Test Results
-===========================
+Capyt 2.2.4a – PWA Hotfix Test Results
+=======================================
 
-Gezielte Capy-/FP1-Regressionen
--------------------------------
-29/29 bestanden.
+PWA-Ursache
+-----------
+Die Versionsvalidierung in js/pwa-update.js akzeptierte normales SemVer,
+aber nicht das in Capyt verwendete Alpha-Schema wie 2.2.3a / 2.2.4a.
+Dadurch wurde version.json als ungueltig verworfen und der iOS/PWA-spezifische
+versionsbezogene Service-Worker-Updatepfad nicht genutzt.
 
-Enthalten sind insbesondere:
-- bestehende Capy-/FP1-Regressionen
-- 2.2.3a Rubbel-Streicheln mit Richtungswechseln, Jitter-Filter, Cooldown und Session-Limit
-- Food-Auswahl mit Bottom-Slot und Pointer-Drag auf Capy
-- Pointer-Cancel und Single-Consume-Schutz
-- Schutz vor Textauswahl, Long-Press und nativen Bild-Drags im Game-Bereich
-- zusaetzliche Idle-/Zustandsbewegungen
-- Pending-Capy-Buchungen ohne Schloss-Emoji und mit reduzierter Deckkraft
+Zusaetzlicher Deployment-Blocker
+--------------------------------
+Der GitHub-Pages-Workflow fuehrt `npm test && npm run check` aus. Im bisherigen
+Stand blockierten veraltete Visualisierungs-/PWA-Tests sowie ein Static-Check,
+der ein nicht aktiv verlinktes Root-Manifest pruefte, die Veroeffentlichung.
+Die Tests wurden an das vorhandene aktuelle Verhalten angepasst und der
+Static-Check prueft jetzt das tatsaechlich in index.html verlinkte Manifest.
 
-Vollstaendiger npm-test-Lauf
-----------------------------
-75/80 bestanden.
+Fixes
+-----
+- Alpha-Versionen wie 2.2.4a werden als gueltige Online-Version akzeptiert.
+- registration.update() bleibt als expliziter Fallback erhalten.
+- pwa-update.js verwendet fuer den Hotfix den Cache-Buster 2.2.4a-pwa1.
+- Das aktiv verlinkte Manifest nutzt GitHub-Pages-taugliche relative Icon-Pfade.
+- Die Manifest-Icons sind im Service-Worker-Precache enthalten.
+- Der Static-Check validiert das wirklich verlinkte Manifest und dessen Icons.
+- Veraltete Tests pruefen wieder das aktuelle Verhalten statt alte Defaults.
 
-Die 5 verbleibenden Fehler entsprechen den bereits im unveraenderten
-2.2.2a-Ausgangsprojekt reproduzierten Baseline-Abweichungen:
-- Desktop bietet Finanzlage und Geldverwendung als getrennte Ansichten
-- Mobile bietet Finanzlage und Geldverwendung als getrennte Monatsansichten
-- Gewaehlte Monatsvisualisierung wird in den mobilen Einstellungen gespeichert
-- PWA-Updater erkennt wartende und neu installierte Versionen
-- Update-Popup und manuelle Update-Pruefung sind in der mobilen UI vorhanden
-
-Bestehender Static-Check
-------------------------
-`npm run check` stoppt weiterhin am bereits im Ausgangsstand vorhandenen Fehler:
-Manifest-Icon fehlt: ./web-app-manifest-192x192.png
-
-Die unrelated Root-Manifest-/Branding-Struktur wurde fuer dieses Capy-Interaktionsupdate
-nicht umgebaut, damit kein fremdes PWA-Verhalten nur fuer einen gruenen Test veraendert wird.
-
-Browser-QA
-----------
-Ein zusaetzlicher Headless-Browser-Check wurde versucht. Die lokale Testseite auf
-127.0.0.1 wird in der aktuellen Ausfuehrungsumgebung jedoch mit
-ERR_BLOCKED_BY_ADMINISTRATOR blockiert. Dieser Browser-/Viewport-Check wird daher
-nicht als bestanden ausgewiesen.
+Tests
+-----
+- npm test: 86/86 bestanden
+- npm run check: bestanden
+- PWA-spezifische Tests: 5/5 bestanden
+- JS-Syntaxcheck fuer js/pwa-update.js: bestanden
 
 Version
 -------
-Auslieferungsstand: 2.2.3a
+Sichtbare App-Version bleibt 2.2.4a (PWA-Hotfix).

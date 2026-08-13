@@ -16,7 +16,8 @@ test('Mobile bietet Finanzlage und Geldverwendung als getrennte Monatsansichten'
   for (const required of ['data-month-visual="buffer"', 'data-month-visual="donut"', 'id="bufferVisualView"', 'id="donutVisualView"', 'id="vaultImage"']) {
     assert.ok(html.includes(required), `Mobile UI fehlt ${required}`);
   }
-  assert.ok(month.includes("visualMode = 'buffer'"));
+  assert.ok(month.includes("visualMode = 'donut'"));
+  assert.ok(month.includes("visualMode === 'buffer' ? 'buffer' : 'donut'"));
   assert.ok(month.includes("if (activeVisualMode === 'donut')"));
 });
 
@@ -28,7 +29,7 @@ test('Mobile-Tresor verwendet alle sieben optimierten Bildstufen', () => {
 });
 
 test('Gewaehlte Monatsvisualisierung wird in den mobilen Einstellungen gespeichert', () => {
-  assert.ok(storage.includes("selectedMonthVisualMode:'buffer'"));
+  assert.ok(storage.includes("selectedMonthVisualMode:'donut'"));
   assert.ok(storage.includes("['buffer','donut'].includes(settings.selectedMonthVisualMode)"));
   assert.ok(app.includes("saveSettings({selectedMonthVisualMode:state.monthVisualMode})"));
 });

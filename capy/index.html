@@ -48,6 +48,7 @@
           <div id="dropHint" class="drop-hint" aria-hidden="true">Hier loslassen</div>
           <div id="effectsLayer" class="effects-layer" aria-hidden="true"></div>
           <div id="floatingLayer" class="floating-layer" aria-hidden="true"></div>
+          <div id="feedDragTutorial" class="feed-drag-tutorial hidden" role="status" aria-live="polite"><span aria-hidden="true">↟</span><strong>Futter geben</strong><p>Zieh das ausgewählte Essen unten mit dem Finger auf dein Capy.</p></div>
           <p id="statusHint" class="status-hint">Streichle dein Capy direkt.</p>
         </div>
       </main>
@@ -84,7 +85,7 @@
   <dialog id="inventorySheet" class="bottom-sheet inventory-sheet" data-sheet>
     <section class="sheet-card">
       <div class="sheet-handle" aria-hidden="true"></div>
-      <header class="sheet-head"><div><span class="eyebrow">AUSWÄHLEN ODER ZIEHEN</span><h2>Inventar</h2><p>Food antippen: Es erscheint unten im Spiel. Alternativ kannst du Items direkt auf Capy ziehen.</p></div><button type="button" data-close-sheet aria-label="Inventar schließen">×</button></header>
+      <header class="sheet-head"><div><span class="eyebrow">INVENTAR</span><h2>Inventar</h2><p>Wähle ein Item aus deinem Inventar.</p></div><button type="button" data-close-sheet aria-label="Inventar schließen">×</button></header>
       <div id="inventoryList" class="inventory-grid"></div>
     </section>
   </dialog>

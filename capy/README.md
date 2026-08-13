@@ -1,6 +1,6 @@
 # Capyt · Capy · Alpha
 
-> **Status: Alpha.** Die Capy-Funktionen befinden sich in Version **2.2.3a** in einer Testphase. Die Finanzplanung und die bestehende FP1-/QR-Synchronisation bleiben die Grundlage.
+> **Status: Alpha.** Die Capy-Funktionen befinden sich in Version **2.2.4a** in einer Testphase. Die Finanzplanung und die bestehende FP1-/QR-Synchronisation bleiben die Grundlage.
 
 Der Capy-Begleiter ist weitgehend im Unterordner `capy/` gekapselt. Die Mobile-Ansicht ist als kleines Pet-Game ausgelegt; Desktop bleibt auf Finanz-, Vorrat- und Sync-Aufgaben fokussiert.
 
@@ -19,7 +19,7 @@ Die normale Spielansicht verwendet `100dvh`, Safe-Areas und keinen Body-Scroll. 
 - fester Game-Bottom-Bar für Shop, Inventar, Spielen, Vorrat und Mehr
 - Bottom-Sheets für Shop, Inventar, Vorrat und weitere Aktionen
 
-Der Capy wird direkt mit Pointer Events gestreichelt. In 2.2.3a arbeitet die Interaktion als echte **Rubbelmechanik**: kleine Jitter-Bewegungen werden ignoriert, Richtungswechsel innerhalb einer stabilen Capy-Hitbox werden erkannt und Rewards unterliegen Distanz-, Cooldown- und Session-Limits. Beim erfolgreichen Rubbeln erscheint ausschließlich kompaktes `+X ❤️`-Feedback.
+Der Capy wird direkt mit Pointer Events gestreichelt. In 2.2.4a arbeitet die Interaktion als echte **Rubbelmechanik**: kleine Jitter-Bewegungen werden ignoriert, Richtungswechsel innerhalb einer stabilen Capy-Hitbox werden erkannt und Rewards unterliegen Distanz-, Cooldown- und Session-Limits. Beim erfolgreichen Rubbeln erscheint ausschließlich ein `❤️` ohne Zahl; unterstützte Mobilgeräte geben bei echter Rubbelbewegung zusätzlich einen kurzen Vibrationsimpuls.
 
 Food kann im Inventar angetippt werden. Danach schließt sich das Bottom-Sheet und das ausgewählte Food erscheint in einem eigenen Slot direkt oberhalb der Game-Navigation. Von dort wird es per Pointer-Capture und `position: fixed` Drag-Ghost auf den Capy gezogen. Bewegungsschwelle oder Hold-Delay können den Drag starten; ein Drop außerhalb beziehungsweise `pointercancel` verbraucht kein Item. Direkter Inventar-Drag bleibt für die generische Item-Interaktion erhalten.
 
@@ -73,3 +73,9 @@ Die bestehende FP1-Kommunikation wird erweitert statt ersetzt:
 - Temporärer UI-State wie Pointer, Drag-Ghost, offene Bottom-Sheets oder Partikel wird nicht synchronisiert.
 
 Die Pflege bleibt Mobile-first. Am PC zeigt Capy hauptsächlich Vorrat, Sperrstatus, Auszahlung, Coins, Sparbuch-/Sync-Informationen und den Aktivierungsstatus.
+
+
+## 2.2.4a – Energie & erste Fütterung
+
+- Fällt die Energie unter 10 %, wechselt Capy automatisch in den Schlafzustand. Petting, Spielen und Food bleiben dabei blockiert. Capy wacht automatisch bei mindestens 25 % Energie wieder auf.
+- Die Drag-and-Drop-Erklärung für Food erscheint pro Gerät nur beim ersten Food-Auswählen, zentriert über dem Spiel, und wird lokal als gesehen markiert.

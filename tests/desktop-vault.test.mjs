@@ -12,7 +12,8 @@ test('Desktop bietet Finanzlage und Geldverwendung als getrennte Ansichten', () 
   assert.ok(html.includes('data-month-visual-mode="donut"'));
   assert.ok(html.includes('id="monthVaultView"'));
   assert.ok(html.includes('id="monthDonutView"'));
-  assert.ok(html.includes('monthVisualMode: "buffer"'));
+  assert.ok(html.includes('const MONTH_VISUAL_MODES = new Set(["buffer", "donut"])'));
+  assert.ok(html.includes('monthVisualMode: "donut"'));
 });
 
 test('Desktop-Tresor verwendet alle sieben Fuellstufen', () => {

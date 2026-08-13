@@ -1,3 +1,16 @@
+# Capyt 2.2.4a – Capy Alpha Update
+
+Dieses Update baut auf 2.2.3a auf und aendert gezielt die Mobile-Capy-Interaktion:
+
+- Streichel-Feedback zeigt nur noch ein Herz ohne Zahl; echte Rubbel-Richtungswechsel koennen ueber die Vibration API einen kurzen Haptikimpuls ausloesen.
+- Unter 10 % Energie schlaeft Capy automatisch und regeneriert Energie; ab 25 % wacht er automatisch wieder auf. Der Zustand bleibt Teil des Capy-/FP1-State.
+- Die Food-Drag-and-Drop-Erklaerung erscheint pro Geraet nur einmal, zentriert im Screen. Danach bleibt der normale Food-Bottom-Slot ohne wiederholte Tutorial-Meldung erhalten.
+- Finanzlogik, FP1/QR, Vorrat, Sperrfristen, Deduplizierung, PWA-Struktur und bestehende Capy-Daten bleiben erhalten.
+
+Siehe `TEST_RESULTS.txt` fuer den aktuellen Teststatus.
+
+---
+
 # Capyt 2.0 – Abschlussbericht
 
 ## 1. Neues Capyt-Design
@@ -109,3 +122,12 @@ Gepruefte Token-Aufloesung: System-Dark und Dark verwenden `#05060B`, Light verw
 - Kein `maskable`-Icon ohne offiziell geeignete Asset-Variante (siehe oben).
 - Safari/iOS kann weiterhin den bestehenden jsQR-Fallback benoetigen, wenn `BarcodeDetector` fehlt.
 - FP1 bleibt absichtlich `FP1`; bestehende IDs, Revisionen, Storage Keys und Protokollfelder wurden fuer Rueckwaertskompatibilitaet nicht umbenannt.
+
+
+## 2.2.4a PWA-Hotfix
+
+- Update-Pruefung akzeptiert Capyt-Alpha-Versionen wie `2.2.4a`.
+- `pwa-update.js` wird einmalig mit `2.2.4a-pwa1` cache-gebustet.
+- Das aktive Web-App-Manifest verwendet relative Icon-Pfade fuer GitHub Pages.
+- GitHub-Pages-Deployment ist wieder freigegeben: `npm test` und `npm run check` sind gruen.
+- Bereits festhaengende Handy-PWA nach Deployment einmal vollstaendig schliessen und neu oeffnen.

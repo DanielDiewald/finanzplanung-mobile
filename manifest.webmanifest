@@ -1,12 +1,12 @@
 {
-  "id": "../../",
+  "id": "./",
   "name": "Capyt · Mobile",
   "short_name": "Capyt",
   "description": "Capyt · Mobile – Monatsstand, Budgets, Buchungen und FP1-Synchronisation offline nutzen.",
   "lang": "de-AT",
   "dir": "ltr",
-  "start_url": "../../index.html#/month",
-  "scope": "../../",
+  "start_url": "./index.html#/month",
+  "scope": "./",
   "display": "standalone",
   "display_override": [
     "standalone",
@@ -22,13 +22,13 @@
   ],
   "icons": [
     {
-      "src": "./web-app-manifest-192x192.png",
+      "src": "./assets/favicons/web-app-manifest-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "./web-app-manifest-512x512.png",
+      "src": "./assets/favicons/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

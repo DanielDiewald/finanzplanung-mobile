@@ -1,7 +1,7 @@
 import { formatCents, parseEuroToCents } from '../../js/utils.js';
 import { loadCapyConfig } from './config.js';
 import { addJournal, applyRemoteCapy, availableCoins, loadCapyState, queueCoinOp, saveCapyState, setCapyEnabled, touchCare } from './shared-state.js';
-import { applyElapsedDecay, applyItem, applyPet, applyPlay, canPlay, chooseVisual, currentPhase, genderCopy } from './engine.js';
+import { applyElapsedDecay, applyItem, applyPet, applyPlay, autoSleepThresholds, canPlay, chooseVisual, currentPhase, genderCopy, isCapySleeping, updateAutoSleepState } from './engine.js';
 import { createStashDeposit, loadFinanceContext, stashBalanceCents } from './finance-adapter.js';
 import { consumePetRewardProgress, createPetSession, itemEffectLabel, movePetSession, petRewardForSession, pointInExpandedRect, pointInRect } from './interactions.js';
 
@@ -14,14 +14,16 @@ const els={
   selectedFeedBar:$('selectedFeedBar'),selectedFeedItem:$('selectedFeedItem'),selectedFeedImage:$('selectedFeedImage'),selectedFeedName:$('selectedFeedName'),selectedFeedEffect:$('selectedFeedEffect'),selectedFeedCount:$('selectedFeedCount'),clearSelectedFeed:$('clearSelectedFeed'),
   vorratName:$('vorratName'),stashValue:$('stashValue'),stashLocked:$('stashLocked'),stashWithdrawable:$('stashWithdrawable'),stashUnlockHint:$('stashUnlockHint'),topUpAmount:$('topUpAmount'),coinRewardHint:$('coinRewardHint'),topUpButton:$('topUpButton'),capyTransactions:$('capyTransactions'),pauseCapyButton:$('pauseCapyButton'),
   setupModal:$('setupModal'),nameInput:$('nameInput'),genderInfo:$('genderInfo'),finishSetupButton:$('finishSetupButton'),creatorPreview:$('creatorPreview'),genderButtons:[...document.querySelectorAll('[data-gender]')],
-  sheets:[...document.querySelectorAll('[data-sheet]')],dragGhost:$('dragGhost'),toast:$('toast')
+  sheets:[...document.querySelectorAll('[data-sheet]')],dragGhost:$('dragGhost'),feedDragTutorial:$('feedDragTutorial'),toast:$('toast')
 };
 
 let config,capy,plan=null,transactions=[];
-let runtimeVisual='',runtimeTimer=0,actionClass='',idleTimer=0,idleMotionTimer=0,idleMotionClass='',toastTimer=0,petPulseTimer=0;
+let runtimeVisual='',runtimeTimer=0,actionClass='',idleTimer=0,idleMotionTimer=0,idleMotionClass='',toastTimer=0,petPulseTimer=0,feedTutorialTimer=0,lastPetHapticAt=0;
 let setupGender='männlich';
 let petSession=null,lastPetRewardAt=0;
 let drag=null,selectedFeedItemId='';
+const FEED_DRAG_TUTORIAL_KEY='capyt.capy.feedDragTutorialSeen.v1';
+let feedTutorialSeenThisSession=false;
 
 boot().catch(error=>{
   console.error(error);
@@ -119,7 +121,7 @@ function openSheet(id){
   if(id==='inventorySheet')renderInventory();if(id==='shopSheet')renderShop();if(id==='stashSheet')renderWallet();if(id==='moreSheet')renderJournal();
 }
 
-function petBlocked(){const phase=currentPhase(config.behavior);return phase.key==='night'&&config.behavior.sleep?.blocksPet!==false;}
+function petBlocked(){return isCapySleeping(capy.care,config.behavior,currentPhase(config.behavior))&&config.behavior.sleep?.blocksPet!==false;}
 function onPetDown(event){
   if(event.pointerType==='mouse'&&event.button!==0)return;
   if(!capy.enabled||!capy.care.initialized||config.behavior.petting?.enabled===false)return;
@@ -131,9 +133,10 @@ function onPetDown(event){
 }
 function onPetMove(event){
   if(!petSession||event.pointerId!==petSession.pointerId)return;
-  const rect=els.capyHitbox.getBoundingClientRect(),inside=pointInExpandedRect(event.clientX,event.clientY,rect,config.behavior.petting?.hitPaddingPx||24);
+  const rect=els.capyHitbox.getBoundingClientRect(),inside=pointInExpandedRect(event.clientX,event.clientY,rect,config.behavior.petting?.hitPaddingPx||24),directionChangesBefore=petSession.directionChanges;
   movePetSession(petSession,event.clientX,event.clientY,{inside,movementThreshold:config.behavior.petting?.movementThreshold||8});
   if(inside&&petSession.lastDelta)updatePetReaction(petSession.lastDelta);else clearPetReaction(false);
+  if(inside&&petSession.directionChanges>directionChangesBefore)triggerPetHaptic();
   const now=Date.now(),reward=petRewardForSession(petSession,config.behavior.petting,capy.care.happiness,lastPetRewardAt,now);
   if(reward>0){petSession.awarded+=reward;consumePetRewardProgress(petSession,config.behavior.petting);lastPetRewardAt=now;awardPet(reward);}
   event.preventDefault();
@@ -142,7 +145,12 @@ function awardPet(reward){
   applyPet(capy.care,config.behavior,reward);touchCare(capy);renderNeeds();
   clearTimeout(petPulseTimer);els.capyImage.classList.add('is-pet-reward');
   petPulseTimer=setTimeout(()=>els.capyImage.classList.remove('is-pet-reward'),180);
-  const jitter=(Math.random()-.5)*12;showFloating(`+${reward} ❤️`,58+jitter,34+(Math.random()-.5)*5);
+  const jitter=(Math.random()-.5)*12;showFloating('❤️',58+jitter,34+(Math.random()-.5)*5);
+}
+function triggerPetHaptic(){
+  const ms=Math.max(0,Number(config.behavior.petting?.hapticMs)||0),cooldown=Math.max(0,Number(config.behavior.petting?.hapticCooldownMs)||120),now=Date.now();
+  if(!ms||now-lastPetHapticAt<cooldown||typeof globalThis.navigator?.vibrate!=='function')return;
+  lastPetHapticAt=now;try{globalThis.navigator.vibrate(ms);}catch{}
 }
 function onPetEnd(event){if(!petSession||event.pointerId!==petSession.pointerId)return;void finishPetSession(event.pointerId,false);event.preventDefault();}
 function onPetCancel(event){if(!petSession||event.pointerId!==petSession.pointerId)return;void finishPetSession(event.pointerId,true);}
@@ -165,7 +173,7 @@ function clearPetReaction(resetDirection=true){
 }
 
 async function playCapy(){
-  if(currentPhase(config.behavior).key==='night'&&config.behavior.sleep?.blocksPlay!==false){showToast(`${capy.care.name||'Capy'} schläft.`);return;}
+  if(isCapySleeping(capy.care,config.behavior,currentPhase(config.behavior))&&config.behavior.sleep?.blocksPlay!==false){showToast(`${capy.care.name||'Capy'} schläft.`);return;}
   if(!canPlay(capy.care,config.behavior)){showToast(`${capy.care.name||'Capy'} ist zu müde zum Spielen.`);return;}
   const before={happiness:capy.care.happiness,energy:capy.care.energy};applyPlay(capy.care,config.behavior);addJournal(capy,'play',`${capy.care.name||'Capy'} hat mit dir gespielt.`,config.behavior.maxJournalEntries);touchCare(capy);capy=await saveCapyState(capy);
   animateCapy('capy--play',animationMs('play',760));spawnEffect('sparkle',38,29,true);showFloating(`${signed(capy.care.happiness-before.happiness)} ❤️  ${signed(capy.care.energy-before.energy)} ⚡`,47,31);renderAll();
@@ -212,7 +220,7 @@ function moveItemPointer(event){
   event.preventDefault();
 }
 function positionGhost(x,y){els.dragGhost.style.left=`${x}px`;els.dragGhost.style.top=`${y}px`;}
-function itemUseAllowed(item){const phase=currentPhase(config.behavior);if(item?.type==='food'&&phase.key==='night'&&config.behavior.sleep?.blocksFood!==false)return false;if(item?.type==='toy'&&phase.key==='night'&&config.behavior.sleep?.blocksPlay!==false)return false;return true;}
+function itemUseAllowed(item){const sleeping=isCapySleeping(capy.care,config.behavior,currentPhase(config.behavior));if(item?.type==='food'&&sleeping&&config.behavior.sleep?.blocksFood!==false)return false;if(item?.type==='toy'&&sleeping&&config.behavior.sleep?.blocksPlay!==false)return false;return true;}
 function updateDropTarget(x,y){
   const over=Boolean(drag?.item)&&itemUseAllowed(drag.item)&&pointInRect(x,y,els.capyHitbox.getBoundingClientRect());
   els.scene.classList.toggle('is-drop-active',over);els.capyHitbox.classList.toggle('is-drop-target',over);els.capyImage.classList.toggle('is-drop-target',over);return over;
@@ -243,7 +251,7 @@ function selectFeedItem(item){
   selectedFeedItemId=item.id;
   if($('inventorySheet')?.open)$('inventorySheet').close();
   renderSelectedFeedItem();
-  showToast(`${item.name} ausgewählt · unten greifen und auf ${capy.care.name||'Capy'} ziehen.`);
+  showFeedDragTutorialOnce();
 }
 function renderSelectedFeedItem(){
   const item=config?.items?.find(x=>x.id===selectedFeedItemId),count=item?Math.max(0,Math.floor(Number(capy.care.inventory[item.id])||0)):0;
@@ -253,10 +261,10 @@ function renderSelectedFeedItem(){
 
 async function useItem(item){
   const count=Math.max(0,Math.floor(Number(capy.care.inventory[item.id])||0));if(count<1){showToast(`${item.name} ist nicht mehr im Inventar.`);return;}
-  const phase=currentPhase(config.behavior);
-  if(item.type==='food'&&phase.key==='night'&&config.behavior.sleep?.blocksFood!==false){showToast(`${capy.care.name||'Capy'} schläft gerade.`);return;}
-  if(item.type==='toy'&&phase.key==='night'&&config.behavior.sleep?.blocksPlay!==false){showToast(`${capy.care.name||'Capy'} schläft gerade.`);return;}
-  capy.care.inventory[item.id]=count-1;const delta=applyItem(capy.care,item);addJournal(capy,item.type,`${capy.care.name||'Capy'} hat ${item.name} benutzt.`,config.behavior.maxJournalEntries);touchCare(capy);capy=await saveCapyState(capy);
+  const sleeping=isCapySleeping(capy.care,config.behavior,currentPhase(config.behavior));
+  if(item.type==='food'&&sleeping&&config.behavior.sleep?.blocksFood!==false){showToast(`${capy.care.name||'Capy'} schläft gerade.`);return;}
+  if(item.type==='toy'&&sleeping&&config.behavior.sleep?.blocksPlay!==false){showToast(`${capy.care.name||'Capy'} schläft gerade.`);return;}
+  capy.care.inventory[item.id]=count-1;const delta=applyItem(capy.care,item);updateAutoSleepState(capy.care,config.behavior);addJournal(capy,item.type,`${capy.care.name||'Capy'} hat ${item.name} benutzt.`,config.behavior.maxJournalEntries);touchCare(capy);capy=await saveCapyState(capy);
   if(selectedFeedItemId===item.id&&capy.care.inventory[item.id]<1)selectedFeedItemId='';
   const animation=item.interaction?.animation||'eat';
   if(animation==='eat'){setRuntimeVisual('eating',animationMs('feed',900),'capy--feed');}
@@ -307,10 +315,10 @@ function syncCapyClasses(visual=null){
 
 function scheduleIdleMotion(){
   clearTimeout(idleTimer);clearTimeout(idleMotionTimer);idleMotionClass='';
-  if(!capy?.enabled||!capy?.care?.initialized||globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches)return;
+  if(!capy?.enabled||!capy?.care?.initialized||isCapySleeping(capy.care,config.behavior,currentPhase(config.behavior))||globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches)return;
   const min=Math.max(500,Number(config.behavior.animations?.idleMinDelayMs)||1500),max=Math.max(min,Number(config.behavior.animations?.idleMaxDelayMs)||4500),delay=min+Math.random()*(max-min);
   idleTimer=setTimeout(()=>{
-    if(petSession||drag||runtimeVisual||actionClass){scheduleIdleMotion();return;}
+    if(petSession||drag||runtimeVisual||actionClass||isCapySleeping(capy.care,config.behavior,currentPhase(config.behavior))){scheduleIdleMotion();return;}
     idleMotionClass=chooseIdleMotion();syncCapyClasses();
     idleMotionTimer=setTimeout(()=>{idleMotionClass='';syncCapyClasses();scheduleIdleMotion();},Math.max(240,Number(config.behavior.animations?.idleMotionMs)||700));
   },delay);
@@ -328,11 +336,17 @@ function setNeed(valueEl,barEl,value){const safe=Math.max(0,Math.min(100,Number(
 function vorratName(){return String(plan?.capy?.budgetName||globalThis.CapytCapyNaming?.budgetName(capy.care.name||'Capy')||'Capy-Vorrat');}
 function formatCoin(value){return new Intl.NumberFormat('de-AT',{maximumFractionDigits:0}).format(Math.max(0,Math.floor(Number(value)||0)));}
 function formatDate(value){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(value||'')))return '–';const [y,m,d]=String(value).split('-').map(Number);return new Intl.DateTimeFormat('de-AT',{day:'2-digit',month:'long'}).format(new Date(y,m-1,d));}
-function moodCopy(visual){const name=capy.care.name||'Capy';return {neutral:{label:'Entspannt',hint:`Rubbel ${name} sanft hin und her.`},happy:{label:'Glücklich',hint:`${name} fühlt sich richtig wohl.`},hungry:{label:'Hungrig',hint:`Wähle Food im Inventar und zieh es unten auf ${name}.`},sleepy:{label:'Müde',hint:`${name} wird langsam schläfrig.`},sleeping:{label:'Schläft',hint:`${name} ruht bis zum Morgen.`},eating:{label:'Mampft',hint:`${name} genießt das Item.`},celebrate:{label:'Feiert',hint:`${name} freut sich.`}}[visual]||{label:'Entspannt',hint:`${name} ist da.`};}
+function moodCopy(visual){const name=capy.care.name||'Capy';return {neutral:{label:'Entspannt',hint:`Rubbel ${name} sanft hin und her.`},happy:{label:'Glücklich',hint:`${name} fühlt sich richtig wohl.`},hungry:{label:'Hungrig',hint:`${name} hat Hunger.`},sleepy:{label:'Müde',hint:`${name} wird langsam schläfrig.`},sleeping:{label:'Schläft',hint:capy.care.autoSleeping?`${name} lädt Energie bis ${Math.round(autoSleepThresholds(config.behavior).wakeAt)}% auf.`:`${name} ruht bis zum Morgen.`},eating:{label:'Mampft',hint:`${name} genießt das Item.`},celebrate:{label:'Feiert',hint:`${name} freut sich.`}}[visual]||{label:'Entspannt',hint:`${name} ist da.`};}
 function animateCapy(className,duration){clearTimeout(runtimeTimer);actionClass=className;syncCapyClasses();runtimeTimer=setTimeout(()=>{actionClass='';renderCapy();scheduleIdleMotion();},duration);}
 function setRuntimeVisual(visual,duration,className){runtimeVisual=visual;actionClass=className;clearTimeout(runtimeTimer);renderCapy();runtimeTimer=setTimeout(()=>{runtimeVisual='';actionClass='';renderCapy();scheduleIdleMotion();},duration);}
 function spawnEffect(kind,left,top,large){const img=document.createElement('img');img.src=`./assets/effects/${kind}.png`;img.alt='';img.draggable=false;img.className=`effect effect--${kind}${large?' effect--large':''}`;img.style.left=`${left}%`;img.style.top=`${top}%`;els.effectsLayer.appendChild(img);setTimeout(()=>img.remove(),kind==='zzz'?animationMs('zzz',3300):animationMs('effect',1800));}
 function showFloating(text,left=50,top=50){const el=document.createElement('div');el.className='floating-feedback';el.textContent=text;el.style.left=`${left}%`;el.style.top=`${top}%`;els.floatingLayer.appendChild(el);setTimeout(()=>el.remove(),1400);}
+function feedDragTutorialSeen(){if(feedTutorialSeenThisSession)return true;try{return localStorage.getItem(FEED_DRAG_TUTORIAL_KEY)==='1';}catch{return false;}}
+function showFeedDragTutorialOnce(){
+  if(!els.feedDragTutorial||feedDragTutorialSeen())return;
+  feedTutorialSeenThisSession=true;try{localStorage.setItem(FEED_DRAG_TUTORIAL_KEY,'1');}catch{}
+  clearTimeout(feedTutorialTimer);els.feedDragTutorial.classList.remove('hidden');feedTutorialTimer=setTimeout(()=>els.feedDragTutorial.classList.add('hidden'),3600);
+}
 function showToast(text){clearTimeout(toastTimer);els.toast.textContent=text;els.toast.classList.add('is-visible');toastTimer=setTimeout(()=>els.toast.classList.remove('is-visible'),2800);}
 function effectFeedback(delta){const parts=[];if(delta.hunger)parts.push(`${signed(delta.hunger)} 🍎`);if(delta.happiness)parts.push(`${signed(delta.happiness)} ❤️`);if(delta.energy)parts.push(`${signed(delta.energy)} ⚡`);if(delta.bond)parts.push(`${signed(delta.bond)} ✦`);return parts.join('  ')||'✓';}
 function signed(value){const n=Math.round(Number(value)||0);return `${n>0?'+':''}${n}`;}

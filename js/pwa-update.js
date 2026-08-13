@@ -7,6 +7,9 @@
   const VERSION_URL = './version.json';
   const PAGE_VERSION = document.querySelector('meta[name="capyt-version"]')?.content?.trim() || '';
   const CHECK_INTERVAL_MS = 15 * 60 * 1000;
+  // Capyt verwendet Alpha-Versionen wie 2.2.4a. Diese sind absichtlich
+  // zusaetzlich zu normalem SemVer mit -/+ Suffix erlaubt.
+  const VERSION_PATTERN = /^\d+\.\d+\.\d+(?:[A-Za-z][0-9A-Za-z.-]*)?(?:[-+][0-9A-Za-z.-]+)?$/;
 
   let registration = null;
   let boundRegistration = null;
@@ -78,7 +81,7 @@
     if (!response.ok) throw new Error(`Versionsdatei HTTP ${response.status}`);
     const payload = await response.json();
     const version = String(payload?.version || '').trim();
-    if (!/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(version)) {
+    if (!VERSION_PATTERN.test(version)) {
       throw new Error('Ungueltige Versionsdatei');
     }
     return version;
@@ -157,7 +160,7 @@
       // kleine version.json zeitweise nicht erreichbar ist.
       try {
         if (!registration) await registerVersion(PAGE_VERSION);
-        await registration?.update();
+        if (registration) await registration.update();
         if (registration?.waiting) {
           showUpdate(registration.waiting, { force: revealDeferred });
           return true;

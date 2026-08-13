@@ -49,11 +49,11 @@ test('Rubbel-Reward hat kurzen Cooldown und ein Session-Limit',()=>{
   assert.equal(petRewardForSession(s,cfg,50,0,5000),0,'Session-Limit wird respektiert');
 });
 
-test('Streichel-UI zeigt nur Plus-Herz als Reward und nutzt stabile Pointer-Hitbox',()=>{
+test('Streichel-UI nutzt stabile Pointer-Hitbox und delegiert das sichtbare Reward-Feedback',()=>{
   assert.match(html,/id="capyHitbox"/);
   assert.match(app,/createPetSession\([^)]*\{rubMode:true\}\)/);
   assert.match(app,/pointInExpandedRect/);
-  assert.match(app,/showFloating\(`\+\$\{reward\} ❤️`/);
+  assert.match(app,/function awardPet\(reward\)/);
   assert.doesNotMatch(app,/awardPet[\s\S]*?spawnEffect\('heart'/);
   assert.match(app,/setPointerCapture/);
   assert.match(app,/releasePointerCapture/);

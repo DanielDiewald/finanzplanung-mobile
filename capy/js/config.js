@@ -6,11 +6,11 @@ const FALLBACK_BEHAVIOR={
   decayPerHour:{hunger:3.2,happiness:.8,energyDay:2.2,energyEvening:4.2,energySleepRecovery:9},
   interactions:{play:{minimumEnergy:12,happiness:7,bond:2,energy:-8}},
   petting:{
-    enabled:true,movementThreshold:8,rewardDistance:80,rewardCooldownMs:500,minimumDirectionChanges:1,rubHappinessGain:1,hitPaddingPx:24,maxSessionGain:12,bondGain:1,
+    enabled:true,movementThreshold:8,rewardDistance:80,rewardCooldownMs:500,minimumDirectionChanges:1,rubHappinessGain:1,hitPaddingPx:24,maxSessionGain:12,bondGain:1,hapticMs:12,hapticCooldownMs:120,
     requiredDistance:120,cooldownMs:2500,happinessGain:4
   },
   inventoryDrag:{holdDelayMs:80,movementThreshold:5,returnAnimationMs:180,consumeAnimationMs:140},
-  sleep:{blocksPet:true,blocksPlay:true,blocksFood:true},
+  sleep:{blocksPet:true,blocksPlay:true,blocksFood:true,autoSleepBelowPercent:10,autoWakeAtPercent:25,autoEnergyRecoveryPerHour:9},
   animations:{idleMinDelayMs:1500,idleMaxDelayMs:4500,idleMotionMs:700},
   animationMs:{pet:520,play:760,feed:900,celebrate:1300,effect:1800,zzz:3300},
   decayTickMs:60000,
