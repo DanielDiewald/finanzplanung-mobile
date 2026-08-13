@@ -10,7 +10,7 @@ const FALLBACK_BEHAVIOR={
   room:{backgroundImage:'',backgroundPosition:'center',backgroundSize:'cover'},
   maxJournalEntries:80
 };
-const FALLBACK_ECONOMY={version:1,coinsPerEuro:1,minimumTopUpCents:100,coinImage:'./assets/ui/coins.png',currency:'EUR',vorratCategory:'Capy Vorrat'};
+const FALLBACK_ECONOMY={version:1,coinsPerEuro:1,minimumTopUpCents:100,coinImage:'./assets/ui/coins.png',currency:'EUR',vorratCategory:'Capy Vorrat',stashLockMonths:1};
 const FALLBACK_ITEMS={version:1,items:[]};
 
 async function readJson(path,fallback){

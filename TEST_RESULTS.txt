@@ -1,23 +1,33 @@
-Capyt 2.1 – Test Results
-========================
+Capyt 2.2.1a – Test Results
+===========================
 
 npm test
 --------
-48 tests, 48 passed, 0 failed, 0 skipped.
+60 Tests insgesamt: 55 bestanden, 5 fehlgeschlagen.
+
+Die 5 fehlgeschlagenen Tests sind bereits in der unveraenderten hochgeladenen Version 2.2.0 vorhanden (dort: 52/57):
+- Desktop-Monatsvisualisierung erwartet den alten Default `monthVisualMode: "buffer"`.
+- Mobile-Monatsvisualisierung erwartet den alten Default `visualMode = 'buffer'`.
+- Mobile-Storage-Test erwartet den alten Default `selectedMonthVisualMode:'buffer'`.
+- PWA-Updater-Test erwartet `registration.update()`.
+- PWA-UI-Test ist auf den alten Script-Pfad `js/pwa-update.js?v=2.1.0` fest verdrahtet.
+
+Neue Capy-/FP1-Regressionstests
+-------------------------------
+18/18 gezielte Capy- und Desktop-FP1-Tests bestanden. Geprueft werden unter anderem:
+- Capy-Aktivierung nach FP1-P/QR-Decoding auf Mobile
+- Dark-Mode-Weitergabe vom Desktop an das Capy-Iframe
+- individueller Vorrat-Lock pro Einzahlung und Auszahlung nach Freigabe
+- interne Vorrat-Umbuchungen ohne Vermoegensverlust
+- Coin-Deduplizierung und gekoppelte Coin-Gutschriften
+- Mobile/PC FP1-Kompatibilitaet
 
 npm run check
 -------------
-Static check OK: 40 precached assets, 2 manifest icons, Safari QR fallback present.
+Der vorhandene Static-Check scheitert weiterhin am bereits in der unveraenderten Version 2.2.0 fehlenden Root-Manifest-Icon `./web-app-manifest-192x192.png`.
 
-Neue Regressionstests
----------------------
-- Tresor-Fuellstufen und Mindestpuffer-Logik
-- Mobile Umschaltung Finanzlage / Geldverwendung inkl. persistierter Auswahl
-- Desktop-Umschaltung Finanzlage / Geldverwendung
-- Donut-Layout ohne seitenuebergreifendes Sticky-Overlay
-- PWA-Update-Lifecycle, Update-Popup und manuelle Update-Pruefung
-- Erstinstallation ohne unnoetigen Reload
-
-Hinweis Browser-E2E
--------------------
-Der im Ausfuehrungscontainer vorhandene Headless-Chromium-Prozess beendet selbst eine minimale Screenshot-Seite nicht regulaer. Daher wurde fuer diesen Build keine neue automatisierte Browser-Screenshot-Abnahme als bestanden gewertet; die DOM-, Logik-, Syntax- und Strukturtests laufen erfolgreich.
+Zusaetzliche Strukturpruefung
+----------------------------
+- Alle JavaScript-Dateien syntaktisch gueltig (`node --check`).
+- Alle JSON-Dateien parsebar.
+- Alle 75 in `sw.js` referenzierten lokalen CORE-Pfade vorhanden.

@@ -143,10 +143,11 @@ function normalizeCapyCare(value) {
   };
 }
 function normalizeCapyPlan(value) {
-  if(!value||typeof value!=='object'||Array.isArray(value)) return {enabled:false,budgetId:'',budgetName:'',stashBalanceCents:0,coins:0,acknowledgedCoinOpIds:[],care:null};
+  if(!value||typeof value!=='object'||Array.isArray(value)) return {enabled:false,budgetId:'',budgetName:'',stashBalanceCents:0,withdrawableStashCents:0,lockedStashCents:0,nextUnlockDate:'',stashLockMonths:1,coins:0,acknowledgedCoinOpIds:[],care:null};
+  const nextUnlockDate=value.nextUnlockDate?day(value.nextUnlockDate,'Capy-Freigabedatum'):'';
   return {
     enabled:Boolean(value.enabled),budgetId:str(value.budgetId||'','Capy-Budget-ID',{required:false,max:160}),budgetName:str(value.budgetName||'','Capy-Budgetname',{required:false,max:120}),
-    stashBalanceCents:cents(value.stashBalanceCents??0,'Capy-Vorrat'),coins:int(value.coins??0,'Capy-Coins',{min:0,max:1000000000}),
+    stashBalanceCents:cents(value.stashBalanceCents??0,'Capy-Vorrat'),withdrawableStashCents:cents(value.withdrawableStashCents??0,'Capy auszahlbar',{allowNegative:false}),lockedStashCents:cents(value.lockedStashCents??0,'Capy gesperrt',{allowNegative:false}),nextUnlockDate,stashLockMonths:int(value.stashLockMonths??1,'Capy-Sperrmonate',{min:0,max:120}),coins:int(value.coins??0,'Capy-Coins',{min:0,max:1000000000}),
     acknowledgedCoinOpIds:Array.isArray(value.acknowledgedCoinOpIds)?[...new Set(value.acknowledgedCoinOpIds.map(String).filter(Boolean))].slice(-5000):[],
     care:normalizeCapyCare(value.care)
   };

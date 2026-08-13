@@ -101,3 +101,46 @@ test('Desktop-Bridge erstellt Vorrat erst nach Aktivierung und dedupliziert Coin
   assert.deepEqual(Array.from(state.capy.appliedCoinOps),['spend-1']);
   assert.equal(state.variableBudgets[0].description,'Momo Vorrat');
 });
+
+test('Capy-Vorrat bleibt bis zum individuellen Freigabedatum gesperrt und ist danach auszahlbar',()=>{
+  const bridgeCode=fs.readFileSync(new URL('../capy/js/desktop-bridge.js',import.meta.url),'utf8');
+  const state={
+    meta:{start:'2026-07'},
+    capy:{version:1,enabled:true,budgetId:'capy-vorrat',coins:5,appliedCoinOps:[],care:null},
+    variableBudgets:[{id:'capy-vorrat',description:'Capy Vorrat',category:'Capy Vorrat',amount:0,interval:'monthly',nextDue:'2026-07',startBalance:0,capyManaged:true}],
+    months:{
+      '2026-07':{locked:false,budgetTransactions:[{id:'dep-1',type:'cash_to_budget',budgetId:'capy-vorrat',fromBudgetId:'',toBudgetId:'capy-vorrat',amount:10,date:'2026-07-13',capyUnlockDate:'2026-08-13',note:''}]},
+      '2026-08':{locked:false,budgetTransactions:[]}
+    }
+  };
+  const months=['2026-07','2026-08'];
+  const balanceThrough=ym=>months.filter(m=>m<=ym).reduce((sum,m)=>sum+(state.months[m].budgetTransactions||[]).reduce((s,tx)=>s+(tx.type==='cash_to_budget'?tx.amount:-tx.amount),0),0);
+  const ctx={
+    console,state,selectedMonth:'2026-08',activeView:'capy',location:{hash:''},__CAPY_NOW__:'2026-08-12T12:00:00.000Z',
+    fetch:()=>Promise.reject(new Error('offline test')),
+    document:{getElementById:()=>null,querySelectorAll:()=>[],querySelector:()=>null,documentElement:{dataset:{theme:'dark',themePreference:'dark'}}},
+    isPlainObject:x=>Boolean(x)&&typeof x==='object'&&!Array.isArray(x),asNumber:x=>Number.isFinite(Number(x))?Number(x):0,
+    currentResults:()=>Object.fromEntries(months.map(ym=>[ym,{budgetDetails:{'capy-vorrat':{closingBalance:balanceThrough(ym)}}}])),
+    planningMonths:()=>months,uid:prefix=>`${prefix}-test`,roundMoney:x=>Math.round(x*100)/100,deepClone:x=>structuredClone(x),
+    saveState:()=>{},updateAndSave:()=>{},showView:()=>{}
+  };
+  ctx.globalThis=ctx;
+  vm.runInNewContext(bridgeCode,ctx,{filename:'desktop-bridge-lock.js'});
+  const api=ctx.CapytCapyDesktopBridge;
+  assert.equal(api.lockStatus().lockedCents,1000);
+  assert.equal(api.lockStatus().withdrawableCents,0);
+  assert.throws(()=>api.withdraw(100),/freigegeben/);
+  ctx.__CAPY_NOW__='2026-08-13T12:00:00.000Z';
+  assert.equal(api.lockStatus().withdrawableCents,1000);
+  api.withdraw(600);
+  assert.equal(api.lockStatus().balanceCents,400);
+  assert.equal(api.lockStatus().withdrawableCents,400);
+  assert.equal(state.months['2026-08'].budgetTransactions.at(-1).type,'budget_to_cash');
+});
+
+test('Desktop-Capy uebernimmt das Theme des Elternfensters',()=>{
+  const code=fs.readFileSync(new URL('../capy/js/desktop-page.js',import.meta.url),'utf8');
+  assert.match(code,/parent.*document.*documentElement/);
+  assert.match(code,/dataset\.theme/);
+  assert.match(code,/capyt-capy-refresh/);
+});

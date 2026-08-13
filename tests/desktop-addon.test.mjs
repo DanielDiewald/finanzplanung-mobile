@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import { TextDecoder, TextEncoder } from 'node:util';
 import { buildTransactionPayload, decodeFP1, encodeFP1 } from '../js/services/sync.js';
+import { applyRemoteCapy, defaultCapyState } from '../capy/js/shared-state.js';
 import { webcrypto } from 'node:crypto';
 
 const addon=fs.readFileSync(new URL('../desktop-integration/mobile-sync-addon.js',import.meta.url),'utf8');
@@ -144,4 +145,17 @@ test('Mobile FP1-T wird vom Desktop-Decoder verstanden',async()=>{
   assert.equal(decoded.exportId,'exp-cross');
   assert.equal(decoded.transactions[0].id,'cross-1');
   assert.equal(decoded.transactions[0].amountCents,2990);
+});
+
+
+test('Desktop FP1-P aktiviert Capy nach QR-Decoding auf Mobile',async()=>{
+  const {ctx,api}=makeContext();
+  ctx.CapytCapyDesktopBridge={syncSnapshot:()=>({enabled:true,budgetId:'budget-food',budgetName:'Momo Vorrat',stashBalanceCents:2500,withdrawableStashCents:0,lockedStashCents:2500,nextUnlockDate:'2026-09-13',stashLockMonths:1,coins:12,acknowledgedCoinOpIds:[],care:null})};
+  const code=await api.fp1Encode('P',api.fp1PlanPayload('2026-08'));
+  const decoded=await decodeFP1(code,{expectedType:'P'});
+  const local=applyRemoteCapy(defaultCapyState(),decoded.capy,decoded.acknowledgedExportIds||[]);
+  assert.equal(decoded.capy.enabled,true);
+  assert.equal(local.enabled,true);
+  assert.equal(decoded.capy.lockedStashCents,2500);
+  assert.equal(decoded.capy.nextUnlockDate,'2026-09-13');
 });

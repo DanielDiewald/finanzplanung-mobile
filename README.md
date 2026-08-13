@@ -2,6 +2,11 @@
 
 **Capyt** verbindet die professionelle Desktop-Finanzplanung (**Capyt · Planung**) mit einer mobilen, offline-faehigen Begleit-PWA (**Capyt · Mobile**).
 
+## Version 2.2.1a · Capy Alpha
+
+Der optionale **Capy-Begleiter** befindet sich in dieser Version im **Alpha-Status**. Die Aktivierung wird ueber FP1 vom Desktop auf Mobile synchronisiert. Das verwaltete Budget **`{Capyname} Vorrat`** arbeitet als interne Vermoegensverschiebung; jede neue Einzahlung ist standardmaessig einen Kalendermonat gesperrt und kann danach am Desktop wieder ausgezahlt werden. Details und konfigurierbare Werte stehen in `capy/README.md` und `capy/settings/`.
+
+
 ## Grundprinzip
 
 - **Desktop = Planung und zentrale Berechnung**

@@ -97,6 +97,7 @@ Eine externe Version `FP2` darf inkompatible Transport-/Payload-Aenderungen einf
 | `acknowledgedTransactionIds` | Array<String> | optional | Legacy-/vereinfachte Bestaetigung | `[]` |
 | `acknowledgedExportIds` | Array<String> | optional | vollstaendig verarbeitete T-Exports | `[]` |
 | `lastSync` | Objekt/null | optional | Info zum letzten Desktop-Import | `null` |
+| `capy` | Objekt/null | optional | Capy-Alpha-Status inkl. Aktivierung, Vorrat, Sperrstatus, Coins und Pflege | siehe 5.5 |
 
 ### 5.1 Budget
 
@@ -173,6 +174,26 @@ Damit wird genau eine bestimmte Revision bestaetigt. Hat das Smartphone nach dem
 
 `acknowledgedExportIds` ist zusaetzlich moeglich, wenn ein kompletter Export ohne Fehler verarbeitet wurde.
 
+### 5.5 Capy Alpha (optional)
+
+Das optionale `capy`-Objekt uebertraegt den Desktop-Stand an Mobile. Die Capy-Funktion befindet sich in Version 2.2.1a im Alpha-Status.
+
+| Feld | Typ | Pflicht | Bedeutung |
+|---|---|---:|---|
+| `enabled` | Boolean | ja | Capy-Funktion aktiv/inaktiv; wird beim PLAN-Import auf Mobile uebernommen |
+| `budgetId` | String | optional | ID des verwalteten Capy-Vorrat-Budgets |
+| `budgetName` | String | optional | sichtbarer Budgetname, z. B. `Momo Vorrat` |
+| `stashBalanceCents` | Integer | ja | gesamter aktueller Vorrat |
+| `withdrawableStashCents` | Integer >= 0 | ja | bereits freigegebener, auszahlbarer Anteil |
+| `lockedStashCents` | Integer >= 0 | ja | noch gesperrter Anteil |
+| `nextUnlockDate` | `YYYY-MM-DD`/leer | optional | naechstes Freigabedatum einer gesperrten Einzahlung |
+| `stashLockMonths` | Integer >= 0 | ja | Sperrdauer neuer Einzahlungen in Kalendermonaten; Standard `1` |
+| `coins` | Integer >= 0 | ja | Desktop-Coin-Stand |
+| `acknowledgedCoinOpIds` | Array<String> | optional | bereits vom Desktop verarbeitete Coin-Operationen |
+| `care` | Objekt/null | optional | synchronisierter Pflege-/Inventarzustand |
+
+Die Sperre gilt **pro Einzahlung**. Bei `stashLockMonths = 1` wird beispielsweise eine Einzahlung vom `2026-08-13` am `2026-09-13` freigegeben. Eine Auszahlung wird als interne `budget_to_cash`-Umbuchung am Desktop erfasst und veraendert das Gesamtvermoegen nicht.
+
 # FP1-T: TRANSAKTIONS-CODE
 
 ## 6. TRANSACTION Top-Level
@@ -187,6 +208,7 @@ Damit wird genau eine bestimmte Revision bestaetigt. Hat das Smartphone nach dem
 | `deviceId` | String | ja | lokale stabile Geraete-ID | UUID |
 | `deviceName` | String | optional | nutzerfreundlicher Name | `"iPhone"` |
 | `transactions` | Array | ja | Buchungen/Korrekturen/Loeschungen | siehe unten |
+| `capy` | Objekt/null | optional | Mobile Capy-Alpha-Aenderungen (Coins/Pflege/Aktivierungsbezug) | siehe 7.1 |
 
 Ein alter `basePlanRevision` ist eine Warnung, kein automatischer Datenverlust. Der T-Code uebertraegt keine Planwerte. Der Desktop prueft stattdessen Plan-ID, Budget-ID, Monat, Sperrstatus und Buchungsrevisionen.
 
@@ -201,7 +223,7 @@ Ein alter `basePlanRevision` ist eine Warnung, kein automatischer Datenverlust. 
 | `updatedAt` | ISO-Zeitpunkt | ja | letzte Aenderung |
 | `date` | `YYYY-MM-DD` | ja | Buchungsdatum |
 | `month` | `YYYY-MM` | ja | muss zu `date` passen |
-| `kind` | String | ja | `budget_expense`, `expense`, `income` |
+| `kind` | String | ja | `budget_expense`, `expense`, `income`, `capy_stash_deposit` |
 | `amountCents` | Integer > 0 | ja | positiver Absolutbetrag |
 | `budgetId` | String | bei Budgetausgabe | stabile Desktop-Budget-ID |
 | `category` | String | ja | Kategorie zum Zeitpunkt der Erfassung |
@@ -209,6 +231,12 @@ Ein alter `basePlanRevision` ist eine Warnung, kein automatischer Datenverlust. 
 | `note` | String | optional | Notiz |
 
 Vorzeichen werden nicht im Betrag kodiert. Die Richtung folgt aus `kind`.
+
+### 7.1 Capy Alpha im TRANSAKTIONS-CODE
+
+Das optionale `capy`-Objekt enthaelt `enabled`, `budgetId`, deduplizierbare `coinOps` sowie optional `care`. Mobile Vorrat-Aufladungen werden als Transaktion mit `kind = "capy_stash_deposit"` uebertragen. Der Desktop versieht die uebernommene Einzahlung mit ihrem individuellen Freigabedatum gemaess `stashLockMonths`.
+
+Coin-Operationen koennen ueber `relatedTransactionId` an eine Vorrat-Aufladung gebunden sein. Wird die zugehoerige Finanzbuchung beim Import abgelehnt, darf auch die dazugehoerige Coin-Gutschrift nicht angewendet werden.
 
 ## 8. Duplikatschutz und Korrekturen
 

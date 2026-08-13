@@ -4,5 +4,6 @@
   "minimumTopUpCents": 100,
   "coinImage": "./assets/ui/coins.png",
   "currency": "EUR",
-  "vorratCategory": "Capy Vorrat"
+  "vorratCategory": "Capy Vorrat",
+  "stashLockMonths": 1
 }

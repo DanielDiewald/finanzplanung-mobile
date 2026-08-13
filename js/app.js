@@ -19,15 +19,17 @@ function monthBounds(ym){ const [y,m]=ym.split('-').map(Number);const last=new D
 function activePlanRows(){ return state.plan?state.transactions.filter(t=>t.planId===state.plan.planId):[]; }
 function visibleRows(){ return activePlanRows().filter(t=>!t.deleted && t.kind!=='capy_stash_deposit'); }
 
-async function loadState(){ state.settings=await getSettings(); state.capy=await loadCapyState(); state.monthVisualMode=state.settings.selectedMonthVisualMode||'donut'; state.donutMode=state.settings.selectedDonutMode||'planned'; state.plan=await getCurrentPlan(); state.transactions=await listTransactions(); state.display=buildDisplayState(state.plan,state.transactions); }
-async function refresh(){ state.plan=await getCurrentPlan(); state.transactions=await listTransactions(); state.display=buildDisplayState(state.plan,state.transactions); renderAll(); }
+async function reconcileCapyFromPlan(){ if(!state.plan)return;const remote=state.plan.capy||{enabled:false};state.capy=applyRemoteCapy(state.capy||await loadCapyState(),remote,state.plan.acknowledgedExportIds||[]);state.capy=await saveCapyState(state.capy); }
+async function loadState(){ state.settings=await getSettings(); state.capy=await loadCapyState(); state.monthVisualMode=state.settings.selectedMonthVisualMode||'donut'; state.donutMode=state.settings.selectedDonutMode||'planned'; state.plan=await getCurrentPlan(); state.transactions=await listTransactions(); await reconcileCapyFromPlan(); state.display=buildDisplayState(state.plan,state.transactions); }
+async function refresh(){ state.plan=await getCurrentPlan(); state.transactions=await listTransactions(); await reconcileCapyFromPlan(); state.display=buildDisplayState(state.plan,state.transactions); renderAll(); }
 function renderAll(){
   const rows=visibleRows();
   renderMonth({display:state.display,visualMode:state.monthVisualMode,donutMode:state.donutMode,selectedSegment:state.selectedSegment,recentTransactions:rows,onSegment:key=>{state.selectedSegment=state.selectedSegment===key?'':key;renderAll();},onBudget:id=>openTransaction({kind:'budget_expense',budgetId:id}),onTransaction:id=>openTransaction({id})});
   renderTransactions({plan:state.plan,transactions:rows,filter:state.transactionFilter,budgetFilter:state.transactionBudgetFilter,onEdit:id=>openTransaction({id})});
   renderSync({plan:state.plan,transactions:state.transactions,pendingPlan:state.pendingPlan,onAcceptPlan:acceptPendingPlan,capyPending:capyHasPendingSync(state.capy)});
-  renderSettings(state.settings,{capyEnabled:Boolean(state.plan?.capy?.enabled),capyName:state.capy?.care?.name||''});
-  setHidden($('capyLauncher'),!state.plan?.capy?.enabled);
+  const capyEnabled=Boolean(state.capy?.enabled&&state.plan?.capy?.enabled);
+  renderSettings(state.settings,{capyEnabled,capyName:state.capy?.care?.name||''});
+  setHidden($('capyLauncher'),!capyEnabled);
   const pending=state.plan?pendingSummary(state.transactions,state.plan):{count:0}; const pendingTotal=pending.count+(capyHasPendingSync(state.capy)?1:0);
   const badge=$('syncNavBadge');badge.textContent=String(pendingTotal);setHidden(badge,!pendingTotal);
   updateHeaderSyncStatus(pendingTotal);
@@ -78,7 +80,7 @@ async function acceptPendingPlan(){
   const plan=state.pendingPlan;if(!plan)return;
   if(state.plan&&plan.planId===state.plan.planId&&plan.revision<state.plan.revision&&!confirm(`Planrevision ${plan.revision} ist älter als die gespeicherte Revision ${state.plan.revision}. Trotzdem übernehmen?`))return;
   await savePlan(plan);const confirmed=await markAcknowledged(plan);
-  state.capy=applyRemoteCapy(state.capy,plan.capy||{enabled:false},plan.acknowledgedExportIds||[]);await saveCapyState(state.capy);
+  state.capy=applyRemoteCapy(state.capy,plan.capy||{enabled:false},plan.acknowledgedExportIds||[]);state.capy=await saveCapyState(state.capy);
   await addSyncHistory({planId:plan.planId,type:'plan-import',revision:plan.revision,createdAt:new Date().toISOString(),confirmedTransactions:confirmed});state.pendingPlan=null;await refresh();toast(`Plan übernommen${confirmed?` · ${confirmed} Buchung${confirmed===1?'':'en'} bestätigt`:''}.`);
 }
 
