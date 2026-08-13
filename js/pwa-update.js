@@ -7,7 +7,7 @@
   const VERSION_URL = './version.json';
   const PAGE_VERSION = document.querySelector('meta[name="capyt-version"]')?.content?.trim() || '';
   const CHECK_INTERVAL_MS = 15 * 60 * 1000;
-  // Capyt verwendet Alpha-Versionen wie 2.2.7b. Diese sind absichtlich
+  // Capyt verwendet Alpha-Versionen wie 2.2.8b. Diese sind absichtlich
   // zusaetzlich zu normalem SemVer mit -/+ Suffix erlaubt.
   const VERSION_PATTERN = /^\d+\.\d+\.\d+(?:[A-Za-z][0-9A-Za-z.-]*)?(?:[-+][0-9A-Za-z.-]+)?$/;
 

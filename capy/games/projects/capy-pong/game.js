@@ -57,6 +57,8 @@
     const nextHeight = Math.max(280, rect.height);
     const oldWidth = width || nextWidth;
     const oldHeight = height || nextHeight;
+    const sizeChanged = Math.abs(nextWidth - width) > 0.5 || Math.abs(nextHeight - height) > 0.5;
+
     width = nextWidth;
     height = nextHeight;
 
@@ -75,9 +77,11 @@
     player.y = height - clamp(height * 0.075, 34, 48);
     rival.y = clamp(height * 0.055, 24, 38);
 
-    if (oldWidth > 0 && oldHeight > 0) {
-      ball.x = clamp((ball.x / oldWidth) * width, ball.r, width - ball.r);
-      ball.y = clamp((ball.y / oldHeight) * height, ball.r, height - ball.r);
+    // Do not clamp the ball every animation frame. While a rally is running it
+    // must be allowed to pass a paddle so the goal detector can award a point.
+    if (sizeChanged && oldWidth > 0 && oldHeight > 0) {
+      ball.x = (ball.x / oldWidth) * width;
+      ball.y = (ball.y / oldHeight) * height;
       player.x = clamp((player.x / oldWidth) * width, 0, width - player.w);
       rival.x = clamp((rival.x / oldWidth) * width, 0, width - rival.w);
     }
@@ -186,8 +190,15 @@
     hitPaddle(player, true);
     hitPaddle(rival, false);
 
-    if (ball.y - ball.r > height) scorePoint('rival');
-    else if (ball.y + ball.r < 0) scorePoint('player');
+    // A point is decided as soon as the ball has fully passed the relevant
+    // paddle. This also keeps scoring independent from the visible canvas edge.
+    if (ball.vy > 0 && ball.y - ball.r > player.y + player.h) {
+      scorePoint('rival');
+      return;
+    }
+    if (ball.vy < 0 && ball.y + ball.r < rival.y) {
+      scorePoint('player');
+    }
   }
 
   function roundRect(x, y, w, h, radius) {

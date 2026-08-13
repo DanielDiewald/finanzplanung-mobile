@@ -54,7 +54,7 @@
       "description": "Pong-Duell gegen ein Rivalen-Capy. Erster bei 5 Punkten gewinnt.",
       "status": "available",
       "enabled": true,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "entry": "./projects/capy-pong/index.html",
       "icon": "🏓",
       "image": "",
