@@ -11,6 +11,7 @@
 <script src="../js/theme.js"></script>
 <link rel="stylesheet" href="../css/capyt-tokens.css">
 <link rel="stylesheet" href="../css/desktop.css">
+<link rel="stylesheet" href="../capy/css/desktop-host.css">
 </head>
 <body>
 <div class="desktop-shell">
@@ -26,6 +27,7 @@
       <button data-view="overview" class="active"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6V11h-6v9Zm0-16v5h6V4h-6Z" fill="currentColor"/></svg><span class="nav-label">Monatsübersicht</span></button>
       <button data-view="month"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v3m10-3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Monat</span></button>
       <button data-view="basics"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Grundlagen</span></button>
+      <button id="capyDesktopNav" data-view="capy" class="hidden"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13c0-4 2.8-7 7-7 3.8 0 6.5 2.2 7 5.5.2 1.6-.4 3.1-1.5 4.1-1.3 1.2-3.1 1.9-5.5 1.9H9.5C7 17.5 5 15.8 5 13Zm2.5-5.5L6 4m10.5 3.5L18 4M9 12h.01M15 12h.01" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Capy</span></button>
       <button data-view="dashboard"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9m5 10V5m5 14v-7m5 7V3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="nav-label">Statistik</span></button>
       <button data-view="backup"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 8.48 6M12 7v5l3 2M18 3v5h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Backup &amp; Hilfe</span></button>
     </nav>
@@ -198,6 +200,13 @@
       <p class="help">Startbestände von Budgets und Sparposten werden separat in den jeweiligen Tabellen gepflegt. Sie sind Bestandswerte und werden nicht noch einmal als Einzahlung oder Ausgabe gebucht.</p>
     </div>
 
+    <div class="panel" id="capyFeatureSettings">
+      <p class="topbar-eyebrow">Optional</p>
+      <h2>Capy-Begleiter</h2>
+      <label class="capy-feature-toggle"><input id="capyFeatureEnabled" type="checkbox"><span><strong>Capy aktivieren</strong><br><span class="help">Erstellt und verwaltet das Variable-Budget <strong id="capyFeatureBudgetName">Capy Vorrat</strong>. Der Status wird über FP1 mit Capyt · Mobile synchronisiert.</span></span></label>
+      <p class="help">Nach der Aktivierung erscheint links der Menüpunkt „Capy“. Am PC sind dort nur Vorrat, Coins und Sparbuch verfügbar; die Pflege bleibt auf dem Smartphone.</p>
+    </div>
+
     <div class="panel">
       <div class="toolbar"><h2 style="margin:0">Gehaltserhöhungen</h2><span class="spacer"></span><button data-add="salaryRaises" class="primary">Erhöhung hinzufügen</button></div>
       <p class="help">Ab dem angegebenen Monat ersetzt das neue Gehalt das bisherige reguläre Monatsgehalt. Manuelle Boni verändern das Gehalt nicht.</p>
@@ -239,6 +248,10 @@
       <p class="help">Startbestand, dynamische Restbetragsrate und geplante Verwendung können je Ziel eingestellt werden. Erreichte Ziele werden nicht automatisch endgültig abgeschlossen; der echte Abschluss erfolgt immer bewusst in der Monatsansicht.</p>
       <div id="goalsTable" class="table-wrap"></div>
     </div>
+  </section>
+
+  <section id="view-capy" class="view">
+    <iframe id="capyDesktopFrame" class="capy-desktop-frame" src="../capy/desktop.html" title="Capy Vorrat und Sparbuch"></iframe>
   </section>
 
   <section id="view-dashboard" class="view">
@@ -384,8 +397,8 @@
 "use strict";
 
 const STORAGE_KEY = "cash_finanzplanung_2026_leer_v1";
-const CURRENT_DATA_VERSION = 10;
-const BACKUP_FORMAT_VERSION = 10;
+const CURRENT_DATA_VERSION = 11;
+const BACKUP_FORMAT_VERSION = 11;
 const LEGACY_DEFAULT_START = "2026-08";
 const LEGACY_DEFAULT_HORIZON = "2029-07";
 const DEFAULT_STATE = {
@@ -394,6 +407,7 @@ const DEFAULT_STATE = {
   settings: { baseSalary: "", vacationPay: "", christmasPay: "", openingBalance: "", minimumCashBuffer: 0 },
   forecastSettings: { budgetForecastEnabled: false },
   statisticsDisplay: { granularity: "auto", visibleRangeMonths: 24, windowStart: null, monthVisualMode: "donut", monthVisualDefaultVersion: 2, donutMode: "allocation" },
+  capy: { version: 1, enabled: false, budgetId: "capy-vorrat", coins: 0, appliedCoinOps: [], care: null, updatedAt: null },
   salaryRaises: [], specialPayRaises: [], recurringCosts: [], loans: [], recurringSavings: [], savingsGoals: [], variableBudgets: [], months: {}
 };
 const INTERVAL_LABELS = { monthly: "monatlich", quarterly: "quartalsweise", yearly: "jährlich" };
@@ -1796,12 +1810,13 @@ function renderAll() {
   if (sidebarPlanName) sidebarPlanName.textContent = planLabel;
   document.title = `Capyt · Planung · ${monthName(state.meta.start)}`;
   renderOverview(); renderMonth(); renderBasics(); renderBackup(); if (activeView === "dashboard") renderDashboard();
+  globalThis.CapytCapyDesktopBridge?.renderHost();
 }
 function showView(name) {
   activeView = name;
   for (const el of document.querySelectorAll(".view")) el.classList.toggle("active", el.id === `view-${name}`);
   for (const btn of document.querySelectorAll("nav [data-view]")) btn.classList.toggle("active", btn.dataset.view === name);
-  if (name === "overview") renderOverview(); else if (name === "month") renderMonth(); else if (name === "basics") renderBasics(); else if (name === "dashboard") renderDashboard(); else if (name === "backup") renderBackup();
+  if (name === "overview") renderOverview(); else if (name === "month") renderMonth(); else if (name === "basics") renderBasics(); else if (name === "dashboard") renderDashboard(); else if (name === "backup") renderBackup(); else if (name === "capy") globalThis.CapytCapyDesktopBridge?.renderHost();
   location.hash = name === "month" ? `month=${selectedMonth}` : name;
 }
 function updateAndSave(message = "Automatisch gespeichert") {
@@ -1958,7 +1973,7 @@ function resetToDefaults() { if (!confirm("Alle Änderungen, Monatsbuchungen und
 function routeFromHash() {
   const hash = location.hash.slice(1);
   if (hash.startsWith("month=")) { const ym = hash.slice(6); if (isValidMonth(ym) && compareMonths(ym, state.meta.start) >= 0) { selectedMonth = ym; if (ensurePlanningThrough(ym)) saveState("Planung erweitert"); } showView("month"); }
-  else if (["overview","month","basics","dashboard","backup"].includes(hash)) showView(hash);
+  else if (["overview","month","basics","dashboard","backup","capy"].includes(hash)) showView(hash);
 }
 
 document.addEventListener("click", event => {
@@ -2043,6 +2058,9 @@ if (storageAvailable) saveState("Automatisch gespeichert"); else setSaveStatus("
 if (location.hash) routeFromHash();
 
 </script>
+
+<!-- Capy desktop bridge -->
+<script src="../capy/js/desktop-bridge.js"></script>
 
 <!-- Mobile companion sync adapter (FP1) -->
 <script src="./qrcode.min.js"></script>

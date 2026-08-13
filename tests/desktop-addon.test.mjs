@@ -94,6 +94,32 @@ test('Desktop-Addon importiert zusätzliche Einnahmen/Ausgaben in Desktop-Monats
 });
 
 
+test('Desktop-Addon importiert eine mobile Capy-Vorrat-Aufladung als interne Budget-Umbuchung',()=>{
+  const {api,state}=makeContext();
+  const deposit=tx({id:'capy-topup',kind:'capy_stash_deposit',budgetId:'budget-food',category:'Capy Vorrat',amountCents:1000,description:'Momo Vorrat aufgeladen'});
+  const row=api.fp1Classification(payload([deposit]))[0];
+  assert.equal(row.status,'new');
+  api.fp1ApplyOne(row.tx);
+  assert.equal(state.months['2026-08'].budgetTransactions.length,1);
+  assert.equal(state.months['2026-08'].budgetTransactions[0].type,'cash_to_budget');
+  assert.equal(state.months['2026-08'].budgetTransactions[0].amount,10);
+  api.fp1ApplyOne({...deposit,recordRevision:2,op:'delete'});
+  assert.equal(state.months['2026-08'].budgetTransactions.length,0);
+});
+
+
+test('Capy-Bonuscoins bleiben offen, wenn die verknüpfte Vorrat-Aufladung fehlschlägt',()=>{
+  const {api}=makeContext();
+  const lockedDeposit=tx({id:'locked-capy-topup',kind:'capy_stash_deposit',month:'2026-07',date:'2026-07-31',budgetId:'budget-food',amountCents:1000});
+  const rows=api.fp1Classification(payload([lockedDeposit]));
+  assert.equal(rows[0].status,'error');
+  const capy=api.fp1CapyForRows({coinOps:[
+    {id:'reward-1',delta:10,relatedTransactionId:'locked-capy-topup'},
+    {id:'spend-2',delta:-2,relatedTransactionId:''}
+  ],care:null},rows);
+  assert.deepEqual(Array.from(capy.coinOps,op=>op.id),['spend-2']);
+});
+
 test('Desktop FP1-P wird vom Mobile-Decoder identisch verstanden',async()=>{
   const {api}=makeContext();
   const payload=api.fp1PlanPayload('2026-08');

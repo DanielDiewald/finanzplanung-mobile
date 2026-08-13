@@ -81,7 +81,7 @@ export async function markAcknowledged(plan) {
 }
 
 export async function exportAllData() {
-  return { format:'finanzplanung-mobile-backup', version:1, exportedAt:new Date().toISOString(), currentPlanId:await getMeta('currentPlanId',''), settings:await getSettings(), plans:await listPlans(), transactions:await listTransactions(), syncHistory:await listSyncHistory() };
+  return { format:'finanzplanung-mobile-backup', version:1, exportedAt:new Date().toISOString(), currentPlanId:await getMeta('currentPlanId',''), settings:await getSettings(), capyState:await getMeta('capyState',null), plans:await listPlans(), transactions:await listTransactions(), syncHistory:await listSyncHistory() };
 }
 export async function resetAllData() {
   const db=await openDatabase(); const tx=db.transaction(['plans','transactions','meta','syncHistory'],'readwrite');

@@ -1,4 +1,4 @@
-const VERSION='2.1.6a';
+const VERSION='2.2.0';
 const CACHE=`capyt-v${VERSION}`;
 const VENDOR_CACHE='capyt-vendor-v1';
 const JSQR_CDN='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
@@ -9,6 +9,7 @@ const CORE=[
   './assets/vendor/qrcode.min.js','./assets/vendor/jsQR.js',
   './assets/branding/capyt-logo-master.png','./assets/branding/capyt-32.png','./assets/branding/capyt-48.png','./assets/branding/capyt-180.png','./assets/branding/capyt-192.png','./assets/branding/capyt-512.png',
   './assets/vault/vault-0.webp','./assets/vault/vault-almost-empty.webp','./assets/vault/vault-10.webp','./assets/vault/vault-25.webp','./assets/vault/vault-50.webp','./assets/vault/vault-75.webp','./assets/vault/vault-100.webp',
+  './capy/','./capy/index.html','./capy/desktop.html','./capy/css/capy.css','./capy/css/desktop.css','./capy/css/desktop-host.css','./capy/js/app.js','./capy/js/config.js','./capy/js/engine.js','./capy/js/finance-adapter.js','./capy/js/shared-state.js','./capy/js/desktop-page.js','./capy/js/desktop-bridge.js','./capy/settings/behavior.json','./capy/settings/economy.json','./capy/settings/items.json','./capy/assets/capy/capy-celebrate.png','./capy/assets/capy/capy-eating.png','./capy/assets/capy/capy-happy.png','./capy/assets/capy/capy-hungry.png','./capy/assets/capy/capy-neutral.png','./capy/assets/capy/capy-sleeping.png','./capy/assets/capy/capy-sleepy.png','./capy/assets/effects/coin.png','./capy/assets/effects/confetti.png','./capy/assets/effects/heart.png','./capy/assets/effects/sparkle.png','./capy/assets/effects/zzz.png','./capy/assets/items/apple.png','./capy/assets/items/carrot.png','./capy/assets/items/cucumber.png','./capy/assets/items/melon.png','./capy/assets/items/pumpkin.png','./capy/assets/items/snack.png','./capy/assets/ui/capy-brand.png','./capy/assets/ui/safe-closed.png',
   './desktop-integration/Finanzplanung_v10_mobile-sync.html','./desktop-integration/mobile-sync-addon.js','./desktop-integration/qrcode.min.js'
 ];
 

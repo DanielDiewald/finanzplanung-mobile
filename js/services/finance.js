@@ -15,7 +15,7 @@ export function currentPendingTransactions(transactions, plan) {
 
 export function buildDisplayState(plan, transactions=[]) {
   if(!plan) return null;
-  const out={ plan:deepClone(plan), pending:currentPendingTransactions(transactions,plan), missingBudgetTransactions:[], mobileDelta:{incomeCents:0,otherExpenseCents:0,budgetExpenseCents:0,budgetOverspendCents:0,accountCents:0,normalCents:0,totalAssetsCents:0} };
+  const out={ plan:deepClone(plan), pending:currentPendingTransactions(transactions,plan), missingBudgetTransactions:[], mobileDelta:{incomeCents:0,otherExpenseCents:0,budgetExpenseCents:0,capyDepositCents:0,budgetOverspendCents:0,accountCents:0,normalCents:0,totalAssetsCents:0} };
   out.plan.donuts={ planned:deepClone(plan.donuts.planned), actual:deepClone(plan.donuts.actual) };
   const budgetById=new Map(out.plan.budgets.map(b=>[b.id,b]));
   for(const tx of out.pending) {
@@ -27,6 +27,11 @@ export function buildDisplayState(plan, transactions=[]) {
       out.mobileDelta.otherExpenseCents += tx.amountCents; out.mobileDelta.accountCents -= tx.amountCents; out.mobileDelta.normalCents -= tx.amountCents; out.mobileDelta.totalAssetsCents -= tx.amountCents;
       addSegment(out.plan.donuts.actual,'extra','Zusätzliche Ausgaben',tx.amountCents,DONUT_COLORS.extra,{label:`Mobil: ${label}`},'cost');
       addSegment(out.plan.donuts.planned,'extra','Zusätzliche Ausgaben',tx.amountCents,DONUT_COLORS.extra,{label:`Mobil: ${label}`},'cost');
+    } else if(tx.kind==='capy_stash_deposit') {
+      out.mobileDelta.capyDepositCents += tx.amountCents; out.mobileDelta.normalCents -= tx.amountCents;
+      const budget=budgetById.get(tx.budgetId);
+      if(budget){ budget.availableCents += tx.amountCents; budget.reserveCents += tx.amountCents; }
+      else { out.missingBudgetTransactions.push(tx); }
     } else if(tx.kind==='budget_expense') {
       out.mobileDelta.budgetExpenseCents += tx.amountCents; out.mobileDelta.accountCents -= tx.amountCents; out.mobileDelta.totalAssetsCents -= tx.amountCents;
       const budget=budgetById.get(tx.budgetId);
@@ -64,7 +69,7 @@ export function buildDisplayState(plan, transactions=[]) {
 
 export function transactionsForBudget(transactions,plan,budgetId) { return transactions.filter(t=>t.planId===plan.planId && t.month===plan.month && t.kind==='budget_expense' && t.budgetId===budgetId).sort((a,b)=>String(b.date).localeCompare(String(a.date))); }
 export function pendingSummary(transactions,plan) {
-  const rows=plan ? transactions.filter(t=>t.planId===plan.planId && t.status!=='confirmed') : []; const active=rows.filter(t=>!t.deleted); return { count:rows.length, deletedCount:rows.length-active.length, expensesCents:active.filter(t=>t.kind!=='income').reduce((s,t)=>s+t.amountCents,0), incomeCents:active.filter(t=>t.kind==='income').reduce((s,t)=>s+t.amountCents,0), rows };
+  const rows=plan ? transactions.filter(t=>t.planId===plan.planId && t.status!=='confirmed') : []; const active=rows.filter(t=>!t.deleted); return { count:rows.length, deletedCount:rows.length-active.length, expensesCents:active.filter(t=>['budget_expense','expense'].includes(t.kind)).reduce((s,t)=>s+t.amountCents,0), incomeCents:active.filter(t=>t.kind==='income').reduce((s,t)=>s+t.amountCents,0), capyDepositCents:active.filter(t=>t.kind==='capy_stash_deposit').reduce((s,t)=>s+t.amountCents,0), rows };
 }
 export function groupTransactionsByDate(rows) {
   const map=new Map(); for(const t of rows){ if(!map.has(t.date)) map.set(t.date,[]); map.get(t.date).push(t); } return [...map.entries()].sort((a,b)=>b[0].localeCompare(a[0]));

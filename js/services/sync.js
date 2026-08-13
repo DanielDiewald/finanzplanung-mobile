@@ -55,11 +55,11 @@ function compactPayloadForTransport(type,payload) {
     G:(payload.savingsGoals||[]).map(g=>[g.id,g.name,g.balanceCents,g.targetCents]),
     D:[compactDonutForTransport(payload.donuts?.planned),compactDonutForTransport(payload.donuts?.actual)],
     A:(payload.acknowledgedTransactions||[]).map(a=>[a.id,a.recordRevision]),
-    I:payload.acknowledgedTransactionIds||[],E:payload.acknowledgedExportIds||[],L:payload.lastSync??null
+    I:payload.acknowledgedTransactionIds||[],E:payload.acknowledgedExportIds||[],L:payload.lastSync??null,C:payload.capy??null
   };
   return {
     v:1,t:'T',p:payload.planId,b:payload.basePlanRevision,m:payload.month,e:payload.exportId,g:payload.generatedAt,d:payload.deviceId,n:payload.deviceName||'',
-    T:(payload.transactions||[]).map(x=>[x.id,x.recordRevision,x.op,x.createdAt,x.updatedAt,x.date,x.month,x.kind,x.amountCents,x.budgetId||'',x.category,x.description||'',x.note||''])
+    T:(payload.transactions||[]).map(x=>[x.id,x.recordRevision,x.op,x.createdAt,x.updatedAt,x.date,x.month,x.kind,x.amountCents,x.budgetId||'',x.category,x.description||'',x.note||'']),C:payload.capy??null
   };
 }
 function expandCompactPayload(type,x) {
@@ -70,11 +70,11 @@ function expandCompactPayload(type,x) {
     budgets:(Array.isArray(x.B)?x.B:[]).map(b=>({id:b[0],name:b[1],category:b[2],interval:b[3]||'monthly',plannedCents:b[4],reserveCents:b[5],spentCents:b[6],availableCents:b[7],color:b[8]||''})),
     savingsGoals:(Array.isArray(x.G)?x.G:[]).map(g=>({id:g[0],name:g[1],balanceCents:g[2],targetCents:g[3]})),
     donuts:{planned:expandDonutFromTransport(x.D?.[0]||[],'planned'),actual:expandDonutFromTransport(x.D?.[1]||[],'actual')},
-    acknowledgedTransactions:(Array.isArray(x.A)?x.A:[]).map(a=>({id:a[0],recordRevision:a[1]})),acknowledgedTransactionIds:Array.isArray(x.I)?x.I:[],acknowledgedExportIds:Array.isArray(x.E)?x.E:[],lastSync:x.L??null
+    acknowledgedTransactions:(Array.isArray(x.A)?x.A:[]).map(a=>({id:a[0],recordRevision:a[1]})),acknowledgedTransactionIds:Array.isArray(x.I)?x.I:[],acknowledgedExportIds:Array.isArray(x.E)?x.E:[],lastSync:x.L??null,capy:x.C??null
   };
   return {
     protocolVersion:x.v,type:'T',planId:x.p,basePlanRevision:x.b,month:x.m,exportId:x.e,generatedAt:x.g,deviceId:x.d,deviceName:x.n||'',
-    transactions:(Array.isArray(x.T)?x.T:[]).map(t=>({id:t[0],recordRevision:t[1],op:t[2],createdAt:t[3],updatedAt:t[4],date:t[5],month:t[6],kind:t[7],amountCents:t[8],budgetId:t[9]||'',category:t[10],description:t[11]||'',note:t[12]||''}))
+    transactions:(Array.isArray(x.T)?x.T:[]).map(t=>({id:t[0],recordRevision:t[1],op:t[2],createdAt:t[3],updatedAt:t[4],date:t[5],month:t[6],kind:t[7],amountCents:t[8],budgetId:t[9]||'',category:t[10],description:t[11]||'',note:t[12]||''})),capy:x.C??null
   };
 }
 
@@ -129,6 +129,38 @@ function normalizeDonut(d, mode) {
   return { mode, title:str(x.title|| (mode==='planned'?'Geplante Geldverwendung':'Nur tatsächliche Ausgaben'),'Donut-Titel',{max:160}), centerLabel:str(x.centerLabel|| (mode==='planned'?'Geplant':'Ausgaben'),'Donut-Mitte',{max:80}), centerSubtext:str(x.centerSubtext||'','Donut-Hinweis',{required:false,max:160}), totalCents:x.totalCents==null?totalCalc:cents(x.totalCents,'Donut-Summe',{allowNegative:false}), segments };
 }
 
+function normalizeCapyCare(value) {
+  if(!value||typeof value!=='object'||Array.isArray(value)) return null;
+  const gender=String(value.gender||'');
+  const inventory=value.inventory&&typeof value.inventory==='object'&&!Array.isArray(value.inventory)
+    ? Object.fromEntries(Object.entries(value.inventory).slice(0,200).map(([id,count])=>[String(id).slice(0,100),Math.max(0,Math.min(100000,Math.floor(Number(count)||0)))])) : {};
+  const need=v=>Math.max(0,Math.min(100,Number(v)||0));
+  return {
+    initialized:Boolean(value.initialized),name:str(value.name||'','Capy-Name',{required:false,max:20}),gender:['weiblich','männlich'].includes(gender)?gender:'',
+    hunger:need(value.hunger),happiness:need(value.happiness),energy:need(value.energy),bond:need(value.bond),inventory,
+    lastUpdate:Number.isFinite(Number(value.lastUpdate))?Math.max(0,Number(value.lastUpdate)):Date.now(),
+    updatedAt:value.updatedAt?iso(value.updatedAt,'Capy-Aktualisierung'):new Date(0).toISOString()
+  };
+}
+function normalizeCapyPlan(value) {
+  if(!value||typeof value!=='object'||Array.isArray(value)) return {enabled:false,budgetId:'',budgetName:'',stashBalanceCents:0,coins:0,acknowledgedCoinOpIds:[],care:null};
+  return {
+    enabled:Boolean(value.enabled),budgetId:str(value.budgetId||'','Capy-Budget-ID',{required:false,max:160}),budgetName:str(value.budgetName||'','Capy-Budgetname',{required:false,max:120}),
+    stashBalanceCents:cents(value.stashBalanceCents??0,'Capy-Vorrat'),coins:int(value.coins??0,'Capy-Coins',{min:0,max:1000000000}),
+    acknowledgedCoinOpIds:Array.isArray(value.acknowledgedCoinOpIds)?[...new Set(value.acknowledgedCoinOpIds.map(String).filter(Boolean))].slice(-5000):[],
+    care:normalizeCapyCare(value.care)
+  };
+}
+function normalizeCapySync(value) {
+  if(!value||typeof value!=='object'||Array.isArray(value)) return null;
+  const coinOps=Array.isArray(value.coinOps)?value.coinOps.slice(0,1000).map((op,i)=>({
+    id:str(op?.id,`Capy-Coin-Operation ${i+1}`,{max:160}),delta:int(op?.delta,`Capy-Coin-Änderung ${i+1}`,{min:-1000000,max:1000000}),
+    reason:str(op?.reason||'','Capy-Coin-Grund',{required:false,max:160}),relatedTransactionId:str(op?.relatedTransactionId||'','Capy-Coin-Buchungs-ID',{required:false,max:160}),createdAt:iso(op?.createdAt,`Capy-Coin-Zeitpunkt ${i+1}`)
+  })).filter(op=>op.delta!==0):[];
+  const seen=new Set(); for(const op of coinOps){if(seen.has(op.id))throw new Error(`Doppelte Capy-Coin-Operation: ${op.id}.`);seen.add(op.id);}
+  return {version:1,enabled:Boolean(value.enabled),budgetId:str(value.budgetId||'','Capy-Budget-ID',{required:false,max:160}),coinOps,care:normalizeCapyCare(value.care)};
+}
+
 export function validatePlanPayload(input) {
   if (!input || typeof input!=='object' || Array.isArray(input)) throw new Error('PLAN-CODE enthält kein Objekt.');
   const planId=str(input.planId,'Plan-ID',{max:120}), revision=int(input.revision,'Sync-Revision',{min:0}), ym=month(input.month), createdAt=iso(input.createdAt,'Erstellungszeitpunkt');
@@ -144,24 +176,25 @@ export function validatePlanPayload(input) {
     source:input.source&&typeof input.source==='object'?deepClone(input.source):{},
     accountBalanceCents, normalBalanceCents:cents(input.normalBalanceCents??accountBalanceCents??0,'Normales Guthaben'), freeAvailableCents:cents(input.freeAvailableCents??0,'Frei verfügbar'), minimumCashBufferCents:cents(input.minimumCashBufferCents??0,'Mindestpuffer',{allowNegative:false}), budgetAssetsCents:cents(input.budgetAssetsCents??budgets.reduce((s,b)=>s+b.availableCents,0),'Budgetvermögen'), savingsAssetsCents:cents(input.savingsAssetsCents??0,'Sparvermögen',{allowNegative:false}), totalAssetsCents:cents(input.totalAssetsCents??0,'Gesamtvermögen'), budgets, savingsGoals:goals,
     donuts:{ planned:normalizeDonut(input.donuts?.planned||{},'planned'), actual:normalizeDonut(input.donuts?.actual||{},'actual') },
-    acknowledgedTransactions:Array.isArray(input.acknowledgedTransactions)?input.acknowledgedTransactions.slice(0,5000).map(x=>({id:str(x?.id,'Bestätigte Transaktions-ID',{max:160}),recordRevision:int(x?.recordRevision??1,'Bestätigte Buchungsrevision',{min:1,max:1000000})})):[], acknowledgedTransactionIds:Array.isArray(input.acknowledgedTransactionIds)?[...new Set(input.acknowledgedTransactionIds.map(x=>String(x)).filter(Boolean))].slice(0,5000):[], acknowledgedExportIds:Array.isArray(input.acknowledgedExportIds)?[...new Set(input.acknowledgedExportIds.map(x=>String(x)).filter(Boolean))].slice(0,1000):[], lastSync:input.lastSync&&typeof input.lastSync==='object'?deepClone(input.lastSync):null };
+    acknowledgedTransactions:Array.isArray(input.acknowledgedTransactions)?input.acknowledgedTransactions.slice(0,5000).map(x=>({id:str(x?.id,'Bestätigte Transaktions-ID',{max:160}),recordRevision:int(x?.recordRevision??1,'Bestätigte Buchungsrevision',{min:1,max:1000000})})):[], acknowledgedTransactionIds:Array.isArray(input.acknowledgedTransactionIds)?[...new Set(input.acknowledgedTransactionIds.map(x=>String(x)).filter(Boolean))].slice(0,5000):[], acknowledgedExportIds:Array.isArray(input.acknowledgedExportIds)?[...new Set(input.acknowledgedExportIds.map(x=>String(x)).filter(Boolean))].slice(0,1000):[], lastSync:input.lastSync&&typeof input.lastSync==='object'?deepClone(input.lastSync):null, capy:normalizeCapyPlan(input.capy) };
 }
 
 export function validateMobileTransaction(t,index=0) {
-  if(!t||typeof t!=='object') throw new Error(`Buchung ${index+1} ist ungültig.`); const kind=str(t.kind,'Buchungsart',{max:40}); if(!['budget_expense','expense','income'].includes(kind)) throw new Error(`Unbekannte Buchungsart: ${kind}.`);
+  if(!t||typeof t!=='object') throw new Error(`Buchung ${index+1} ist ungültig.`); const kind=str(t.kind,'Buchungsart',{max:40}); if(!['budget_expense','expense','income','capy_stash_deposit'].includes(kind)) throw new Error(`Unbekannte Buchungsart: ${kind}.`);
   const amountCents=cents(t.amountCents,'Betrag',{allowNegative:false}); if(amountCents<=0) throw new Error('Betrag muss größer als 0 sein.'); const date=day(t.date); const m=month(t.month||date.slice(0,7)); if(m!==date.slice(0,7)) throw new Error('Buchungsmonat und Datum stimmen nicht überein.');
   const op=t.op==='delete'?'delete':'upsert'; const recordRevision=int(t.recordRevision??1,'Buchungsrevision',{min:1,max:1000000});
-  return { id:str(t.id,'Transaktions-ID',{max:160}),recordRevision,op,createdAt:iso(t.createdAt,'Erfassungszeitpunkt'),updatedAt:iso(t.updatedAt||t.createdAt,'Änderungszeitpunkt'),date,month:m,kind,amountCents,budgetId:kind==='budget_expense'?str(t.budgetId,'Budget-ID',{max:160}):'',category:str(t.category||'Sonstiges','Kategorie',{max:120}),description:str(t.description||'','Beschreibung',{required:false,max:100}),note:str(t.note||'','Notiz',{required:false,max:300}) };
+  return { id:str(t.id,'Transaktions-ID',{max:160}),recordRevision,op,createdAt:iso(t.createdAt,'Erfassungszeitpunkt'),updatedAt:iso(t.updatedAt||t.createdAt,'Änderungszeitpunkt'),date,month:m,kind,amountCents,budgetId:['budget_expense','capy_stash_deposit'].includes(kind)?str(t.budgetId,'Budget-ID',{max:160}):'',category:str(t.category||'Sonstiges','Kategorie',{max:120}),description:str(t.description||'','Beschreibung',{required:false,max:100}),note:str(t.note||'','Notiz',{required:false,max:300}) };
 }
 export function validateTransactionPayload(input) {
   if(!input||typeof input!=='object'||Array.isArray(input)) throw new Error('TRANSAKTIONS-CODE enthält kein Objekt.'); if(!Array.isArray(input.transactions)) throw new Error('Transaktionsliste fehlt.');
   const rows=input.transactions.map(validateMobileTransaction); const ids=new Set(); for(const row of rows){ if(ids.has(row.id)) throw new Error(`Doppelte Transaktions-ID im Code: ${row.id}.`); ids.add(row.id); }
-  return { ...deepClone(input),protocolVersion:FP_VERSION,type:'T',planId:str(input.planId,'Plan-ID',{max:120}),basePlanRevision:int(input.basePlanRevision,'Basis-Revision',{min:0}),month:month(input.month),exportId:str(input.exportId||uuid(),'Export-ID',{max:160}),generatedAt:iso(input.generatedAt,'Exportzeitpunkt'),deviceId:str(input.deviceId,'Geräte-ID',{max:160}),deviceName:str(input.deviceName||'','Gerätename',{required:false,max:60}),transactions:rows };
+  return { ...deepClone(input),protocolVersion:FP_VERSION,type:'T',planId:str(input.planId,'Plan-ID',{max:120}),basePlanRevision:int(input.basePlanRevision,'Basis-Revision',{min:0}),month:month(input.month),exportId:str(input.exportId||uuid(),'Export-ID',{max:160}),generatedAt:iso(input.generatedAt,'Exportzeitpunkt'),deviceId:str(input.deviceId,'Geräte-ID',{max:160}),deviceName:str(input.deviceName||'','Gerätename',{required:false,max:60}),transactions:rows,capy:normalizeCapySync(input.capy) };
 }
 
-export function buildTransactionPayload({plan,transactions,settings,exportId=uuid()}) {
-  if(!plan) throw new Error('Kein Plan vorhanden.'); if(!transactions?.length) throw new Error('Keine nicht bestätigten Buchungen vorhanden.');
-  return validateTransactionPayload({ protocolVersion:1,type:'T',planId:plan.planId,basePlanRevision:plan.revision,month:plan.month,exportId,generatedAt:new Date().toISOString(),deviceId:settings.deviceId,deviceName:settings.deviceName||'',transactions:transactions.map(t=>({id:t.id,recordRevision:t.recordRevision||1,op:t.deleted?'delete':'upsert',createdAt:t.createdAt,updatedAt:t.updatedAt,date:t.date,month:t.month,kind:t.kind,amountCents:t.amountCents,budgetId:t.budgetId||'',category:t.category,description:t.description||'',note:t.note||''})) });
+export function buildTransactionPayload({plan,transactions=[],settings,capy=null,exportId=uuid()}) {
+  if(!plan) throw new Error('Kein Plan vorhanden.');
+  if(!transactions?.length&&!capy) throw new Error('Keine nicht bestätigten Änderungen vorhanden.');
+  return validateTransactionPayload({ protocolVersion:1,type:'T',planId:plan.planId,basePlanRevision:plan.revision,month:plan.month,exportId,generatedAt:new Date().toISOString(),deviceId:settings.deviceId,deviceName:settings.deviceName||'',capy,transactions:(transactions||[]).map(t=>({id:t.id,recordRevision:t.recordRevision||1,op:t.deleted?'delete':'upsert',createdAt:t.createdAt,updatedAt:t.updatedAt,date:t.date,month:t.month,kind:t.kind,amountCents:t.amountCents,budgetId:t.budgetId||'',category:t.category,description:t.description||'',note:t.note||''})) });
 }
 
 export function dedupeTransactionImport(existingIds, payload) {

@@ -8,27 +8,29 @@ import { renderMonth } from './views/month.js';
 import { renderTransactions } from './views/transactions.js';
 import { renderSync } from './views/sync-view.js';
 import { applyTheme, renderSettings } from './views/settings.js';
+import { applyRemoteCapy, buildCapySyncPayload, capyHasPendingSync, loadCapyState, markCapyPrepared, saveCapyState } from '../capy/js/shared-state.js';
 
-const state={ plan:null,transactions:[],settings:null,display:null,pendingPlan:null,monthVisualMode:'donut',donutMode:'planned',selectedSegment:'',transactionFilter:'all',transactionBudgetFilter:'',lastTransactionCode:'',deferredInstall:null };
+const state={ plan:null,transactions:[],settings:null,capy:null,display:null,pendingPlan:null,monthVisualMode:'donut',donutMode:'planned',selectedSegment:'',transactionFilter:'all',transactionBudgetFilter:'',lastTransactionCode:'',deferredInstall:null };
 let router;
 const $=id=>document.getElementById(id);
 
 function toast(message,{error=false,duration=3300}={}){ const el=document.createElement('div');el.className=`toast${error?' error':''}`;el.textContent=message;$('toastRegion').append(el);setTimeout(()=>el.remove(),duration); }
 function monthBounds(ym){ const [y,m]=ym.split('-').map(Number);const last=new Date(y,m,0).getDate();return {min:`${ym}-01`,max:`${ym}-${String(last).padStart(2,'0')}`}; }
 function activePlanRows(){ return state.plan?state.transactions.filter(t=>t.planId===state.plan.planId):[]; }
-function visibleRows(){ return activePlanRows().filter(t=>!t.deleted); }
+function visibleRows(){ return activePlanRows().filter(t=>!t.deleted && t.kind!=='capy_stash_deposit'); }
 
-async function loadState(){ state.settings=await getSettings(); state.monthVisualMode=state.settings.selectedMonthVisualMode||'donut'; state.donutMode=state.settings.selectedDonutMode||'planned'; state.plan=await getCurrentPlan(); state.transactions=await listTransactions(); state.display=buildDisplayState(state.plan,state.transactions); }
+async function loadState(){ state.settings=await getSettings(); state.capy=await loadCapyState(); state.monthVisualMode=state.settings.selectedMonthVisualMode||'donut'; state.donutMode=state.settings.selectedDonutMode||'planned'; state.plan=await getCurrentPlan(); state.transactions=await listTransactions(); state.display=buildDisplayState(state.plan,state.transactions); }
 async function refresh(){ state.plan=await getCurrentPlan(); state.transactions=await listTransactions(); state.display=buildDisplayState(state.plan,state.transactions); renderAll(); }
 function renderAll(){
   const rows=visibleRows();
   renderMonth({display:state.display,visualMode:state.monthVisualMode,donutMode:state.donutMode,selectedSegment:state.selectedSegment,recentTransactions:rows,onSegment:key=>{state.selectedSegment=state.selectedSegment===key?'':key;renderAll();},onBudget:id=>openTransaction({kind:'budget_expense',budgetId:id}),onTransaction:id=>openTransaction({id})});
   renderTransactions({plan:state.plan,transactions:rows,filter:state.transactionFilter,budgetFilter:state.transactionBudgetFilter,onEdit:id=>openTransaction({id})});
-  renderSync({plan:state.plan,transactions:state.transactions,pendingPlan:state.pendingPlan,onAcceptPlan:acceptPendingPlan});
-  renderSettings(state.settings);
-  const pending=state.plan?pendingSummary(state.transactions,state.plan):{count:0};
-  const badge=$('syncNavBadge');badge.textContent=String(pending.count);setHidden(badge,!pending.count);
-  updateHeaderSyncStatus(pending.count);
+  renderSync({plan:state.plan,transactions:state.transactions,pendingPlan:state.pendingPlan,onAcceptPlan:acceptPendingPlan,capyPending:capyHasPendingSync(state.capy)});
+  renderSettings(state.settings,{capyEnabled:Boolean(state.plan?.capy?.enabled),capyName:state.capy?.care?.name||''});
+  setHidden($('capyLauncher'),!state.plan?.capy?.enabled);
+  const pending=state.plan?pendingSummary(state.transactions,state.plan):{count:0}; const pendingTotal=pending.count+(capyHasPendingSync(state.capy)?1:0);
+  const badge=$('syncNavBadge');badge.textContent=String(pendingTotal);setHidden(badge,!pendingTotal);
+  updateHeaderSyncStatus(pendingTotal);
   $('shareTransactionCode').classList.toggle('hidden',!navigator.share);
 }
 
@@ -75,16 +77,20 @@ async function previewPlanCode(code){
 async function acceptPendingPlan(){
   const plan=state.pendingPlan;if(!plan)return;
   if(state.plan&&plan.planId===state.plan.planId&&plan.revision<state.plan.revision&&!confirm(`Planrevision ${plan.revision} ist älter als die gespeicherte Revision ${state.plan.revision}. Trotzdem übernehmen?`))return;
-  await savePlan(plan);const confirmed=await markAcknowledged(plan);await addSyncHistory({planId:plan.planId,type:'plan-import',revision:plan.revision,createdAt:new Date().toISOString(),confirmedTransactions:confirmed});state.pendingPlan=null;await refresh();toast(`Plan übernommen${confirmed?` · ${confirmed} Buchung${confirmed===1?'':'en'} bestätigt`:''}.`);
+  await savePlan(plan);const confirmed=await markAcknowledged(plan);
+  state.capy=applyRemoteCapy(state.capy,plan.capy||{enabled:false},plan.acknowledgedExportIds||[]);await saveCapyState(state.capy);
+  await addSyncHistory({planId:plan.planId,type:'plan-import',revision:plan.revision,createdAt:new Date().toISOString(),confirmedTransactions:confirmed});state.pendingPlan=null;await refresh();toast(`Plan übernommen${confirmed?` · ${confirmed} Buchung${confirmed===1?'':'en'} bestätigt`:''}.`);
 }
 
 async function generateTransactionCode(){
-  if(!state.plan)return; const rows=state.transactions.filter(t=>t.planId===state.plan.planId&&t.status!=='confirmed'); if(!rows.length){toast('Keine nicht bestätigten Buchungen vorhanden.');return;}
+  if(!state.plan)return; const rows=state.transactions.filter(t=>t.planId===state.plan.planId&&t.status!=='confirmed'); const capyPending=capyHasPendingSync(state.capy); if(!rows.length&&!capyPending){toast('Keine nicht bestätigten Änderungen vorhanden.');return;}
   try {
-    const payload=buildTransactionPayload({plan:state.plan,transactions:rows,settings:state.settings}); const code=await encodeFP1('T',payload); state.lastTransactionCode=code; $('transactionCodeText').value=code;setHidden($('transactionExport'),false);setHidden($('qrTooLarge'),true);
-    for(const row of rows){row.status='prepared';row.everPrepared=true;row.preparedExportIds=[...new Set([...(row.preparedExportIds||[]),payload.exportId])];} await putManyTransactions(rows);await addSyncHistory({planId:state.plan.planId,type:'transaction-export',exportId:payload.exportId,transactionIds:rows.map(x=>x.id),createdAt:payload.generatedAt});
+    const payload=buildTransactionPayload({plan:state.plan,transactions:rows,settings:state.settings,capy:capyPending?buildCapySyncPayload(state.capy):null}); const code=await encodeFP1('T',payload); state.lastTransactionCode=code; $('transactionCodeText').value=code;setHidden($('transactionExport'),false);setHidden($('qrTooLarge'),true);
+    for(const row of rows){row.status='prepared';row.everPrepared=true;row.preparedExportIds=[...new Set([...(row.preparedExportIds||[]),payload.exportId])];} await putManyTransactions(rows);
+    if(capyPending){markCapyPrepared(state.capy,payload.exportId);state.capy=await saveCapyState(state.capy);}
+    await addSyncHistory({planId:state.plan.planId,type:'transaction-export',exportId:payload.exportId,transactionIds:rows.map(x=>x.id),capy:capyPending,createdAt:payload.generatedAt});
     try { renderQr($('qrOutput'),code,{size:285}); } catch(err){ $('qrTooLarge').textContent=`${err.message} Der Textcode bleibt vollständig nutzbar.`;setHidden($('qrTooLarge'),false); }
-    await refresh();toast(`${rows.length} Änderung${rows.length===1?'':'en'} für Export vorbereitet.`);
+    await refresh();const count=rows.length+(capyPending?1:0);toast(`${count} Änderung${count===1?'':'en'} für Export vorbereitet.`);
   } catch(err){toast(err.message,{error:true,duration:5200});}
 }
 
