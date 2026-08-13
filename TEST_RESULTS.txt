@@ -1,42 +1,46 @@
-Capyt 2.2.2a – Test Results
+Capyt 2.2.3a - Test Results
 ===========================
 
-Baseline (unveraenderter hochgeladener Stand 2.2.1a)
----------------------------------------------------
-`npm test`: 60 Tests insgesamt, 55 bestanden, 5 fehlgeschlagen.
-`npm run check`: fehlgeschlagen, weil das Root-Manifest `./web-app-manifest-192x192.png` erwartet, die vorhandenen Manifest-Icons aber unter `assets/favicons/` liegen.
+Gezielte Capy-/FP1-Regressionen
+-------------------------------
+29/29 bestanden.
 
-Die fuenf Baseline-Testfehler sind:
-- Desktop-Monatsvisualisierung erwartet den alten Default `monthVisualMode: "buffer"`.
-- Mobile-Monatsvisualisierung erwartet den alten Default `visualMode = 'buffer'`.
-- Mobile-Storage-Test erwartet den alten Default `selectedMonthVisualMode:'buffer'`.
-- PWA-Updater-Test erwartet `registration.update()`.
-- PWA-UI-Test ist auf den alten Script-Pfad `js/pwa-update.js?v=2.1.0` fest verdrahtet.
+Enthalten sind insbesondere:
+- bestehende Capy-/FP1-Regressionen
+- 2.2.3a Rubbel-Streicheln mit Richtungswechseln, Jitter-Filter, Cooldown und Session-Limit
+- Food-Auswahl mit Bottom-Slot und Pointer-Drag auf Capy
+- Pointer-Cancel und Single-Consume-Schutz
+- Schutz vor Textauswahl, Long-Press und nativen Bild-Drags im Game-Bereich
+- zusaetzliche Idle-/Zustandsbewegungen
+- Pending-Capy-Buchungen ohne Schloss-Emoji und mit reduzierter Deckkraft
 
-Aktueller Stand 2.2.2a
-----------------------
-`npm test`: 71 Tests insgesamt, 66 bestanden, 5 fehlgeschlagen.
-Die fuenf Fehler sind exakt dieselben bereits im unveraenderten Ausgangsstand vorhandenen Tests. Es wurde kein bestehender Test geloescht oder deaktiviert.
-
-Neue/aktualisierte Capy-/FP1-Regressionstests
---------------------------------------------
-29/29 gezielte Capy- und Desktop-FP1-Tests bestanden. Geprueft werden unter anderem:
-- Character Creator: maennlich/weiblich, temporaere Auswahl bis `Capy erstellen`, kein `divers`
-- direkte Pointer-Streichelmechanik: Mindestdistanz, Cooldown, Happiness-Cap und Session-Limit
-- Pointer-Inventar-Drag, Drag-Ghost, Drop-Zone und `pointercancel`
-- Shop ohne direkte Fuettern-Aktion sowie Item-Typen `food`, `toy`, `care`
-- generische Item-Effekte aus `items.json`
-- Mobile-Viewport/Safe-Area/Bottom-Sheet-Struktur
-- Pause erhaelt Game-State und wird ueber FP1 synchronisiert
-- abgelehnte Capy-Buchungen liefern `rejected` zurueck und sperren die gekoppelte Coin-Gutschrift
-- FP1-P transportiert `transactionResults` inklusive Ablehnungsgrund
-- Budgetmigration `Momo Vorrat` -> `Momo's Vorrat` ohne Duplikat und ohne Verlust bestehender Bezüge
-- bestehende Vorrat-Sperren, interne Umbuchungen, Coin-Deduplizierung, Dark-Mode-Bridge und FP1-Kompatibilitaet
-
-Statische/Strukturpruefungen
+Vollstaendiger npm-test-Lauf
 ----------------------------
-- Alle geaenderten JavaScript-/MJS-Dateien syntaktisch gueltig (`node --check`).
-- `git diff --check` ohne Whitespace-Fehler.
-- Relevante JSON-Dateien parsebar.
-- Alle 77 in `sw.js` referenzierten lokalen CORE-Pfade sind vorhanden.
-- Der vorhandene `npm run check` scheitert weiterhin ausschließlich am bereits im Baseline-Stand vorhandenen Manifest-Pfadfehler.
+75/80 bestanden.
+
+Die 5 verbleibenden Fehler entsprechen den bereits im unveraenderten
+2.2.2a-Ausgangsprojekt reproduzierten Baseline-Abweichungen:
+- Desktop bietet Finanzlage und Geldverwendung als getrennte Ansichten
+- Mobile bietet Finanzlage und Geldverwendung als getrennte Monatsansichten
+- Gewaehlte Monatsvisualisierung wird in den mobilen Einstellungen gespeichert
+- PWA-Updater erkennt wartende und neu installierte Versionen
+- Update-Popup und manuelle Update-Pruefung sind in der mobilen UI vorhanden
+
+Bestehender Static-Check
+------------------------
+`npm run check` stoppt weiterhin am bereits im Ausgangsstand vorhandenen Fehler:
+Manifest-Icon fehlt: ./web-app-manifest-192x192.png
+
+Die unrelated Root-Manifest-/Branding-Struktur wurde fuer dieses Capy-Interaktionsupdate
+nicht umgebaut, damit kein fremdes PWA-Verhalten nur fuer einen gruenen Test veraendert wird.
+
+Browser-QA
+----------
+Ein zusaetzlicher Headless-Browser-Check wurde versucht. Die lokale Testseite auf
+127.0.0.1 wird in der aktuellen Ausfuehrungsumgebung jedoch mit
+ERR_BLOCKED_BY_ADMINISTRATOR blockiert. Dieser Browser-/Viewport-Check wird daher
+nicht als bestanden ausgewiesen.
+
+Version
+-------
+Auslieferungsstand: 2.2.3a

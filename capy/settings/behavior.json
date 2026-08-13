@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "genders": ["weiblich", "männlich"],
   "initialNeeds": {"hunger": 64, "happiness": 76, "energy": 82, "bond": 18},
   "phaseSchedule": {
@@ -9,14 +9,27 @@
     "night": {"from": 22, "to": 6, "label": "Nacht"}
   },
   "decayPerHour": {"hunger": 3.2, "happiness": 0.8, "energyDay": 2.2, "energyEvening": 4.2, "energySleepRecovery": 9},
-  "petting": {"enabled": true, "requiredDistance": 120, "cooldownMs": 2500, "happinessGain": 4, "bondGain": 1, "maxSessionGain": 12},
-  "inventoryDrag": {"holdDelayMs": 120, "movementThreshold": 6, "returnAnimationMs": 180},
+  "petting": {
+    "enabled": true,
+    "movementThreshold": 8,
+    "rewardDistance": 80,
+    "rewardCooldownMs": 500,
+    "minimumDirectionChanges": 1,
+    "rubHappinessGain": 1,
+    "hitPaddingPx": 24,
+    "maxSessionGain": 12,
+    "bondGain": 1,
+    "requiredDistance": 120,
+    "cooldownMs": 2500,
+    "happinessGain": 4
+  },
+  "inventoryDrag": {"holdDelayMs": 80, "movementThreshold": 5, "returnAnimationMs": 180, "consumeAnimationMs": 140},
   "feeding": {},
   "playing": {"minimumEnergy": 12, "happiness": 7, "bond": 2, "energy": -8},
   "interactions": {"play": {"minimumEnergy": 12, "happiness": 7, "bond": 2, "energy": -8}},
   "sleep": {"blocksPet": true, "blocksPlay": true, "blocksFood": true},
   "needs": {},
-  "animations": {},
+  "animations": {"idleMinDelayMs": 1500, "idleMaxDelayMs": 4500, "idleMotionMs": 700},
   "uiFeedback": {},
   "visualThresholds": {"hungryAtOrBelow": 24, "happyHappinessAtOrAbove": 88, "happyEnergyAtOrAbove": 38, "sleepyEnergyAtOrBelow": 34},
   "roomBackground": "",

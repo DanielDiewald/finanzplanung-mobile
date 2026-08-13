@@ -10,7 +10,7 @@
 </head>
 <body>
   <div class="desktop-block">
-    <img src="./assets/ui/capy-brand.png" alt="" class="desktop-block-logo">
+    <img src="./assets/ui/capy-brand.png" alt="" class="desktop-block-logo" draggable="false">
     <h1>Capy · Alpha ist Mobile-first</h1>
     <p>Am PC bleiben Vorrat, Coins, Sperren und Synchronisation im Mittelpunkt.</p>
     <a href="../desktop-integration/Finanzplanung_v10_mobile-sync.html#capy">Zur Planung</a>
@@ -20,7 +20,7 @@
 
   <div class="capy-game mobile-care" id="capyApp">
     <section id="inactiveState" class="inactive-state hidden">
-      <img src="./assets/ui/capy-brand.png" alt="">
+      <img src="./assets/ui/capy-brand.png" alt="" draggable="false">
       <h1 id="inactiveTitle">Capy · Alpha</h1>
       <p id="inactiveCopy">Capy ist noch nicht aktiviert.</p>
       <a class="primary-link" href="../#/settings">Zu den Einstellungen</a>
@@ -30,7 +30,7 @@
       <header class="game-hud" aria-label="Capy Status">
         <a class="hud-back" href="../#/month" aria-label="Zurück zu Capyt">←</a>
         <div class="hud-profile"><strong id="capyName">Capy</strong><span id="capyMeta">Capy · Alpha</span></div>
-        <div class="hud-coin" aria-label="Coins"><img id="coinIconTop" alt="" aria-hidden="true"><span class="coin-fallback">🪙</span><strong id="coinCountTop">0</strong></div>
+        <div class="hud-coin" aria-label="Coins"><img id="coinIconTop" alt="" aria-hidden="true" draggable="false"><span class="coin-fallback">🪙</span><strong id="coinCountTop">0</strong></div>
         <div class="hud-needs">
           <div class="hud-need"><span aria-hidden="true">🍎</span><i><b id="hungerBar"></b></i><small id="hungerValue">0%</small></div>
           <div class="hud-need"><span aria-hidden="true">❤️</span><i><b id="happinessBar"></b></i><small id="happinessValue">0%</small></div>
@@ -42,13 +42,25 @@
         <div class="scene" id="scene">
           <div class="scene-shade"></div>
           <div class="scene-status"><span id="phasePill">Tag</span><strong id="moodValue">Entspannt</strong></div>
-          <img id="capyImage" class="capy capy--idle" src="./assets/capy/capy-neutral.png" alt="Capybara" draggable="false">
-          <div id="dropHint" class="drop-hint" aria-hidden="true">Hier ablegen</div>
+          <div id="capyHitbox" class="capy-hitbox" role="img" aria-label="Capybara" tabindex="-1">
+            <img id="capyImage" class="capy capy--idle" src="./assets/capy/capy-neutral.png" alt="" draggable="false">
+          </div>
+          <div id="dropHint" class="drop-hint" aria-hidden="true">Hier loslassen</div>
           <div id="effectsLayer" class="effects-layer" aria-hidden="true"></div>
           <div id="floatingLayer" class="floating-layer" aria-hidden="true"></div>
           <p id="statusHint" class="status-hint">Streichle dein Capy direkt.</p>
         </div>
       </main>
+
+      <div id="selectedFeedBar" class="selected-feed-bar hidden" aria-label="Ausgewähltes Food">
+        <span class="selected-feed-label">Ausgewählt</span>
+        <button id="selectedFeedItem" class="selected-feed-item" type="button" aria-label="Ausgewähltes Food auf Capy ziehen">
+          <img id="selectedFeedImage" alt="" draggable="false">
+          <span><strong id="selectedFeedName">Food</strong><small id="selectedFeedEffect">Auf Capy ziehen</small></span>
+          <em id="selectedFeedCount">x0</em>
+        </button>
+        <button id="clearSelectedFeed" class="selected-feed-clear" type="button" aria-label="Food-Auswahl entfernen">×</button>
+      </div>
 
       <nav class="game-nav" aria-label="Capy Navigation">
         <button type="button" data-open-sheet="shopSheet"><span>🛒</span><small>Shop</small></button>
@@ -72,7 +84,7 @@
   <dialog id="inventorySheet" class="bottom-sheet inventory-sheet" data-sheet>
     <section class="sheet-card">
       <div class="sheet-handle" aria-hidden="true"></div>
-      <header class="sheet-head"><div><span class="eyebrow">ZIEHEN &amp; ABLEGEN</span><h2>Inventar</h2><p>Item gedrückt halten und auf dein Capy ziehen.</p></div><button type="button" data-close-sheet aria-label="Inventar schließen">×</button></header>
+      <header class="sheet-head"><div><span class="eyebrow">AUSWÄHLEN ODER ZIEHEN</span><h2>Inventar</h2><p>Food antippen: Es erscheint unten im Spiel. Alternativ kannst du Items direkt auf Capy ziehen.</p></div><button type="button" data-close-sheet aria-label="Inventar schließen">×</button></header>
       <div id="inventoryList" class="inventory-grid"></div>
     </section>
   </dialog>
@@ -81,7 +93,7 @@
     <section class="sheet-card">
       <div class="sheet-handle" aria-hidden="true"></div>
       <header class="sheet-head"><div><span class="eyebrow">ECHTES GELD</span><h2 id="vorratName">Capy's Vorrat</h2></div><button type="button" data-close-sheet aria-label="Vorrat schließen">×</button></header>
-      <div class="stash-hero"><strong id="stashValue">0,00 €</strong><div><span>🔒 Gesperrt <b id="stashLocked">0,00 €</b></span><span>✓ Auszahlbar <b id="stashWithdrawable">0,00 €</b></span></div><p id="stashUnlockHint"></p></div>
+      <div class="stash-hero"><strong id="stashValue">0,00 €</strong><div><span>Gesperrt <b id="stashLocked">0,00 €</b></span><span>Auszahlbar <b id="stashWithdrawable">0,00 €</b></span></div><p id="stashUnlockHint"></p></div>
       <div class="topup-card"><label for="topUpAmount">Vorrat aufladen</label><div class="money-input"><input id="topUpAmount" inputmode="decimal" placeholder="20,00"><span>€</span></div><p id="coinRewardHint">1,00 € = 5 Coins</p><button id="topUpButton" type="button" class="primary wide">Aufladen</button></div>
       <div class="pending-panel"><h3>Mobile Capy-Buchungen</h3><div id="capyTransactions" class="capy-transactions"></div></div>
     </section>
@@ -101,7 +113,7 @@
     <form method="dialog" class="setup-card" id="setupForm">
       <span class="eyebrow">CHARACTER CREATOR · ALPHA</span>
       <h2>Dein Capy erstellen</h2>
-      <img id="creatorPreview" src="./assets/capy/capy-happy.png" alt="Capy-Vorschau" class="creator-preview">
+      <img id="creatorPreview" src="./assets/capy/capy-happy.png" alt="Capy-Vorschau" class="creator-preview" draggable="false">
       <label class="creator-name"><span>Name</span><input id="nameInput" maxlength="20" autocomplete="off" placeholder="z. B. Napoeln"></label>
       <fieldset class="gender-picker"><legend>Geschlecht</legend><button type="button" data-gender="männlich">♂ <span>männlich</span></button><button type="button" data-gender="weiblich">♀ <span>weiblich</span></button></fieldset>
       <p id="genderInfo" class="creator-info">Auswahl wird erst beim Erstellen gespeichert.</p>
@@ -109,7 +121,7 @@
     </form>
   </dialog>
 
-  <div id="dragGhost" class="drag-ghost hidden" aria-hidden="true"><img alt=""><span></span></div>
+  <div id="dragGhost" class="drag-ghost hidden" aria-hidden="true"><img alt="" draggable="false"><span></span></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./js/naming.js"></script>
   <script type="module" src="./js/app.js"></script>

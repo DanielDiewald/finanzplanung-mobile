@@ -1,6 +1,6 @@
 # Capyt · Capy · Alpha
 
-> **Status: Alpha.** Die Capy-Funktionen befinden sich in Version **2.2.2a** in einer Testphase. Die Finanzplanung und die bestehende FP1-/QR-Synchronisation bleiben die Grundlage.
+> **Status: Alpha.** Die Capy-Funktionen befinden sich in Version **2.2.3a** in einer Testphase. Die Finanzplanung und die bestehende FP1-/QR-Synchronisation bleiben die Grundlage.
 
 Der Capy-Begleiter ist weitgehend im Unterordner `capy/` gekapselt. Die Mobile-Ansicht ist als kleines Pet-Game ausgelegt; Desktop bleibt auf Finanz-, Vorrat- und Sync-Aufgaben fokussiert.
 
@@ -19,9 +19,11 @@ Die normale Spielansicht verwendet `100dvh`, Safe-Areas und keinen Body-Scroll. 
 - fester Game-Bottom-Bar für Shop, Inventar, Spielen, Vorrat und Mehr
 - Bottom-Sheets für Shop, Inventar, Vorrat und weitere Aktionen
 
-Der Capy wird direkt mit Pointer Events gestreichelt. Eine Session benötigt echte Bewegungsdistanz, berücksichtigt Cooldown und Session-Limit und zeigt Floating-Feedback ohne Layoutverschiebung.
+Der Capy wird direkt mit Pointer Events gestreichelt. In 2.2.3a arbeitet die Interaktion als echte **Rubbelmechanik**: kleine Jitter-Bewegungen werden ignoriert, Richtungswechsel innerhalb einer stabilen Capy-Hitbox werden erkannt und Rewards unterliegen Distanz-, Cooldown- und Session-Limits. Beim erfolgreichen Rubbeln erscheint ausschließlich kompaktes `+X ❤️`-Feedback.
 
-Inventar-Items werden per Pointer-Drag auf den Capy gezogen. Dabei wird ein `position: fixed` Drag-Ghost verwendet; ein Drop außerhalb beziehungsweise `pointercancel` verbraucht kein Item. Der Shop kauft ausschließlich Items und enthält keine direkte Füttern-Aktion.
+Food kann im Inventar angetippt werden. Danach schließt sich das Bottom-Sheet und das ausgewählte Food erscheint in einem eigenen Slot direkt oberhalb der Game-Navigation. Von dort wird es per Pointer-Capture und `position: fixed` Drag-Ghost auf den Capy gezogen. Bewegungsschwelle oder Hold-Delay können den Drag starten; ein Drop außerhalb beziehungsweise `pointercancel` verbraucht kein Item. Direkter Inventar-Drag bleibt für die generische Item-Interaktion erhalten.
+
+Der Game-Bereich unterdrückt Textselektion, Long-Press-Kontextmenüs und native Bild-Drags, ohne Formfelder zu blockieren. Mehrere zufällige Idle-, Happy-, Hungry- und Drowsy-Bewegungen lassen den Capy lebendiger wirken; `prefers-reduced-motion` bleibt berücksichtigt.
 
 ## Character Creator
 
@@ -33,8 +35,8 @@ Der Creator bietet nur `männlich` und `weiblich`. Die Auswahl bleibt bis zum Kl
   - erlaubte Geschlechter (`weiblich`, `männlich`)
   - Startwerte und Tagesphasen
   - Bedürfnis-Verfall / nächtliche Energie-Regeneration
-  - `petting` mit Mindestdistanz, Cooldown, Happiness- und Session-Limit
-  - `inventoryDrag` mit Hold-Delay, Bewegungsschwelle und Return-Animation
+  - `petting` mit Jitter-Schwelle, Rubbel-Distanz, Richtungswechsel, kurzem Reward-Cooldown, Happiness- und Session-Limit
+  - `inventoryDrag` mit Hold-Delay, Bewegungsschwelle, Return- und Consume-Animation
   - Spielen, Schlafen, Animationen und UI-Feedback
   - `roomBackground` / Raum-Hintergrund
 - `settings/items.json`
@@ -59,7 +61,7 @@ Eine Vorrat-Aufladung ist **keine Ausgabe**, sondern eine interne Umbuchung vom 
 
 Jede neue Einzahlung ist standardmäßig **einen Kalendermonat ab ihrem eigenen Einzahlungsdatum gesperrt**. Mehrere Einzahlungen können daher unterschiedliche Freigabedaten besitzen.
 
-Eine Mobile-Aufladung wird sofort in **Buchungen** als Pending-Eintrag sichtbar. Bis der PC verarbeitet hat, gilt sie nicht als endgültig gebucht. FP1 liefert anschließend `confirmed` oder `rejected` zurück. Bei einer Ablehnung wird die zugehörige Coin-Gutschrift nicht als verfügbar gezählt und die Transaktion bleibt für einen späteren Sync erhalten.
+Eine Mobile-Aufladung wird sofort in **Buchungen** als Pending-Eintrag sichtbar. Pending-Capy-Buchungen verwenden dieselbe Zeilenstruktur wie normale Buchungen und sind nur leicht transparent; ein Schloss-Emoji wird nicht mehr verwendet. Bis der PC verarbeitet hat, gilt die Buchung nicht als endgültig gebucht. FP1 liefert anschließend `confirmed` oder `rejected` zurück. Bei einer Ablehnung wird die zugehörige Coin-Gutschrift nicht als verfügbar gezählt und die Transaktion bleibt für einen späteren Sync erhalten.
 
 ## Sync
 

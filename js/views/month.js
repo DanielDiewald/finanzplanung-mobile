@@ -90,9 +90,15 @@ function renderRecentTransactions(plan, transactions, onTransaction) {
     return;
   }
   target.innerHTML = `<div class="transaction-group-list">${rows.map(t => {
+    if (t.kind === 'capy_stash_deposit') {
+      const pending = t.status !== 'confirmed' && t.status !== 'rejected';
+      const name = plan?.capy?.budgetName || t.description || 'Capy-Vorrat';
+      const status = t.status === 'confirmed' ? 'Gebucht' : t.status === 'rejected' ? `Nicht übernommen${t.rejectionReason ? ` · ${t.rejectionReason}` : ''}` : 'Wartet auf PC';
+      return `<div class="transaction-row capy-transaction-row${pending ? ' is-pending' : ''}${t.status === 'rejected' ? ' is-rejected' : ''}"><span class="transaction-main"><strong>${escapeHtml(name)}</strong><small>${formatDate(t.date)} · ${escapeHtml(status)}</small></span><span class="transaction-amount capy-transfer">${formatCents(t.amountCents)}</span></div>`;
+    }
     const name = t.description || t.category || (t.kind === 'income' ? 'Einnahme' : 'Ausgabe');
     const secondary = t.kind === 'budget_expense' ? (budgetMap.get(t.budgetId)?.name || t.category || 'Budget') : t.category;
-    const status = t.status === 'confirmed' ? 'Bestätigt' : t.status === 'prepared' ? 'Vorbereitet' : 'Lokal';
+    const status = t.status === 'confirmed' ? 'Bestätigt' : t.status === 'rejected' ? 'Nicht übernommen' : t.status === 'prepared' ? 'Vorbereitet' : 'Lokal';
     return `<button type="button" class="transaction-row" data-recent-transaction-id="${escapeHtml(t.id)}"><span class="transaction-main"><strong>${escapeHtml(name)}</strong><small>${formatDate(t.date)} · ${escapeHtml(secondary || '')} · ${status}</small></span><span class="transaction-amount ${t.kind === 'income' ? 'income' : ''}">${t.kind === 'income' ? '+' : '−'}${formatCents(t.amountCents)}</span></button>`;
   }).join('')}</div>`;
   target.querySelectorAll('[data-recent-transaction-id]').forEach(button => button.addEventListener('click', () => onTransaction?.(button.dataset.recentTransactionId)));
