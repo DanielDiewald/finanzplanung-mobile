@@ -47,7 +47,10 @@ test('Haptik wird bei gültiger Rubbelbewegung versucht und hat stärkeren Zunei
   assert.equal(behavior.petting.hapticCooldownMs,90);
 });
 
-test('Service Worker behält Petting-Hotfix im aktuellen PWA-Build',()=>{
-  assert.match(sw,/const VERSION='2\.2\.7a';/);
-  assert.match(sw,/const BUILD='games1';/);
+test('Service Worker bindet den aktuellen PWA-Cache an die zentrale App-Version',()=>{
+  const env=fs.readFileSync(new URL('../.env',import.meta.url),'utf8');
+  const version=env.match(/^\s*APP_VERSION\s*=\s*([^\s#]+)/m)?.[1];
+  assert.ok(version);
+  assert.ok(sw.includes(`const VERSION='${version}';`));
+  assert.match(sw,/const CACHE=`capyt-v\$\{VERSION\}-\$\{BUILD\}`;/);
 });

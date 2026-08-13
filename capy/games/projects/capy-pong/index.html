@@ -20,7 +20,7 @@
 
       <div class="match-copy">
         <strong>Capy Pong</strong>
-        <span>Erster bei 5</span>
+        <span id="matchDifficulty">Normal · bis 5</span>
       </div>
 
       <div class="competitor competitor--player">
@@ -42,7 +42,24 @@
           <img src="./assets/capy.png" alt="" class="duel-rival">
         </div>
         <h1>Capy Pong</h1>
-        <p id="introText">Ziehe deinen Schläger nach links und rechts. Schlage das Rivalen-Capy zuerst mit 5 Punkten.</p>
+        <p id="introText">Wähle eine Schwierigkeit. Ziehe deinen Schläger nach links und rechts und erreiche zuerst 5 Punkte.</p>
+
+        <div class="difficulty" aria-label="Schwierigkeit wählen">
+          <span class="difficulty-label">Schwierigkeit</span>
+          <div class="difficulty-options" role="group" aria-label="Schwierigkeitsstufe">
+            <button type="button" data-difficulty="easy" aria-pressed="false">
+              <strong>Leicht</strong><span>+5 🪙</span>
+            </button>
+            <button type="button" data-difficulty="normal" class="is-selected" aria-pressed="true">
+              <strong>Normal</strong><span>+10 🪙</span>
+            </button>
+            <button type="button" data-difficulty="hard" aria-pressed="false">
+              <strong>Schwer</strong><span>+15 🪙</span>
+            </button>
+          </div>
+          <span id="difficultyCopy" class="difficulty-copy">Normal · Sieg +10 🪙</span>
+        </div>
+
         <div class="stats-line"><span id="winsCopy">Siege: 0</span><span>🏓 KI-Duell</span></div>
         <button id="startButton" type="button">Match starten</button>
       </div>
@@ -52,7 +69,7 @@
       </div>
 
       <div id="finishOverlay" class="finish-overlay" hidden>
-        <strong id="finishTitle">Match beendet</strong>
+        <strong id="finishTitle">Punktestand</strong>
         <span id="finishCopy">Ergebnis wird geprüft …</span>
       </div>
     </section>

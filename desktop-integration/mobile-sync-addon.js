@@ -61,7 +61,7 @@
 
   function fp1PlanPayload(ym) {
     const meta=fp1Meta(); const result=currentResults()[ym]; if(!result)throw new Error('Für den gewählten Monat liegen keine Berechnungswerte vor.');
-    const budgets=allBudgetItems().map(item=>{const d=result.budgetDetails?.[item.id]||{};return {id:String(item.id),name:String(item.description||item.name||item.category||'Budget'),category:String(item.category||'Sonstiges'),interval:String(item.interval||'monthly'),plannedCents:fp1EuroToCents(item.amount),reserveCents:fp1EuroToCents(d.reserve),spentCents:fp1EuroToCents(d.spent),availableCents:fp1EuroToCents(d.closingBalance)};});
+    const budgets=allBudgetItems().map(item=>{const d=result.budgetDetails?.[item.id]||{},monthlyPlan=asNumber(d.reserve);return {id:String(item.id),name:String(item.description||item.name||item.category||'Budget'),category:String(item.category||'Sonstiges'),interval:String(item.interval||'monthly'),plannedCents:fp1EuroToCents(monthlyPlan),reserveCents:fp1EuroToCents(d.reserve),spentCents:fp1EuroToCents(d.spent),availableCents:fp1EuroToCents(d.closingBalance)};});
     const goals=(state.savingsGoals||[]).filter(g=>!g.closedMonth||compareMonths(g.closedMonth,ym)>=0).map(g=>({id:String(g.id),name:String(g.name||'Sparziel'),balanceCents:fp1EuroToCents(result.goalBalancesAfter?.[g.id]),targetCents:fp1EuroToCents(g.target)}));
     const ackTx=Object.entries(meta.importedTransactions).map(([id,r])=>({id,recordRevision:Number(r.recordRevision)||1})).slice(-5000);
     const transactionResults=Object.values(meta.rejectedTransactions||{}).slice(-5000).map(r=>({id:String(r.id),recordRevision:Number(r.recordRevision)||1,status:'rejected',reason:String(r.reason||'Nicht übernommen'),updatedAt:String(r.updatedAt||new Date().toISOString())}));

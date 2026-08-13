@@ -2,8 +2,53 @@
   'use strict';
 
   const FIRST_TO = 5;
-  const WIN_BONUS = 250;
-  const POINT_VALUE = 100;
+  const DIFFICULTIES = Object.freeze({
+    easy: Object.freeze({
+      label: 'Leicht',
+      reward: 5,
+      ballFactor: 0.70,
+      ballMin: 205,
+      ballMax: 330,
+      speedGrowth: 1.030,
+      maxSpeedFactor: 1.08,
+      aiFactor: 0.38,
+      aiMin: 110,
+      aiMax: 185,
+      wobbleFactor: 0.10,
+      wobbleMax: 42,
+      prediction: 0
+    }),
+    normal: Object.freeze({
+      label: 'Normal',
+      reward: 10,
+      ballFactor: 0.82,
+      ballMin: 235,
+      ballMax: 380,
+      speedGrowth: 1.045,
+      maxSpeedFactor: 1.28,
+      aiFactor: 0.58,
+      aiMin: 165,
+      aiMax: 265,
+      wobbleFactor: 0.055,
+      wobbleMax: 24,
+      prediction: 0.025
+    }),
+    hard: Object.freeze({
+      label: 'Schwer',
+      reward: 15,
+      ballFactor: 0.94,
+      ballMin: 270,
+      ballMax: 430,
+      speedGrowth: 1.060,
+      maxSpeedFactor: 1.42,
+      aiFactor: 0.82,
+      aiMin: 230,
+      aiMax: 360,
+      wobbleFactor: 0.018,
+      wobbleMax: 8,
+      prediction: 0.07
+    })
+  });
 
   const canvas = document.getElementById('arena');
   const ctx = canvas.getContext('2d');
@@ -14,6 +59,9 @@
   const playerScore = document.getElementById('playerScore');
   const rivalScore = document.getElementById('rivalScore');
   const winsCopy = document.getElementById('winsCopy');
+  const difficultyCopy = document.getElementById('difficultyCopy');
+  const matchDifficulty = document.getElementById('matchDifficulty');
+  const difficultyButtons = [...document.querySelectorAll('[data-difficulty]')];
   const pauseOverlay = document.getElementById('pauseOverlay');
   const finishOverlay = document.getElementById('finishOverlay');
   const finishTitle = document.getElementById('finishTitle');
@@ -36,9 +84,11 @@
   let serveDirection = 1;
   let lastFrame = performance.now();
   let wins = 0;
+  let difficulty = 'normal';
   let colors = {};
 
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  const difficultyConfig = () => DIFFICULTIES[difficulty] || DIFFICULTIES.normal;
 
   function refreshColors() {
     const style = getComputedStyle(document.documentElement);
@@ -77,8 +127,8 @@
     player.y = height - clamp(height * 0.075, 34, 48);
     rival.y = clamp(height * 0.055, 24, 38);
 
-    // Do not clamp the ball every animation frame. While a rally is running it
-    // must be allowed to pass a paddle so the goal detector can award a point.
+    // A running ball must be allowed to leave the court vertically so the
+    // goal detector can score immediately after it passes a paddle.
     if (sizeChanged && oldWidth > 0 && oldHeight > 0) {
       ball.x = (ball.x / oldWidth) * width;
       ball.y = (ball.y / oldHeight) * height;
@@ -101,8 +151,29 @@
     rivalScore.textContent = String(rivalPoints);
   }
 
+  function updateDifficultyUi() {
+    const config = difficultyConfig();
+    for (const button of difficultyButtons) {
+      const selected = button.dataset.difficulty === difficulty;
+      button.classList.toggle('is-selected', selected);
+      button.setAttribute('aria-pressed', String(selected));
+    }
+    difficultyCopy.textContent = `${config.label} · Sieg +${config.reward} 🪙`;
+    matchDifficulty.textContent = `${config.label} · bis ${FIRST_TO}`;
+  }
+
+  async function selectDifficulty(next, persist = true) {
+    if (phase !== 'idle' || !DIFFICULTIES[next]) return;
+    difficulty = next;
+    updateDifficultyUi();
+    if (persist) {
+      try { await CapytGame.storage.set('difficulty', difficulty); } catch {}
+    }
+  }
+
   function resetBall(direction = Math.random() < 0.5 ? -1 : 1) {
-    const speed = clamp(width * 0.82, 235, 380);
+    const config = difficultyConfig();
+    const speed = clamp(width * config.ballFactor, config.ballMin, config.ballMax);
     const horizontal = speed * (0.22 + Math.random() * 0.25) * (Math.random() < 0.5 ? -1 : 1);
     ball.x = width / 2;
     ball.y = height / 2;
@@ -111,10 +182,12 @@
   }
 
   function bounceFromPaddle(paddle, verticalDirection) {
+    const config = difficultyConfig();
     const center = paddle.x + paddle.w / 2;
     const offset = clamp((ball.x - center) / (paddle.w / 2), -1, 1);
     const currentSpeed = Math.hypot(ball.vx, ball.vy);
-    const speed = clamp(currentSpeed * 1.045, width * 0.82, width * 1.28);
+    const minSpeed = width * config.ballFactor;
+    const speed = clamp(currentSpeed * config.speedGrowth, minSpeed, width * config.maxSpeedFactor);
     const angle = offset * (Math.PI / 3.15);
     ball.vx = speed * Math.sin(angle);
     ball.vy = verticalDirection * Math.abs(speed * Math.cos(angle));
@@ -156,11 +229,13 @@
   }
 
   function updateAi(dt, now) {
+    const config = difficultyConfig();
     const center = rival.x + rival.w / 2;
-    const tracking = ball.vy < 0 ? ball.x : width / 2;
-    const wobble = Math.sin(now / 720) * Math.min(24, width * 0.055);
+    const predictedX = ball.x + ball.vx * config.prediction;
+    const tracking = ball.vy < 0 ? predictedX : width / 2;
+    const wobble = Math.sin(now / 720) * Math.min(config.wobbleMax, width * config.wobbleFactor);
     const target = clamp(tracking + wobble, rival.w / 2, width - rival.w / 2);
-    const maxMove = clamp(width * 0.58, 165, 265) * dt;
+    const maxMove = clamp(width * config.aiFactor, config.aiMin, config.aiMax) * dt;
     const delta = clamp(target - center, -maxMove, maxMove);
     rival.x = clamp(rival.x + delta, 0, width - rival.w);
   }
@@ -190,8 +265,6 @@
     hitPaddle(player, true);
     hitPaddle(rival, false);
 
-    // A point is decided as soon as the ball has fully passed the relevant
-    // paddle. This also keeps scoring independent from the visible canvas edge.
     if (ball.vy > 0 && ball.y - ball.r > player.y + player.h) {
       scorePoint('rival');
       return;
@@ -303,6 +376,7 @@
       playerPoints = 0;
       rivalPoints = 0;
       updateScoreboard();
+      updateDifficultyUi();
       centerPieces();
       resetBall(Math.random() < 0.5 ? -1 : 1);
       roundDelay = 0.55;
@@ -327,17 +401,18 @@
     roundDelay = 0;
 
     const won = playerPoints > rivalPoints;
-    const gameScore = playerPoints * POINT_VALUE + (won ? WIN_BONUS : 0);
+    const config = difficultyConfig();
     const now = performance.now();
     const currentPause = paused && pausedAt ? now - pausedAt : 0;
     const durationMs = Math.max(1000, Math.round(now - startedAt - pausedTotal - currentPause));
+    const details = { playerPoints, rivalPoints, difficulty };
 
-    finishTitle.textContent = won ? 'Du hast gewonnen! 🏆' : 'Rivalen-Capy gewinnt';
-    finishCopy.textContent = `${playerPoints}:${rivalPoints} · Game-Score ${gameScore} · Ergebnis wird geprüft …`;
+    finishTitle.textContent = won ? 'Sieg 🏆' : 'Punktestand';
+    finishCopy.textContent = `${playerPoints} : ${rivalPoints} · ${config.label} · Ergebnis wird geprüft …`;
     finishOverlay.hidden = false;
 
     try {
-      await CapytGame.submitScore({ score: gameScore });
+      await CapytGame.submitScore({ score: playerPoints, details });
       if (won) {
         wins += 1;
         await CapytGame.storage.set('wins', wins);
@@ -346,10 +421,11 @@
         player: playerPoints,
         rival: rivalPoints,
         won,
-        score: gameScore
+        difficulty,
+        score: playerPoints
       });
-      const result = await CapytGame.finish({ score: gameScore, durationMs });
-      finishCopy.textContent = `${playerPoints}:${rivalPoints} · ${result.coinsAwarded || 0} Coins`;
+      const result = await CapytGame.finish({ score: playerPoints, durationMs, details });
+      finishCopy.textContent = `${playerPoints} : ${rivalPoints} · ${config.label} · +${result.coinsAwarded || 0} 🪙`;
     } catch (error) {
       phase = 'idle';
       finishTitle.textContent = 'Ergebnis konnte nicht gesendet werden';
@@ -364,13 +440,19 @@
     const capy = init?.capy || await CapytGame.getCapy();
     const name = String(capy?.name || 'Dein Capy').trim() || 'Dein Capy';
     playerName.textContent = name;
-    introText.textContent = `${name} spielt gegen das Rivalen-Capy. Ziehe deinen Schläger nach links und rechts. Erster bei 5 Punkten gewinnt.`;
+    introText.textContent = `${name} spielt gegen das Rivalen-Capy. Wähle die Schwierigkeit und erreiche zuerst ${FIRST_TO} Punkte.`;
     wins = Math.max(0, Number(await CapytGame.storage.get('wins')) || 0);
+    const savedDifficulty = String(await CapytGame.storage.get('difficulty') || 'normal');
+    difficulty = DIFFICULTIES[savedDifficulty] ? savedDifficulty : 'normal';
     winsCopy.textContent = `Siege: ${wins}`;
+    updateDifficultyUi();
     startButton.disabled = false;
   }
 
   startButton.addEventListener('click', () => void beginMatch());
+  for (const button of difficultyButtons) {
+    button.addEventListener('click', () => void selectDifficulty(button.dataset.difficulty));
+  }
 
   CapytGame.onThemeChange(() => {
     refreshColors();

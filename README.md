@@ -10,6 +10,10 @@ Neu unter `capy/games/` sind `games.json`, Game Hub/Loader/Bridge/Reward/Storage
 
 Der optionale **Capy-Begleiter** bleibt im **Alpha-Status**. Der persistente Capy-State wurde rückwärtskompatibel um einen namespaceten `games`-Bereich erweitert; laufende Minigame-Sessions werden nicht über FP1 synchronisiert. Details stehen in `capy/README.md` und `capy/games/docs/NEW_GAME_GUIDE.md`.
 
+### App-Version zentral verwalten
+
+Die aktuelle App-Version wird in `.env` über `APP_VERSION` gepflegt. Nach einer Änderung synchronisiert `npm run version:sync` automatisch `package.json`, `version.json`, die Mobile-Anzeige, den PWA-Update-Parameter und die Service-Worker-Version. Der GitHub-Pages-Workflow führt diesen Schritt vor Tests und Deployment ebenfalls aus.
+
 ## Grundprinzip
 
 - **Desktop = Planung und zentrale Berechnung**

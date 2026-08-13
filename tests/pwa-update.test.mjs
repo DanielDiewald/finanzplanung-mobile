@@ -25,7 +25,10 @@ test('Update-Popup und manuelle Update-Pruefung sind in der mobilen UI vorhanden
   for (const required of ['id="updateDialog"', 'id="updateNowButton"', 'id="updateLaterButton"', 'id="checkForUpdates"']) {
     assert.ok(html.includes(required), `index.html fehlt ${required}`);
   }
-  assert.match(html, /js\/pwa-update\.js\?v=2\.2\.7a(?:-[0-9A-Za-z.-]+)?/);
+  const env=fs.readFileSync(path.join(root,'.env'),'utf8');
+  const version=env.match(/^\s*APP_VERSION\s*=\s*([^\s#]+)/m)?.[1];
+  assert.ok(version);
+  assert.ok(html.includes(`js/pwa-update.js?v=${version}-pwa1`));
 });
 
 test('Capyt-Alpha-Versionen werden fuer die Online-Update-Pruefung akzeptiert', () => {

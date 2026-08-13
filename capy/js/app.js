@@ -253,7 +253,19 @@ async function startMinigame(game){
 }
 function showGameError(message){els.gameLoading.hidden=true;els.gameResult.hidden=true;els.gameError.hidden=false;els.gameErrorCopy.textContent=message||'Unbekannter Fehler.';}
 function showGameResult(result){
-  els.gameLoading.hidden=true;els.gameError.hidden=true;els.gameResult.hidden=false;els.gameResultTitle.textContent=result.newHighScore?'Neuer Highscore!':'Geschafft!';els.gameResultScore.textContent=new Intl.NumberFormat('de-AT').format(Number(result.score)||0);els.gameResultHighscore.textContent=`Bester Score: ${new Intl.NumberFormat('de-AT').format(Number(result.bestScore)||0)}`;els.gameResultReward.textContent=result.coinsAwarded>0?`+${result.coinsAwarded} 🪙`:result.duplicate?'Run bereits verarbeitet':'Keine Coins für diesen Run';renderGames();renderWallet();
+  els.gameLoading.hidden=true;els.gameError.hidden=true;els.gameResult.hidden=false;
+  const versus=result?.display?.type==='versus'?result.display:null;
+  if(versus){
+    els.gameResultTitle.textContent=versus.won?'Sieg':'Punktestand';
+    els.gameResultScore.textContent=`${Number(versus.playerPoints)||0} : ${Number(versus.rivalPoints)||0}`;
+    const difficulty=String(versus.difficultyLabel||versus.difficulty||'').trim();
+    els.gameResultHighscore.textContent=`${difficulty?`${difficulty} · `:''}Erster bei ${Number(versus.targetScore)||5}`;
+  }else{
+    els.gameResultTitle.textContent=result.newHighScore?'Neuer Highscore!':'Geschafft!';
+    els.gameResultScore.textContent=new Intl.NumberFormat('de-AT').format(Number(result.score)||0);
+    els.gameResultHighscore.textContent=`Bester Score: ${new Intl.NumberFormat('de-AT').format(Number(result.bestScore)||0)}`;
+  }
+  els.gameResultReward.textContent=result.coinsAwarded>0?`+${result.coinsAwarded} 🪙`:result.duplicate?'Run bereits verarbeitet':'Keine Coins für diesen Run';renderGames();renderWallet();
 }
 async function requestCloseGame(){
   const status=gameLoader?.session()?.status;if(status==='playing'&&!confirm('Spiel verlassen?\n\nDer aktuelle Lauf wird beendet.'))return;closeGamePlayer();await openGameHub();

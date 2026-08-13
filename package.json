@@ -4,7 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "version:sync": "node scripts/sync-version.mjs",
+    "version:check": "node scripts/sync-version.mjs --check",
+    "pretest": "npm run version:sync",
     "test": "node --test tests/*.test.mjs",
-    "check": "node tests/static-check.mjs"
+    "check": "node tests/static-check.mjs",
+    "precheck": "npm run version:sync"
   }
 }

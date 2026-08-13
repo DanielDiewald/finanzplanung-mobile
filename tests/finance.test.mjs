@@ -15,3 +15,17 @@ test('gelöschte Tombstones beeinflussen Monatswerte nicht',()=>{const d=buildDi
 
 test('Sync-Zusammenfassung behält offene Buchungen aus älteren Monaten',()=>{const rows=[{...base,id:'old',month:'2026-07',date:'2026-07-31',kind:'expense',amountCents:1200},{...base,id:'now',kind:'income',amountCents:3000},{...base,id:'done',kind:'expense',amountCents:500,status:'confirmed'}];const s=pendingSummary(rows,plan);assert.equal(s.count,2);assert.equal(s.expensesCents,1200);assert.equal(s.incomeCents,3000);});
 test('Verfügbar-Donut enthält Budgetstand und mobile Buchungsdetails',()=>{const d=buildDisplayState(plan,[{...base,id:'detail',kind:'budget_expense',amountCents:2990,budgetId:'budget-food',category:'Lebensmittel',description:'Billa'}]);const seg=d.plan.availableDonut.segments.find(x=>x.key==='budget-food');assert.ok(seg.details.some(x=>x.label==='Bisher ausgegeben'&&x.amountCents===15830));assert.ok(seg.details.some(x=>x.label.includes('Billa')&&x.amountCents===2990));});
+
+
+test('Capy-Guthaben erscheint im Verfügbar-Donut erst als freigegebener Anteil',()=>{
+  const capyPlan=structuredClone(plan);
+  capyPlan.budgets.push({id:'capy-vorrat',name:"Momo's Vorrat",category:'Capy Vorrat',interval:'monthly',plannedCents:0,reserveCents:0,spentCents:0,availableCents:2500,color:''});
+  capyPlan.capy={enabled:true,budgetId:'capy-vorrat',budgetName:"Momo's Vorrat",stashBalanceCents:2500,withdrawableStashCents:0,lockedStashCents:2500,nextUnlockDate:'2026-09-13',stashLockMonths:1,coins:0};
+  const locked=buildDisplayState(capyPlan,[]);
+  assert.equal(locked.plan.availableDonut.segments.some(x=>x.key==='capy-vorrat'),false);
+  capyPlan.capy.withdrawableStashCents=1000; capyPlan.capy.lockedStashCents=1500;
+  const partlyUnlocked=buildDisplayState(capyPlan,[]);
+  const segment=partlyUnlocked.plan.availableDonut.segments.find(x=>x.key==='capy-vorrat');
+  assert.equal(segment.amountCents,1000);
+  assert.equal(segment.details.find(x=>x.label==='Noch verfügbar').amountCents,1000);
+});

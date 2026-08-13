@@ -38,7 +38,7 @@ function makeContext(){
   };
   ctx.globalThis=ctx;
   vm.runInNewContext(addon,ctx,{filename:'mobile-sync-addon.js'});
-  return {ctx,state,api:ctx.__FP1_DESKTOP_TEST_API__};
+  return {ctx,state,budgets,api:ctx.__FP1_DESKTOP_TEST_API__};
 }
 
 function tx(overrides={}){
@@ -119,6 +119,15 @@ test('Capy-Bonuscoins bleiben offen, wenn die verknüpfte Vorrat-Aufladung fehls
     {id:'spend-2',delta:-2,relatedTransactionId:''}
   ],care:null},rows);
   assert.deepEqual(Array.from(capy.coinOps,op=>op.id),['spend-2']);
+});
+
+test('Desktop FP1-P überträgt für Tages-/Wochenbudgets die berechnete Monatssumme statt der Einzelrate',()=>{
+  const {api,budgets}=makeContext();
+  budgets[0].amount=10; budgets[0].interval='daily';
+  const payload=api.fp1PlanPayload('2026-08');
+  assert.equal(payload.budgets[0].interval,'daily');
+  assert.equal(payload.budgets[0].plannedCents,35000);
+  assert.equal(payload.budgets[0].reserveCents,35000);
 });
 
 test('Desktop FP1-P wird vom Mobile-Decoder identisch verstanden',async()=>{

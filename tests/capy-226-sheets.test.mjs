@@ -33,9 +33,11 @@ test('Capy Sheet transformiert weich und der Griff hat ein großes Touch-Ziel',(
   assert.match(css,/\.sheet-handle::after\{[^}]*width:46px;[^}]*height:5px/);
 });
 
-test('2.2.8b behält Sheet-Gesten und aktualisiert App/PWA-Cache',()=>{
-  assert.match(sw,/const VERSION='2\.2\.7a';/);
-  assert.match(sw,/const BUILD='games1';/);
-  assert.match(rootHtml,/content=\"2\.2\.7a\"/);
-  assert.match(rootHtml,/pwa-update\.js\?v=2\.2\.7a-pwa1/);
+test('Sheet-Gesten bleiben mit der zentralen App-/PWA-Version gekoppelt',()=>{
+  const env=fs.readFileSync(new URL('../.env',import.meta.url),'utf8');
+  const version=env.match(/^\s*APP_VERSION\s*=\s*([^\s#]+)/m)?.[1];
+  assert.ok(version);
+  assert.ok(sw.includes(`const VERSION='${version}';`));
+  assert.ok(rootHtml.includes(`content="${version}"`));
+  assert.ok(rootHtml.includes(`pwa-update.js?v=${version}-pwa1`));
 });

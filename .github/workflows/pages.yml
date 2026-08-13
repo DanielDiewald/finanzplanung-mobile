@@ -38,6 +38,9 @@ jobs:
           cp /tmp/jsqr-package/package/dist/jsQR.js assets/vendor/jsQR.js
           cp /tmp/jsqr-package/package/LICENSE assets/vendor/jsQR-LICENSE.txt
 
+      - name: Sync app version from .env
+        run: npm run version:sync
+
       - name: Run tests
         run: npm test && npm run check
 

@@ -19,7 +19,7 @@ test('games.json lädt, sortiert und blendet disabled Games aus',()=>{
   assert.equal(registry.schemaVersion,1);
   assert.equal(registry.apiVersion,1);
   const games=visibleGames(registry);
-  assert.deepEqual(games.map(game=>game.id),['carrot-catch','river-ride','snack-toss']);
+  assert.deepEqual(games.map(game=>game.id),['carrot-catch','capy-pong','river-ride','snack-toss']);
   assert.equal(games.some(game=>game.id==='bridge-demo'),false);
 });
 

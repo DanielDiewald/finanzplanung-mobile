@@ -9,6 +9,15 @@ function addSegment(donut,key,label,amountCents,color,detail,group='cost') {
   donut.totalCents = donut.segments.reduce((s,x)=>s+x.amountCents,0);
 }
 
+
+function availableBudgetCentsForDonut(plan,budget) {
+  const available=Math.max(0,Number(budget?.availableCents)||0);
+  const capy=plan?.capy;
+  if(!capy||String(capy.budgetId||'')!==String(budget?.id||'')) return available;
+  const withdrawable=Math.max(0,Number(capy.withdrawableStashCents)||0);
+  return Math.min(available,withdrawable);
+}
+
 export function currentPendingTransactions(transactions, plan) {
   if(!plan) return []; return transactions.filter(t=>t.planId===plan.planId && t.month===plan.month && !['confirmed','rejected'].includes(t.status));
 }
@@ -54,12 +63,12 @@ export function buildDisplayState(plan, transactions=[]) {
   out.plan.totalAssetsCents += out.mobileDelta.totalAssetsCents;
   if(out.plan.accountBalanceCents!==null) out.plan.accountBalanceCents += out.mobileDelta.accountCents;
   out.plan.budgetAssetsCents = out.plan.budgets.reduce((s,b)=>s+b.availableCents,0);
-  out.plan.availableDonut={ mode:'available',title:'Noch verfügbar',centerLabel:'Verfügbar',centerSubtext:'in Alltagsbudgets',segments:out.plan.budgets.filter(b=>b.availableCents>0).map((b,i)=>{
+  out.plan.availableDonut={ mode:'available',title:'Noch verfügbar',centerLabel:'Verfügbar',centerSubtext:'in Alltagsbudgets',segments:out.plan.budgets.map((b,i)=>({budget:b,index:i,visibleCents:availableBudgetCentsForDonut(out.plan,b)})).filter(x=>x.visibleCents>0).map(({budget:b,index:i,visibleCents})=>{
     const mobileRows=transactions.filter(t=>!t.deleted && t.planId===plan.planId && t.month===plan.month && t.kind==='budget_expense' && t.budgetId===b.id).sort((a,z)=>String(z.date).localeCompare(String(a.date)) || String(z.createdAt).localeCompare(String(a.createdAt)));
-    return {key:b.id,label:b.name,amountCents:b.availableCents,group:'available',color:b.color||stableColor(i),details:[
+    return {key:b.id,label:b.name,amountCents:visibleCents,group:'available',color:b.color||stableColor(i),details:[
       {label:'Geplanter Budgetbetrag',amountCents:b.plannedCents},
       {label:'Bisher ausgegeben',amountCents:b.spentCents},
-      {label:'Noch verfügbar',amountCents:b.availableCents},
+      {label:'Noch verfügbar',amountCents:visibleCents},
       ...mobileRows.slice(0,30).map(t=>({label:`Mobil ${t.date} · ${t.description||t.category}`,amountCents:t.amountCents}))
     ]};
   }) };

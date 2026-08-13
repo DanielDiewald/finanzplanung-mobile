@@ -51,10 +51,10 @@
     {
       "id": "capy-pong",
       "name": "Capy Pong",
-      "description": "Pong-Duell gegen ein Rivalen-Capy. Erster bei 5 Punkten gewinnt.",
+      "description": "Pong-Duell gegen ein Rivalen-Capy mit drei Schwierigkeitsstufen. Erster bei 5 Punkten gewinnt.",
       "status": "available",
       "enabled": true,
-      "version": "1.0.1",
+      "version": "1.1.0",
       "entry": "./projects/capy-pong/index.html",
       "icon": "🏓",
       "image": "",
@@ -68,17 +68,31 @@
       "rewards": {
         "enabled": true,
         "currency": "coins",
-        "maxCoinsPerRun": 10,
-        "dailyRewardLimit": 50,
+        "maxCoinsPerRun": 15,
+        "dailyRewardLimit": 75,
         "cooldownMs": 0,
         "strategy": {
-          "type": "score",
-          "scorePerCoin": 75
+          "type": "difficulty_win",
+          "targetScore": 5,
+          "difficulties": {
+            "easy": {
+              "label": "Leicht",
+              "coins": 5
+            },
+            "normal": {
+              "label": "Normal",
+              "coins": 10
+            },
+            "hard": {
+              "label": "Schwer",
+              "coins": 15
+            }
+          }
         }
       },
       "resultValidation": {
         "minScore": 0,
-        "maxScore": 750,
+        "maxScore": 5,
         "minDurationMs": 1000,
         "maxDurationMs": 1800000
       },
