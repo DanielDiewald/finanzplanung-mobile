@@ -61,6 +61,9 @@
   }
   media?.addEventListener?.('change', onSystemChange);
   media?.addListener?.(onSystemChange);
+  globalThis.addEventListener?.('storage', event => {
+    if (event.key === STORAGE_KEY) apply(normalize(event.newValue || 'system'), { persist: false });
+  });
 
   preference = readPreference();
   apply(preference, { persist: false, notify: false });

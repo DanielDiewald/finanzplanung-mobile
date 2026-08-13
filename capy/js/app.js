@@ -14,7 +14,7 @@ const els={
   inactiveState:$('inactiveState'),inactiveTitle:$('inactiveTitle'),inactiveCopy:$('inactiveCopy'),enabledState:$('enabledState'),capyApp:$('capyApp'),
   capyName:$('capyName'),capyMeta:$('capyMeta'),coinIconTop:$('coinIconTop'),coinCountTop:$('coinCountTop'),coinCountShop:$('coinCountShop'),
   hungerValue:$('hungerValue'),happinessValue:$('happinessValue'),energyValue:$('energyValue'),bondValue:$('bondValue'),hungerBar:$('hungerBar'),happinessBar:$('happinessBar'),energyBar:$('energyBar'),bondBar:$('bondBar'),phasePill:$('phasePill'),moodValue:$('moodValue'),statusHint:$('statusHint'),
-  scene:$('scene'),capyHitbox:$('capyHitbox'),capyImage:$('capyImage'),effectsLayer:$('effectsLayer'),floatingLayer:$('floatingLayer'),dropHint:$('dropHint'),playButton:$('playButton'),inventoryBadge:$('inventoryBadge'),shopList:$('shopList'),inventoryList:$('inventoryList'),journalList:$('journalList'),
+  scene:$('scene'),capyHitbox:$('capyHitbox'),capyGroundShadow:$('capyGroundShadow'),capyImage:$('capyImage'),effectsLayer:$('effectsLayer'),floatingLayer:$('floatingLayer'),dropHint:$('dropHint'),playButton:$('playButton'),inventoryBadge:$('inventoryBadge'),shopList:$('shopList'),inventoryList:$('inventoryList'),journalList:$('journalList'),
   selectedFeedBar:$('selectedFeedBar'),selectedFeedItem:$('selectedFeedItem'),selectedFeedImage:$('selectedFeedImage'),selectedFeedName:$('selectedFeedName'),selectedFeedEffect:$('selectedFeedEffect'),selectedFeedCount:$('selectedFeedCount'),clearSelectedFeed:$('clearSelectedFeed'),
   vorratName:$('vorratName'),stashValue:$('stashValue'),stashLocked:$('stashLocked'),stashWithdrawable:$('stashWithdrawable'),stashUnlockHint:$('stashUnlockHint'),topUpAmount:$('topUpAmount'),coinRewardHint:$('coinRewardHint'),topUpButton:$('topUpButton'),capyTransactions:$('capyTransactions'),pauseCapyButton:$('pauseCapyButton'),
   setupModal:$('setupModal'),nameInput:$('nameInput'),genderInfo:$('genderInfo'),finishSetupButton:$('finishSetupButton'),creatorPreview:$('creatorPreview'),genderButtons:[...document.querySelectorAll('[data-gender]')],
@@ -333,9 +333,11 @@ async function finishPetSession(pointerId,cancelled){
 function updatePetReaction(delta){
   const dx=Math.max(-5,Math.min(5,Number(delta.x||0)*.16)),dy=Math.max(-3,Math.min(3,Number(delta.y||0)*.1)),tilt=Math.max(-3,Math.min(3,Number(delta.x||0)/18));
   els.capyImage.style.setProperty('--pet-shift-x',`${dx}px`);els.capyImage.style.setProperty('--pet-shift-y',`${dy}px`);els.capyImage.style.setProperty('--pet-tilt',`${tilt}deg`);
+  if(els.capyGroundShadow){const movement=Math.min(1,Math.hypot(Number(delta.x)||0,Number(delta.y)||0)/42),shadowX=Math.max(-3,Math.min(3,dx*.55));els.capyGroundShadow.style.setProperty('--shadow-pet-x',`${shadowX}px`);els.capyGroundShadow.style.setProperty('--shadow-pet-scale-x',String(1-movement*.07));els.capyGroundShadow.style.setProperty('--shadow-pet-scale-y',String(1-movement*.05));els.capyGroundShadow.style.setProperty('--shadow-pet-opacity',String(.78-movement*.08));}
 }
 function clearPetReaction(resetDirection=true){
   els.capyImage.style.removeProperty('--pet-shift-x');els.capyImage.style.removeProperty('--pet-shift-y');els.capyImage.style.removeProperty('--pet-tilt');
+  if(els.capyGroundShadow){els.capyGroundShadow.style.removeProperty('--shadow-pet-x');els.capyGroundShadow.style.removeProperty('--shadow-pet-scale-x');els.capyGroundShadow.style.removeProperty('--shadow-pet-scale-y');els.capyGroundShadow.style.removeProperty('--shadow-pet-opacity');}
   if(resetDirection&&petSession)petSession.lastDirection=null;
 }
 
@@ -477,7 +479,9 @@ function renderCapy(){
 }
 function syncCapyClasses(visual=null){
   const currentVisual=visual||runtimeVisual||chooseVisual(capy.care,currentPhase(config.behavior),config.behavior),base=actionClass|| (currentVisual==='sleeping'?'capy--sleeping':'capy--idle'),classes=['capy',base];
-  if(idleMotionClass&&!actionClass&&!runtimeVisual&&!petSession&&!drag)classes.push(idleMotionClass);if(petSession)classes.push('is-petting');if(els.capyHitbox.classList.contains('is-drop-target'))classes.push('is-drop-target');els.capyImage.className=classes.join(' ');
+  const activeIdleMotion=idleMotionClass&&!actionClass&&!runtimeVisual&&!petSession&&!drag?idleMotionClass:'';
+  if(activeIdleMotion)classes.push(activeIdleMotion);if(petSession)classes.push('is-petting');if(els.capyHitbox.classList.contains('is-drop-target'))classes.push('is-drop-target');els.capyImage.className=classes.join(' ');
+  if(els.capyGroundShadow){const motion=activeIdleMotion||base;const shadowClasses=['capy-ground-shadow',`shadow--${String(motion).replace(/^capy--/,'')}`];if(petSession)shadowClasses.push('is-petting');if(els.capyHitbox.classList.contains('is-drop-target'))shadowClasses.push('is-drop-target');els.capyGroundShadow.className=shadowClasses.join(' ');}
 }
 
 function scheduleIdleMotion(){

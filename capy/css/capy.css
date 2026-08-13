@@ -1,4 +1,4 @@
-:root{--capy-bg:#0b0d14;--capy-panel:#151925;--capy-panel-2:#202638;--capy-text:#f7f8ff;--capy-muted:#9da6bd;--capy-line:rgba(255,255,255,.1);--capy-accent:#8179ff;--capy-accent-2:#8de1c0;--capy-danger:#ef6b79;--nav-h:70px;--hud-h:102px;color-scheme:dark}
+:root{--capy-bg:var(--color-bg);--capy-panel:var(--color-surface);--capy-panel-2:var(--color-surface-secondary);--capy-text:var(--color-text);--capy-muted:var(--color-text-muted);--capy-line:var(--color-border);--capy-accent:var(--color-primary);--capy-accent-2:var(--color-teal);--capy-danger:var(--color-negative);--nav-h:70px;--hud-h:102px}
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;background:var(--capy-bg);color:var(--capy-text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 body{height:100dvh;overflow:hidden;overscroll-behavior:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
@@ -37,3 +37,95 @@ button,input{font:inherit}button{color:inherit}.hidden{display:none!important}.d
 @media(orientation:landscape) and (max-height:560px) and (max-width:1000px){.capy-game{display:none}.landscape-note{height:100dvh;display:grid;place-items:center;align-content:center;gap:.35rem;padding:1.5rem;text-align:center;background:var(--capy-bg)}.landscape-note span{max-width:460px;color:var(--capy-muted)}}
 @media(min-width:900px){body{overflow:auto;height:auto}.mobile-care,.landscape-note{display:none!important}.desktop-block{display:grid;min-height:100dvh;place-items:center;align-content:center;padding:2rem;text-align:center}.desktop-block-logo{width:96px}.desktop-block p{max-width:520px;color:var(--capy-muted)}.desktop-block a{margin-top:.6rem;padding:.7rem 1rem;border-radius:14px;background:var(--capy-accent);color:white;text-decoration:none;font-weight:800}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}.capy.is-petting{transition:none!important}}
+
+
+/* Capyt Mobile theme bridge: Capy uses the exact same theme preference and shared design tokens. */
+:root{
+  --capy-hud-bg:var(--color-header-glass);
+  --capy-control-bg:var(--color-surface-secondary);
+  --capy-control-wash:rgba(24,29,51,.045);
+  --capy-track-bg:rgba(24,29,51,.09);
+  --capy-pill-bg:rgba(255,255,255,.76);
+  --capy-floating-bg:rgba(255,255,255,.90);
+  --capy-handle-bg:rgba(24,29,51,.18);
+  --capy-handle-active-bg:rgba(24,29,51,.30);
+  --capy-scene-glow:rgba(88,81,232,.16);
+  --capy-scene-top:#e7e9f4;
+  --capy-scene-mid:#f4f5fa;
+  --capy-scene-floor:#e3e6ee;
+  --capy-scene-shade:linear-gradient(180deg,rgba(255,255,255,.28),transparent 45%,rgba(23,25,39,.08));
+  --capy-ground-shadow-color:rgba(24,29,51,.24);
+  --capy-elevated-shadow:0 18px 48px rgba(24,29,51,.16);
+}
+:root[data-theme="dark"]{
+  --capy-control-wash:rgba(255,255,255,.04);
+  --capy-track-bg:rgba(255,255,255,.08);
+  --capy-pill-bg:rgba(8,10,17,.54);
+  --capy-floating-bg:rgba(8,10,17,.74);
+  --capy-handle-bg:rgba(255,255,255,.18);
+  --capy-handle-active-bg:rgba(255,255,255,.34);
+  --capy-scene-glow:rgba(98,91,255,.23);
+  --capy-scene-top:#252b40;
+  --capy-scene-mid:#171c2a;
+  --capy-scene-floor:#0d1018;
+  --capy-scene-shade:linear-gradient(180deg,rgba(255,255,255,.04),transparent 45%,rgba(0,0,0,.28));
+  --capy-ground-shadow-color:rgba(0,0,0,.38);
+  --capy-elevated-shadow:0 20px 60px rgba(0,0,0,.38);
+}
+.game-hud,.game-nav{background:var(--capy-hud-bg)}
+.hud-back,.selected-feed-clear,.sheet-head>button,.more-grid>button,.wide,.gender-picker button{background:var(--capy-control-wash)}
+.hud-need i,.meter{background:var(--capy-track-bg)}
+.scene{background:radial-gradient(circle at 50% 18%,var(--capy-scene-glow),transparent 35%),linear-gradient(180deg,var(--capy-scene-top) 0%,var(--capy-scene-mid) 55%,var(--capy-scene-floor) 100%)}
+.scene-shade{background:var(--capy-scene-shade)}
+.scene-status span,.scene-status strong,.status-hint{background:var(--capy-pill-bg);border-color:var(--capy-line)}
+.floating-feedback{background:var(--capy-floating-bg);box-shadow:var(--shadow-xs)}
+.feed-drag-tutorial,.sheet-card,.drag-ghost,.setup-modal{background:var(--capy-panel);box-shadow:var(--capy-elevated-shadow)}
+.selected-feed-bar{background:var(--capy-hud-bg)}
+.bottom-sheet::backdrop,.setup-modal::backdrop{background:var(--color-backdrop)}
+.sheet-handle::after{background:var(--capy-handle-bg)}
+.sheet-card.is-dragging .sheet-handle::after{background:var(--capy-handle-active-bg)}
+.shop-item,.inventory-item,.stash-hero,.topup-card,.pending-panel,.more-grid,.journal,.journal-entry,.stash-hero span{background:var(--capy-control-wash)}
+.money-input,.creator-name input{background:var(--capy-control-bg)}
+.money-input input,.creator-name input{color:var(--capy-text)}
+.drag-ghost{border-color:var(--capy-line)}
+.toast{background:var(--color-toast-background);color:var(--color-on-dark);box-shadow:var(--shadow-md)}
+.primary,.shop-item button{background:var(--gradient-brand);color:var(--color-on-brand)}
+.primary-link{background:var(--gradient-brand);color:var(--color-on-brand)}
+.danger{border-color:var(--color-border);color:var(--capy-danger);background:var(--color-negative-soft)}
+.inventory-badge,.drag-ghost span{color:var(--color-on-brand)}
+
+/* Ground shadow follows Capy's current motion instead of remaining static. */
+.capy-ground-shadow{position:absolute;z-index:0;left:50%;bottom:7.4%;width:54%;height:7.5%;border-radius:50%;background:var(--capy-ground-shadow-color);filter:blur(9px);opacity:.78;transform:translateX(-50%) scale(1);transform-origin:50% 50%;pointer-events:none;will-change:transform,opacity,filter}
+.capy{position:relative;z-index:1}
+.shadow--idle{animation:capy-shadow-breathe 3.8s ease-in-out infinite}
+.shadow--sleeping{animation:capy-shadow-sleep 3s ease-in-out infinite}
+.shadow--pet{animation:capy-shadow-pet .52s ease}
+.shadow--happy-bounce{animation:capy-shadow-happy-bounce .52s ease}
+.shadow--play{animation:capy-shadow-play .76s ease}
+.shadow--feed{animation:capy-shadow-feed .72s ease}
+.shadow--celebrate{animation:capy-shadow-celebrate .85s ease}
+.shadow--care{animation:capy-shadow-care .62s ease}
+.shadow--idle-look-left{animation:capy-shadow-look-left .68s ease}
+.shadow--idle-look-right{animation:capy-shadow-look-right .68s ease}
+.shadow--idle-bob{animation:capy-shadow-bob .72s ease}
+.shadow--idle-blink{animation:capy-shadow-blink .42s ease}
+.shadow--idle-happy{animation:capy-shadow-happy .74s ease}
+.shadow--idle-hungry{animation:capy-shadow-hungry .8s ease}
+.shadow--idle-drowsy{animation:capy-shadow-drowsy .9s ease}
+.capy-ground-shadow.is-petting{animation:none!important;transform:translateX(calc(-50% + var(--shadow-pet-x,0px))) scale(var(--shadow-pet-scale-x,1),var(--shadow-pet-scale-y,1));opacity:var(--shadow-pet-opacity,.78);transition:transform 70ms linear,opacity 70ms linear}
+.capy-ground-shadow.is-drop-target{filter:blur(10px);opacity:.9}
+@keyframes capy-shadow-breathe{0%,100%{transform:translateX(-50%) scale(1);opacity:.78}50%{transform:translateX(-50%) scale(.95,.92);opacity:.68}}
+@keyframes capy-shadow-sleep{0%,100%{transform:translateX(-50%) scale(1,.96);opacity:.74}50%{transform:translateX(-50%) scale(1.04,1);opacity:.82}}
+@keyframes capy-shadow-pet{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.04,.92)}}
+@keyframes capy-shadow-happy-bounce{0%,100%{transform:translateX(-50%) scale(1);opacity:.78}45%{transform:translateX(-50%) scale(.82,.82);opacity:.52}72%{transform:translateX(-50%) scale(.94,.9);opacity:.68}}
+@keyframes capy-shadow-play{0%,100%{transform:translateX(-50%) scale(1);opacity:.78}30%{transform:translateX(-50%) scale(.84,.84);opacity:.55}65%{transform:translateX(-50%) scale(.91,.88);opacity:.63}}
+@keyframes capy-shadow-feed{0%,100%{transform:translateX(-50%) scale(1);opacity:.78}35%{transform:translateX(-50%) scale(.94,.91);opacity:.67}55%{transform:translateX(-50%) scale(.84,.82);opacity:.52}75%{transform:translateX(-50%) scale(.98,.95);opacity:.74}}
+@keyframes capy-shadow-care{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(.97,.93)}}
+@keyframes capy-shadow-celebrate{0%,100%{transform:translateX(-50%) scale(1);opacity:.78}50%{transform:translateX(-50%) scale(.74,.74);opacity:.42}}
+@keyframes capy-shadow-look-left{0%,100%{transform:translateX(-50%) scale(1)}45%{transform:translateX(calc(-50% - 4px)) scale(.99,.96)}}
+@keyframes capy-shadow-look-right{0%,100%{transform:translateX(-50%) scale(1)}45%{transform:translateX(calc(-50% + 4px)) scale(.99,.96)}}
+@keyframes capy-shadow-bob{0%,100%{transform:translateX(-50%) scale(1);opacity:.78}45%{transform:translateX(-50%) scale(.88,.86);opacity:.60}}
+@keyframes capy-shadow-blink{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.01,.98)}}
+@keyframes capy-shadow-happy{0%,100%{transform:translateX(-50%) scale(1);opacity:.78}35%{transform:translateX(-50%) scale(.91,.88);opacity:.62}65%{transform:translateX(-50%) scale(.95,.91);opacity:.68}}
+@keyframes capy-shadow-hungry{0%,100%{transform:translateX(-50%) scale(1);opacity:.78}45%{transform:translateX(-50%) scale(1.025,1);opacity:.83}}
+@keyframes capy-shadow-drowsy{0%,100%{transform:translateX(-50%) scale(1);opacity:.76}50%{transform:translateX(-50%) scale(1.035,1);opacity:.82}}
