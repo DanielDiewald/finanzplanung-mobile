@@ -818,3 +818,4 @@ input[type="month"]::-webkit-calendar-picker-indicator {
     transition-duration: .001ms !important;
   }
 }
+.capy-transaction-row{cursor:default}.capy-transaction-row .capy-transfer{color:var(--color-text);font-weight:800}.capy-transaction-row.is-rejected{border-color:color-mix(in srgb,var(--color-danger) 35%,transparent)}.capy-transaction-row.is-rejected small{color:var(--color-danger)}.sync-dot.rejected{background:var(--color-danger)}.capy-setting-actions{margin-top:.75rem}

@@ -174,15 +174,33 @@ Damit wird genau eine bestimmte Revision bestaetigt. Hat das Smartphone nach dem
 
 `acknowledgedExportIds` ist zusaetzlich moeglich, wenn ein kompletter Export ohne Fehler verarbeitet wurde.
 
+Zusätzlich kann der Desktop einzelne fehlgeschlagene Mobile-Buchungen im PLAN-Code zurückmelden:
+
+```json
+{
+  "transactionResults": [
+    {
+      "id": "capy_tx_...",
+      "recordRevision": 1,
+      "status": "rejected",
+      "reason": "Monat ist gesperrt",
+      "updatedAt": "2026-08-13T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+`rejected` markiert die Buchung auf Mobile als **Nicht übernommen**. Sie bleibt für einen späteren Sync erhalten; eine daran gebundene positive Coin-Operation darf währenddessen nicht als verfügbar gelten. Erfolgreich übernommene Buchungen werden weiterhin über `acknowledgedTransactions` beziehungsweise einen vollständig bestätigten Export auf `confirmed` gesetzt.
+
 ### 5.5 Capy Alpha (optional)
 
-Das optionale `capy`-Objekt uebertraegt den Desktop-Stand an Mobile. Die Capy-Funktion befindet sich in Version 2.2.1a im Alpha-Status.
+Das optionale `capy`-Objekt uebertraegt den Desktop-Stand an Mobile. Die Capy-Funktion befindet sich in Version 2.2.2a im Alpha-Status.
 
 | Feld | Typ | Pflicht | Bedeutung |
 |---|---|---:|---|
 | `enabled` | Boolean | ja | Capy-Funktion aktiv/inaktiv; wird beim PLAN-Import auf Mobile uebernommen |
 | `budgetId` | String | optional | ID des verwalteten Capy-Vorrat-Budgets |
-| `budgetName` | String | optional | sichtbarer Budgetname, z. B. `Momo Vorrat` |
+| `budgetName` | String | optional | sichtbarer Budgetname, z. B. `Momo's Vorrat` |
 | `stashBalanceCents` | Integer | ja | gesamter aktueller Vorrat |
 | `withdrawableStashCents` | Integer >= 0 | ja | bereits freigegebener, auszahlbarer Anteil |
 | `lockedStashCents` | Integer >= 0 | ja | noch gesperrter Anteil |
@@ -234,7 +252,7 @@ Vorzeichen werden nicht im Betrag kodiert. Die Richtung folgt aus `kind`.
 
 ### 7.1 Capy Alpha im TRANSAKTIONS-CODE
 
-Das optionale `capy`-Objekt enthaelt `enabled`, `budgetId`, deduplizierbare `coinOps` sowie optional `care`. Mobile Vorrat-Aufladungen werden als Transaktion mit `kind = "capy_stash_deposit"` uebertragen. Der Desktop versieht die uebernommene Einzahlung mit ihrem individuellen Freigabedatum gemaess `stashLockMonths`.
+Das optionale `capy`-Objekt enthaelt `enabled`, `budgetId`, deduplizierbare `coinOps` sowie optional `care`. `enabled` ist synchronisierbarer Capy-State; ein Wechsel auf `false` pausiert den Begleiter und löscht weder Game- noch Finanzdaten. Mobile Vorrat-Aufladungen werden als Transaktion mit `kind = "capy_stash_deposit"` uebertragen. Der Desktop versieht die uebernommene Einzahlung mit ihrem individuellen Freigabedatum gemaess `stashLockMonths`.
 
 Coin-Operationen koennen ueber `relatedTransactionId` an eine Vorrat-Aufladung gebunden sein. Wird die zugehoerige Finanzbuchung beim Import abgelehnt, darf auch die dazugehoerige Coin-Gutschrift nicht angewendet werden.
 

@@ -22,13 +22,13 @@
   function ensureState(){
     if(!isPlainObject(state.capy))state.capy={};
     const c=state.capy;
-    c.version=1;c.enabled=Boolean(c.enabled);c.budgetId=CAPY_BUDGET_ID;c.coins=Math.max(0,Math.floor(asNumber(c.coins)));
+    c.version=2;c.enabled=Boolean(c.enabled);c.budgetId=CAPY_BUDGET_ID;c.coins=Math.max(0,Math.floor(asNumber(c.coins)));
     if(!Array.isArray(c.appliedCoinOps))c.appliedCoinOps=[];
     if(!isPlainObject(c.care))c.care=null;
     if(!c.updatedAt)c.updatedAt=now();
     return c;
   }
-  function budgetName(){const c=ensureState(),name=String(c.care?.name||'').trim();return `${name||'Capy'} Vorrat`;}
+  function budgetName(){const c=ensureState(),name=String(c.care?.name||'').trim();return globalThis.CapytCapyNaming?.budgetName(name)||'Capy-Vorrat';}
   function ensureBudget(create=ensureState().enabled){
     const c=ensureState(); let b=(state.variableBudgets||[]).find(x=>String(x.id)===CAPY_BUDGET_ID),changed=false;
     if(!b&&!create)return {budget:null,changed:false};
@@ -59,27 +59,28 @@
   }
   function snapshot(){const c=ensureState();ensureBudget(c.enabled);const lock=lockStatus();return {enabled:c.enabled,budgetId:CAPY_BUDGET_ID,budgetName:budgetName(),stashBalanceCents:lock.balanceCents,withdrawableStashCents:lock.withdrawableCents,lockedStashCents:lock.lockedCents,nextUnlockDate:lock.nextUnlockDate,stashLockMonths:lock.lockMonths,coins:c.coins,coinsPerEuro:Math.max(0,Number(economy.coinsPerEuro)||1),minimumTopUpCents:Math.max(1,Math.floor(Number(economy.minimumTopUpCents)||100)),coinImage:String(economy.coinImage||'./assets/ui/coins.png'),month:selectedMonth,history:history()};}
   function syncSnapshot(ym){const c=ensureState();ensureBudget(c.enabled);const lock=lockStatus(ym);return {enabled:c.enabled,budgetId:CAPY_BUDGET_ID,budgetName:budgetName(),stashBalanceCents:lock.balanceCents,withdrawableStashCents:lock.withdrawableCents,lockedStashCents:lock.lockedCents,nextUnlockDate:lock.nextUnlockDate,stashLockMonths:lock.lockMonths,coins:c.coins,acknowledgedCoinOpIds:c.appliedCoinOps.slice(-5000),care:c.care?deepClone(c.care):null};}
-  function setEnabled(enabled){const c=ensureState();c.enabled=Boolean(enabled);c.updatedAt=now();ensureBudget();updateAndSave(c.enabled?'Capy aktiviert':'Capy deaktiviert');if(!c.enabled&&activeView==='capy')showView('basics');renderHost();}
+  function setEnabled(enabled){const c=ensureState();c.enabled=Boolean(enabled);c.updatedAt=now();ensureBudget();updateAndSave(c.enabled?'Capy aktiviert':'Capy pausiert');if(!c.enabled&&activeView==='capy')showView('basics');renderHost();}
   function topUp(amountCents){
-    const c=ensureState();if(!c.enabled)throw new Error('Capy ist deaktiviert.');const cents=Number(amountCents);if(!Number.isSafeInteger(cents)||cents<Math.max(1,Number(economy.minimumTopUpCents)||100))throw new Error('Bitte einen g\u00fcltigen Aufladebetrag eingeben.');
+    const c=ensureState();if(!c.enabled)throw new Error('Capy ist pausiert.');const cents=Number(amountCents);if(!Number.isSafeInteger(cents)||cents<Math.max(1,Number(economy.minimumTopUpCents)||100))throw new Error('Bitte einen g\u00fcltigen Aufladebetrag eingeben.');
     const data=state.months[selectedMonth];if(!data)throw new Error('Monat nicht gefunden.');if(data.locked)throw new Error('Der ausgew\u00e4hlte Monat ist bereits abgeschlossen.');ensureBudget();
     const date=referenceDate(selectedMonth),capyUnlockDate=addMonthsToDate(date);
     data.budgetTransactions=data.budgetTransactions||[];data.budgetTransactions.push({id:uid('capy-vorrat'),type:'cash_to_budget',budgetId:CAPY_BUDGET_ID,fromBudgetId:'',toBudgetId:CAPY_BUDGET_ID,amount:roundMoney(cents/100),date,capyUnlockDate,note:`Capy Vorrat aufgeladen \u00b7 gesperrt bis ${capyUnlockDate}`});
     const reward=Math.max(1,Math.floor((cents/100)*(Number(economy.coinsPerEuro)||1)));c.coins+=reward;c.updatedAt=now();updateAndSave(`Capy Vorrat aufgeladen \u00b7 ${reward} Coin${reward===1?'':'s'}`);return snapshot();
   }
   function withdraw(amountCents){
-    const c=ensureState();if(!c.enabled)throw new Error('Capy ist deaktiviert.');const cents=Number(amountCents);if(!Number.isSafeInteger(cents)||cents<=0)throw new Error('Bitte einen g\u00fcltigen Auszahlungsbetrag eingeben.');
+    const c=ensureState();if(!c.enabled)throw new Error('Capy ist pausiert.');const cents=Number(amountCents);if(!Number.isSafeInteger(cents)||cents<=0)throw new Error('Bitte einen g\u00fcltigen Auszahlungsbetrag eingeben.');
     const data=state.months[selectedMonth];if(!data)throw new Error('Monat nicht gefunden.');if(data.locked)throw new Error('Der ausgew\u00e4hlte Monat ist bereits abgeschlossen.');ensureBudget();
     const lock=lockStatus(selectedMonth);if(cents>lock.withdrawableCents){const available=(lock.withdrawableCents/100).toFixed(2).replace('.',',');throw new Error(`Aktuell sind nur ${available} EUR zur Auszahlung freigegeben. Einzahlungen bleiben ${lock.lockMonths} Monat${lock.lockMonths===1?'':'e'} gesperrt.`);}
     const date=referenceDate(selectedMonth);data.budgetTransactions=data.budgetTransactions||[];data.budgetTransactions.push({id:uid('capy-auszahlung'),type:'budget_to_cash',budgetId:CAPY_BUDGET_ID,fromBudgetId:CAPY_BUDGET_ID,toBudgetId:'',amount:roundMoney(cents/100),date,note:'Capy Vorrat ausgezahlt'});
     c.updatedAt=now();updateAndSave('Capy Vorrat ausgezahlt');return snapshot();
   }
   function applyMobileSync(payload){
-    if(!payload||typeof payload!=='object')return {coinOps:0,care:false};const c=ensureState(),known=new Set(c.appliedCoinOps.map(String));let coinOps=0;
+    if(!payload||typeof payload!=='object')return {coinOps:0,care:false,enabled:false};const c=ensureState(),known=new Set(c.appliedCoinOps.map(String));let coinOps=0,enabledChanged=false;
+    if(typeof payload.enabled==='boolean'&&c.enabled!==payload.enabled){c.enabled=payload.enabled;enabledChanged=true;}
     for(const op of Array.isArray(payload.coinOps)?payload.coinOps:[]){const id=String(op?.id||'');if(!id||known.has(id))continue;const delta=Math.trunc(Number(op.delta)||0);c.coins=Math.max(0,c.coins+delta);c.appliedCoinOps.push(id);known.add(id);coinOps++;}
     c.appliedCoinOps=[...new Set(c.appliedCoinOps.map(String))].slice(-5000);
     let care=false;const remote=payload.care&&typeof payload.care==='object'?payload.care:null;if(remote){const rt=Date.parse(remote.updatedAt||'')||0,lt=Date.parse(c.care?.updatedAt||'')||0;if(!c.care||rt>=lt){c.care=deepClone(remote);care=true;}}
-    c.updatedAt=now();const {changed}=ensureBudget(c.enabled);if(changed||coinOps||care)saveState('Capy Mobile-Daten \u00fcbernommen');renderHost();return {coinOps,care};
+    c.updatedAt=now();const {changed}=ensureBudget(c.enabled);if(changed||coinOps||care||enabledChanged)saveState('Capy Mobile-Daten übernommen');if(!c.enabled&&activeView==='capy')showView('basics');renderHost();return {coinOps,care,enabled:enabledChanged};
   }
   function decorateBasics(){
     const toggle=document.getElementById('capyFeatureEnabled');if(toggle)toggle.checked=ensureState().enabled;const status=document.getElementById('capyFeatureBudgetName');if(status)status.textContent=budgetName();
@@ -91,7 +92,7 @@
   }
   function openMonth(){showView('month');}
   globalThis.CapytCapyDesktopBridge={snapshot,syncSnapshot,setEnabled,topUp,withdraw,lockStatus,lockDateFor:date=>addMonthsToDate(date),applyMobileSync,renderHost,openMonth,isEnabled:()=>ensureState().enabled,budgetId:CAPY_BUDGET_ID};
-  document.getElementById('capyFeatureEnabled')?.addEventListener('change',e=>setEnabled(e.target.checked));
+  document.getElementById('capyFeatureEnabled')?.addEventListener('change',e=>{if(!e.target.checked){const name=ensureState().care?.name||'Capy';if(!confirm(`Capy-Begleiter pausieren?\n\n${name} und dein Fortschritt bleiben gespeichert. Während der Pause verändern sich seine Bedürfnisse nicht.`)){e.target.checked=true;return;}}setEnabled(e.target.checked);});
   renderHost();
   if(location.hash==='#capy')showView(ensureState().enabled?'capy':'basics');
 })();

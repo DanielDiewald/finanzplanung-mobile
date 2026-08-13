@@ -97,7 +97,7 @@ test('Desktop-Addon importiert zusätzliche Einnahmen/Ausgaben in Desktop-Monats
 
 test('Desktop-Addon importiert eine mobile Capy-Vorrat-Aufladung als interne Budget-Umbuchung',()=>{
   const {api,state}=makeContext();
-  const deposit=tx({id:'capy-topup',kind:'capy_stash_deposit',budgetId:'budget-food',category:'Capy Vorrat',amountCents:1000,description:'Momo Vorrat aufgeladen'});
+  const deposit=tx({id:'capy-topup',kind:'capy_stash_deposit',budgetId:'budget-food',category:'Capy Vorrat',amountCents:1000,description:"Momo's Vorrat aufgeladen"});
   const row=api.fp1Classification(payload([deposit]))[0];
   assert.equal(row.status,'new');
   api.fp1ApplyOne(row.tx);
@@ -150,7 +150,7 @@ test('Mobile FP1-T wird vom Desktop-Decoder verstanden',async()=>{
 
 test('Desktop FP1-P aktiviert Capy nach QR-Decoding auf Mobile',async()=>{
   const {ctx,api}=makeContext();
-  ctx.CapytCapyDesktopBridge={syncSnapshot:()=>({enabled:true,budgetId:'budget-food',budgetName:'Momo Vorrat',stashBalanceCents:2500,withdrawableStashCents:0,lockedStashCents:2500,nextUnlockDate:'2026-09-13',stashLockMonths:1,coins:12,acknowledgedCoinOpIds:[],care:null})};
+  ctx.CapytCapyDesktopBridge={syncSnapshot:()=>({enabled:true,budgetId:'budget-food',budgetName:"Momo's Vorrat",stashBalanceCents:2500,withdrawableStashCents:0,lockedStashCents:2500,nextUnlockDate:'2026-09-13',stashLockMonths:1,coins:12,acknowledgedCoinOpIds:[],care:null})};
   const code=await api.fp1Encode('P',api.fp1PlanPayload('2026-08'));
   const decoded=await decodeFP1(code,{expectedType:'P'});
   const local=applyRemoteCapy(defaultCapyState(),decoded.capy,decoded.acknowledgedExportIds||[]);

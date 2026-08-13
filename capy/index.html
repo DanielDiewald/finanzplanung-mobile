@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
   <meta name="theme-color" content="#10111a">
   <title>Capyt · Capy · Alpha</title>
   <link rel="stylesheet" href="../css/capyt-tokens.css">
@@ -11,136 +11,107 @@
 <body>
   <div class="desktop-block">
     <img src="./assets/ui/capy-brand.png" alt="" class="desktop-block-logo">
-    <h1>Capy-Pflege ist für Mobile gedacht</h1>
-    <p>Am PC stehen Coins kaufen und das Sparbuch im eigenen Capy-Menü von Capyt · Planung zur Verfügung.</p>
+    <h1>Capy · Alpha ist Mobile-first</h1>
+    <p>Am PC bleiben Vorrat, Coins, Sperren und Synchronisation im Mittelpunkt.</p>
     <a href="../desktop-integration/Finanzplanung_v10_mobile-sync.html#capy">Zur Planung</a>
   </div>
 
-  <div class="capy-app mobile-care" id="capyApp">
-    <header class="capy-topbar">
-      <a class="icon-link" href="../#/month" aria-label="Zurück zu Capyt">←</a>
-      <div class="brand-lockup">
-        <img src="./assets/ui/capy-brand.png" alt="">
-        <div><span>CAPYT · CAPY · ALPHA</span><strong id="headerTitle">Vorrat</strong></div>
-      </div>
-      <div class="coin-pill" title="Coins">
-        <img id="coinIconTop" alt="" aria-hidden="true"><span class="coin-fallback">◉</span><strong id="coinCountTop">0</strong>
-      </div>
-    </header>
+  <div class="landscape-note" role="status"><strong>Capy mag Hochformat.</strong><span>Für das beste Capy-Erlebnis bitte das Gerät hochkant halten.</span></div>
 
-    <main class="capy-main">
-      <section id="disabledState" class="panel disabled-state hidden">
-        <img src="./assets/ui/capy-brand.png" alt="">
-        <h1>Capy ist noch nicht aktiviert</h1>
-        <p>Aktiviere Capy am PC unter <strong>Grundlagen → Capy</strong> und synchronisiere danach den Plan erneut mit dem Handy.</p>
-        <a class="primary-link" href="../#/sync">Zur Synchronisation</a>
-      </section>
+  <div class="capy-game mobile-care" id="capyApp">
+    <section id="inactiveState" class="inactive-state hidden">
+      <img src="./assets/ui/capy-brand.png" alt="">
+      <h1 id="inactiveTitle">Capy · Alpha</h1>
+      <p id="inactiveCopy">Capy ist noch nicht aktiviert.</p>
+      <a class="primary-link" href="../#/settings">Zu den Einstellungen</a>
+    </section>
 
-      <div id="enabledState">
-        <section class="page is-active" data-page="home">
-          <section class="panel scene-panel">
-            <div class="panel-head">
-              <div>
-                <span class="eyebrow">DEIN CAPY</span>
-                <h1><span id="capyName">Capy</span> <span id="capyGender" class="gender-mark"></span></h1>
-                <p id="capyMeta" class="muted">Noch nicht eingerichtet</p>
-              </div>
-              <span class="phase-pill" id="phasePill">Tag</span>
-            </div>
+    <div id="enabledState" class="game-shell">
+      <header class="game-hud" aria-label="Capy Status">
+        <a class="hud-back" href="../#/month" aria-label="Zurück zu Capyt">←</a>
+        <div class="hud-profile"><strong id="capyName">Capy</strong><span id="capyMeta">Capy · Alpha</span></div>
+        <div class="hud-coin" aria-label="Coins"><img id="coinIconTop" alt="" aria-hidden="true"><span class="coin-fallback">🪙</span><strong id="coinCountTop">0</strong></div>
+        <div class="hud-needs">
+          <div class="hud-need"><span aria-hidden="true">🍎</span><i><b id="hungerBar"></b></i><small id="hungerValue">0%</small></div>
+          <div class="hud-need"><span aria-hidden="true">❤️</span><i><b id="happinessBar"></b></i><small id="happinessValue">0%</small></div>
+          <div class="hud-need"><span aria-hidden="true">⚡</span><i><b id="energyBar"></b></i><small id="energyValue">0%</small></div>
+        </div>
+      </header>
 
-            <div class="scene" id="scene">
-              <div class="scene-shade"></div>
-              <img id="capyImage" class="capy capy--idle" src="./assets/capy/capy-neutral.png" alt="Capybara">
-              <div id="effectsLayer" class="effects-layer" aria-hidden="true"></div>
-            </div>
+      <main class="game-stage" id="gameStage">
+        <div class="scene" id="scene">
+          <div class="scene-shade"></div>
+          <div class="scene-status"><span id="phasePill">Tag</span><strong id="moodValue">Entspannt</strong></div>
+          <img id="capyImage" class="capy capy--idle" src="./assets/capy/capy-neutral.png" alt="Capybara" draggable="false">
+          <div id="dropHint" class="drop-hint" aria-hidden="true">Hier ablegen</div>
+          <div id="effectsLayer" class="effects-layer" aria-hidden="true"></div>
+          <div id="floatingLayer" class="floating-layer" aria-hidden="true"></div>
+          <p id="statusHint" class="status-hint">Streichle dein Capy direkt.</p>
+        </div>
+      </main>
 
-            <div class="mood-row"><div><span>Aktueller Zustand</span><strong id="moodValue">Entspannt</strong></div><p id="statusHint">Capy macht es sich gemütlich.</p></div>
-            <div class="action-row">
-              <button id="petButton" type="button">♡<span>Streicheln</span></button>
-              <button id="playButton" type="button">✦<span>Spielen</span></button>
-              <button id="openFoodButton" type="button" class="primary">🥕<span>Füttern</span></button>
-            </div>
-          </section>
-
-          <section class="panel needs-panel">
-            <div class="panel-head"><div><span class="eyebrow">BEDÜRFNISSE</span><h2>Wie geht's?</h2></div></div>
-            <div class="needs-grid">
-              <div class="need"><div><span>Sättigung</span><strong id="hungerValue">0%</strong></div><div class="meter"><i id="hungerBar"></i></div></div>
-              <div class="need"><div><span>Glück</span><strong id="happinessValue">0%</strong></div><div class="meter"><i id="happinessBar"></i></div></div>
-              <div class="need"><div><span>Energie</span><strong id="energyValue">0%</strong></div><div class="meter"><i id="energyBar"></i></div></div>
-              <div class="need"><div><span>Bindung</span><strong id="bondValue">0%</strong></div><div class="meter"><i id="bondBar"></i></div></div>
-            </div>
-          </section>
-
-          <section class="panel wallet-mini">
-            <div><span class="eyebrow">SPARBUCH</span><h2 id="vorratNameMini">Capy Vorrat</h2><strong id="stashValueMini">0,00 €</strong></div>
-            <button type="button" data-nav-target="stash">Öffnen →</button>
-          </section>
-        </section>
-
-        <section class="page" data-page="shop">
-          <div class="page-head"><div><span class="eyebrow">COIN-SHOP</span><h1>Food & Pflege</h1><p>Foods kaufst du mit Coins. Gekaufte Items landen im Inventar und können danach verfüttert werden.</p></div><div class="coin-big"><span class="coin-fallback">◉</span><strong id="coinCountShop">0</strong></div></div>
-          <div id="foodList" class="food-list"></div>
-        </section>
-
-        <section class="page" data-page="stash">
-          <section class="panel stash-hero">
-            <span class="eyebrow">SPARBUCH</span>
-            <h1 id="vorratName">Capy Vorrat</h1>
-            <strong id="stashValue">0,00 €</strong>
-            <div class="stash-lock-grid">
-              <div><span>Gesperrt</span><strong id="stashLocked">0,00 €</strong></div>
-              <div><span>Am PC auszahlbar</span><strong id="stashWithdrawable">0,00 €</strong></div>
-            </div>
-            <p id="stashUnlockHint" class="muted"></p>
-            <p>Aufladungen werden als interne Umbuchung in dein Capy-Budget synchronisiert. Dein Gesamtvermögen ändert sich dadurch nicht. Neue Einzahlungen bleiben einen Monat gesperrt.</p>
-          </section>
-          <section class="panel topup-card">
-            <div class="panel-head"><div><span class="eyebrow">AUFLADEN</span><h2>Vorrat + Coins</h2></div></div>
-            <label><span>Betrag</span><div class="money-input"><input id="topUpAmount" inputmode="decimal" placeholder="10,00"><span>€</span></div></label>
-            <p id="coinRewardHint" class="muted">1,00 € = 1 Coin</p>
-            <button id="topUpButton" type="button" class="primary wide">Vorrat aufladen</button>
-          </section>
-          <section class="panel">
-            <div class="panel-head"><div><span class="eyebrow">INVENTAR</span><h2>Deine Foods</h2></div></div>
-            <div id="inventoryList" class="inventory-list"></div>
-          </section>
-          <section class="panel">
-            <div class="panel-head"><div><span class="eyebrow">TAGEBUCH</span><h2>Letzte Ereignisse</h2></div></div>
-            <div id="journalList" class="journal-list"></div>
-          </section>
-        </section>
-      </div>
-    </main>
-
-    <nav class="capy-nav" aria-label="Capy Navigation">
-      <button class="nav-item is-active" data-nav="home"><span>⌂</span><small>Zuhause</small></button>
-      <button class="nav-item" data-nav="shop"><span>◉</span><small>Shop</small></button>
-      <button class="nav-item" data-nav="stash"><span>▤</span><small>Vorrat</small></button>
-    </nav>
+      <nav class="game-nav" aria-label="Capy Navigation">
+        <button type="button" data-open-sheet="shopSheet"><span>🛒</span><small>Shop</small></button>
+        <button type="button" data-open-sheet="inventorySheet"><span>🎒</span><small>Inventar</small><em id="inventoryBadge" class="inventory-badge hidden">0</em></button>
+        <button type="button" id="playButton"><span>🎮</span><small>Spielen</small></button>
+        <button type="button" data-open-sheet="stashSheet"><span>💰</span><small>Vorrat</small></button>
+        <button type="button" data-open-sheet="moreSheet"><span>•••</span><small>Mehr</small></button>
+      </nav>
+    </div>
   </div>
 
-  <dialog id="setupModal" class="setup-modal">
-    <div class="setup-card">
-      <section class="setup-stage is-active" data-setup-stage="safe">
-        <span class="eyebrow">ERSTER START</span>
-        <h2>Wer wohnt in deinem Vorrat?</h2>
-        <p>Öffne den Safe. Das Geschlecht wird zufällig aus den in <code>behavior.json</code> erlaubten Optionen gewählt.</p>
-        <img src="./assets/ui/safe-closed.png" alt="Geschlossener Safe" class="safe-image">
-        <button id="openSafeButton" type="button" class="primary wide">Safe öffnen</button>
-      </section>
-      <section class="setup-stage" data-setup-stage="name">
-        <span class="eyebrow">DEIN CAPY</span>
-        <h2 id="revealTitle">Hallo!</h2>
-        <p id="genderInfo">Geschlecht wurde bestimmt.</p>
-        <img src="./assets/capy/capy-happy.png" alt="Capybara" class="reveal-capy">
-        <label><span>Name</span><input id="nameInput" maxlength="20" autocomplete="off" placeholder="z. B. Momo"></label>
-        <button id="finishSetupButton" type="button" class="primary wide">Einziehen lassen</button>
-      </section>
-    </div>
+  <dialog id="shopSheet" class="bottom-sheet" data-sheet>
+    <section class="sheet-card">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <header class="sheet-head"><div><span class="eyebrow">CAPY · ALPHA</span><h2>Shop</h2><p>Nur kaufen – benutzen kannst du Items im Inventar.</p></div><button type="button" data-close-sheet aria-label="Shop schließen">×</button></header>
+      <div class="sheet-coin"><span>🪙</span><strong id="coinCountShop">0</strong></div>
+      <div id="shopList" class="shop-grid"></div>
+    </section>
   </dialog>
 
+  <dialog id="inventorySheet" class="bottom-sheet inventory-sheet" data-sheet>
+    <section class="sheet-card">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <header class="sheet-head"><div><span class="eyebrow">ZIEHEN &amp; ABLEGEN</span><h2>Inventar</h2><p>Item gedrückt halten und auf dein Capy ziehen.</p></div><button type="button" data-close-sheet aria-label="Inventar schließen">×</button></header>
+      <div id="inventoryList" class="inventory-grid"></div>
+    </section>
+  </dialog>
+
+  <dialog id="stashSheet" class="bottom-sheet" data-sheet>
+    <section class="sheet-card">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <header class="sheet-head"><div><span class="eyebrow">ECHTES GELD</span><h2 id="vorratName">Capy's Vorrat</h2></div><button type="button" data-close-sheet aria-label="Vorrat schließen">×</button></header>
+      <div class="stash-hero"><strong id="stashValue">0,00 €</strong><div><span>🔒 Gesperrt <b id="stashLocked">0,00 €</b></span><span>✓ Auszahlbar <b id="stashWithdrawable">0,00 €</b></span></div><p id="stashUnlockHint"></p></div>
+      <div class="topup-card"><label for="topUpAmount">Vorrat aufladen</label><div class="money-input"><input id="topUpAmount" inputmode="decimal" placeholder="20,00"><span>€</span></div><p id="coinRewardHint">1,00 € = 5 Coins</p><button id="topUpButton" type="button" class="primary wide">Aufladen</button></div>
+      <div class="pending-panel"><h3>Mobile Capy-Buchungen</h3><div id="capyTransactions" class="capy-transactions"></div></div>
+    </section>
+  </dialog>
+
+  <dialog id="moreSheet" class="bottom-sheet" data-sheet>
+    <section class="sheet-card">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <header class="sheet-head"><div><span class="eyebrow">CAPY · ALPHA</span><h2>Mehr</h2></div><button type="button" data-close-sheet aria-label="Mehr schließen">×</button></header>
+      <div class="more-grid"><div><span>Bindung</span><strong id="bondValue">0%</strong><i class="meter"><b id="bondBar"></b></i></div><button type="button" data-open-main="settings">⚙ Einstellungen</button></div>
+      <div class="journal"><h3>Letzte Ereignisse</h3><div id="journalList"></div></div>
+      <button id="pauseCapyButton" type="button" class="danger wide">Capy pausieren</button>
+    </section>
+  </dialog>
+
+  <dialog id="setupModal" class="setup-modal">
+    <form method="dialog" class="setup-card" id="setupForm">
+      <span class="eyebrow">CHARACTER CREATOR · ALPHA</span>
+      <h2>Dein Capy erstellen</h2>
+      <img id="creatorPreview" src="./assets/capy/capy-happy.png" alt="Capy-Vorschau" class="creator-preview">
+      <label class="creator-name"><span>Name</span><input id="nameInput" maxlength="20" autocomplete="off" placeholder="z. B. Napoeln"></label>
+      <fieldset class="gender-picker"><legend>Geschlecht</legend><button type="button" data-gender="männlich">♂ <span>männlich</span></button><button type="button" data-gender="weiblich">♀ <span>weiblich</span></button></fieldset>
+      <p id="genderInfo" class="creator-info">Auswahl wird erst beim Erstellen gespeichert.</p>
+      <button id="finishSetupButton" type="button" class="primary wide">Capy erstellen</button>
+    </form>
+  </dialog>
+
+  <div id="dragGhost" class="drag-ghost hidden" aria-hidden="true"><img alt=""><span></span></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./js/naming.js"></script>
   <script type="module" src="./js/app.js"></script>
 </body>
 </html>

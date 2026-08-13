@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "coinsPerEuro": 1,
+  "version": 2,
+  "coinsPerEuro": 5,
   "minimumTopUpCents": 100,
   "coinImage": "./assets/ui/coins.png",
   "currency": "EUR",

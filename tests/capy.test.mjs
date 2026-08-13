@@ -12,8 +12,8 @@ const care={initialized:true,name:'Momo',gender:'weiblich',hunger:70,happiness:8
 
 function capyPlan(){
   return validatePlanPayload({...raw,
-    budgets:[...raw.budgets,{id:'capy-vorrat',name:'Momo Vorrat',category:'Capy Vorrat',plannedCents:0,reserveCents:0,spentCents:0,availableCents:2500}],
-    capy:{enabled:true,budgetId:'capy-vorrat',budgetName:'Momo Vorrat',stashBalanceCents:2500,coins:19,acknowledgedCoinOpIds:['coin-1'],care}
+    budgets:[...raw.budgets,{id:'capy-vorrat',name:"Momo's Vorrat",category:'Capy Vorrat',plannedCents:0,reserveCents:0,spentCents:0,availableCents:2500}],
+    capy:{enabled:true,budgetId:'capy-vorrat',budgetName:"Momo's Vorrat",stashBalanceCents:2500,coins:19,acknowledgedCoinOpIds:['coin-1'],care}
   });
 }
 
@@ -22,7 +22,7 @@ test('Capy-Plan bleibt in kompaktem FP1-P vollständig erhalten',async()=>{
   const code=await encodeFP1('P',plan,{forceEncoding:'C'});
   const decoded=await decodeFP1(code,{expectedType:'P'});
   assert.equal(decoded.capy.enabled,true);
-  assert.equal(decoded.capy.budgetName,'Momo Vorrat');
+  assert.equal(decoded.capy.budgetName,"Momo's Vorrat");
   assert.equal(decoded.capy.coins,19);
   assert.deepEqual(decoded.capy.acknowledgedCoinOpIds,['coin-1']);
   assert.equal(decoded.capy.care.name,'Momo');
@@ -42,7 +42,7 @@ test('Capy-only Sync funktioniert ohne normale Finanzbuchung',async()=>{
 });
 
 test('Vorrat-Aufladung ist eine erlaubte interne FP1-Buchungsart',()=>{
-  const tx=validateMobileTransaction({id:'stash-1',recordRevision:1,createdAt:'2026-08-13T11:00:00.000Z',updatedAt:'2026-08-13T11:00:00.000Z',date:'2026-08-13',month:'2026-08',kind:'capy_stash_deposit',amountCents:1000,budgetId:'capy-vorrat',category:'Capy Vorrat',description:'Momo Vorrat aufgeladen',note:''});
+  const tx=validateMobileTransaction({id:'stash-1',recordRevision:1,createdAt:'2026-08-13T11:00:00.000Z',updatedAt:'2026-08-13T11:00:00.000Z',date:'2026-08-13',month:'2026-08',kind:'capy_stash_deposit',amountCents:1000,budgetId:'capy-vorrat',category:'Capy Vorrat',description:"Momo's Vorrat aufgeladen",note:''});
   assert.equal(tx.kind,'capy_stash_deposit');
   assert.equal(tx.budgetId,'capy-vorrat');
 });
@@ -73,6 +73,7 @@ test('behavior.json bietet nur weiblich und männlich an und Raum-Pfad ist leer'
 });
 
 test('Desktop-Bridge erstellt Vorrat erst nach Aktivierung und dedupliziert Coin-Operationen',()=>{
+  const namingCode=fs.readFileSync(new URL('../capy/js/naming.js',import.meta.url),'utf8');
   const bridgeCode=fs.readFileSync(new URL('../capy/js/desktop-bridge.js',import.meta.url),'utf8');
   const state={meta:{start:'2026-08'},capy:{version:1,enabled:false,budgetId:'capy-vorrat',coins:0,appliedCoinOps:[],care:null},variableBudgets:[],months:{'2026-08':{locked:false,budgetTransactions:[]}}};
   let seq=0;
@@ -86,6 +87,7 @@ test('Desktop-Bridge erstellt Vorrat erst nach Aktivierung und dedupliziert Coin
     saveState:()=>{},updateAndSave:()=>{},showView:()=>{}
   };
   ctx.globalThis=ctx;
+  vm.runInNewContext(namingCode,ctx,{filename:'naming.js'});
   vm.runInNewContext(bridgeCode,ctx,{filename:'desktop-bridge.js'});
   const api=ctx.CapytCapyDesktopBridge;
   assert.equal(state.variableBudgets.length,0);
@@ -99,10 +101,11 @@ test('Desktop-Bridge erstellt Vorrat erst nach Aktivierung und dedupliziert Coin
   api.applyMobileSync(sync);api.applyMobileSync(sync);
   assert.equal(state.capy.coins,7);
   assert.deepEqual(Array.from(state.capy.appliedCoinOps),['spend-1']);
-  assert.equal(state.variableBudgets[0].description,'Momo Vorrat');
+  assert.equal(state.variableBudgets[0].description,"Momo's Vorrat");
 });
 
 test('Capy-Vorrat bleibt bis zum individuellen Freigabedatum gesperrt und ist danach auszahlbar',()=>{
+  const namingCode=fs.readFileSync(new URL('../capy/js/naming.js',import.meta.url),'utf8');
   const bridgeCode=fs.readFileSync(new URL('../capy/js/desktop-bridge.js',import.meta.url),'utf8');
   const state={
     meta:{start:'2026-07'},
@@ -125,6 +128,7 @@ test('Capy-Vorrat bleibt bis zum individuellen Freigabedatum gesperrt und ist da
     saveState:()=>{},updateAndSave:()=>{},showView:()=>{}
   };
   ctx.globalThis=ctx;
+  vm.runInNewContext(namingCode,ctx,{filename:'naming.js'});
   vm.runInNewContext(bridgeCode,ctx,{filename:'desktop-bridge-lock.js'});
   const api=ctx.CapytCapyDesktopBridge;
   assert.equal(api.lockStatus().lockedCents,1000);

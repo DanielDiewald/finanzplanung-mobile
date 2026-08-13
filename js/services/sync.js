@@ -55,7 +55,7 @@ function compactPayloadForTransport(type,payload) {
     G:(payload.savingsGoals||[]).map(g=>[g.id,g.name,g.balanceCents,g.targetCents]),
     D:[compactDonutForTransport(payload.donuts?.planned),compactDonutForTransport(payload.donuts?.actual)],
     A:(payload.acknowledgedTransactions||[]).map(a=>[a.id,a.recordRevision]),
-    I:payload.acknowledgedTransactionIds||[],E:payload.acknowledgedExportIds||[],L:payload.lastSync??null,C:payload.capy??null
+    I:payload.acknowledgedTransactionIds||[],E:payload.acknowledgedExportIds||[],R:payload.transactionResults||[],L:payload.lastSync??null,C:payload.capy??null
   };
   return {
     v:1,t:'T',p:payload.planId,b:payload.basePlanRevision,m:payload.month,e:payload.exportId,g:payload.generatedAt,d:payload.deviceId,n:payload.deviceName||'',
@@ -70,7 +70,7 @@ function expandCompactPayload(type,x) {
     budgets:(Array.isArray(x.B)?x.B:[]).map(b=>({id:b[0],name:b[1],category:b[2],interval:b[3]||'monthly',plannedCents:b[4],reserveCents:b[5],spentCents:b[6],availableCents:b[7],color:b[8]||''})),
     savingsGoals:(Array.isArray(x.G)?x.G:[]).map(g=>({id:g[0],name:g[1],balanceCents:g[2],targetCents:g[3]})),
     donuts:{planned:expandDonutFromTransport(x.D?.[0]||[],'planned'),actual:expandDonutFromTransport(x.D?.[1]||[],'actual')},
-    acknowledgedTransactions:(Array.isArray(x.A)?x.A:[]).map(a=>({id:a[0],recordRevision:a[1]})),acknowledgedTransactionIds:Array.isArray(x.I)?x.I:[],acknowledgedExportIds:Array.isArray(x.E)?x.E:[],lastSync:x.L??null,capy:x.C??null
+    acknowledgedTransactions:(Array.isArray(x.A)?x.A:[]).map(a=>({id:a[0],recordRevision:a[1]})),acknowledgedTransactionIds:Array.isArray(x.I)?x.I:[],acknowledgedExportIds:Array.isArray(x.E)?x.E:[],transactionResults:Array.isArray(x.R)?x.R:[],lastSync:x.L??null,capy:x.C??null
   };
   return {
     protocolVersion:x.v,type:'T',planId:x.p,basePlanRevision:x.b,month:x.m,exportId:x.e,generatedAt:x.g,deviceId:x.d,deviceName:x.n||'',
@@ -152,6 +152,17 @@ function normalizeCapyPlan(value) {
     care:normalizeCapyCare(value.care)
   };
 }
+function normalizeTransactionResults(value) {
+  if(!Array.isArray(value)) return [];
+  return value.slice(0,5000).map((row,i)=>({
+    id:str(row?.id,`Buchungsergebnis ${i+1}`,{max:160}),
+    recordRevision:int(row?.recordRevision??1,`Buchungsergebnis-Revision ${i+1}`,{min:1,max:1000000}),
+    status:row?.status==='rejected'?'rejected':'confirmed',
+    reason:str(row?.reason||'','Buchungsergebnis-Hinweis',{required:false,max:300}),
+    updatedAt:row?.updatedAt?iso(row.updatedAt,`Buchungsergebnis-Zeitpunkt ${i+1}`):new Date(0).toISOString()
+  }));
+}
+
 function normalizeCapySync(value) {
   if(!value||typeof value!=='object'||Array.isArray(value)) return null;
   const coinOps=Array.isArray(value.coinOps)?value.coinOps.slice(0,1000).map((op,i)=>({
@@ -159,7 +170,7 @@ function normalizeCapySync(value) {
     reason:str(op?.reason||'','Capy-Coin-Grund',{required:false,max:160}),relatedTransactionId:str(op?.relatedTransactionId||'','Capy-Coin-Buchungs-ID',{required:false,max:160}),createdAt:iso(op?.createdAt,`Capy-Coin-Zeitpunkt ${i+1}`)
   })).filter(op=>op.delta!==0):[];
   const seen=new Set(); for(const op of coinOps){if(seen.has(op.id))throw new Error(`Doppelte Capy-Coin-Operation: ${op.id}.`);seen.add(op.id);}
-  return {version:1,enabled:Boolean(value.enabled),budgetId:str(value.budgetId||'','Capy-Budget-ID',{required:false,max:160}),coinOps,care:normalizeCapyCare(value.care)};
+  return {version:2,enabled:Boolean(value.enabled),budgetId:str(value.budgetId||'','Capy-Budget-ID',{required:false,max:160}),coinOps,care:normalizeCapyCare(value.care)};
 }
 
 export function validatePlanPayload(input) {
@@ -177,7 +188,7 @@ export function validatePlanPayload(input) {
     source:input.source&&typeof input.source==='object'?deepClone(input.source):{},
     accountBalanceCents, normalBalanceCents:cents(input.normalBalanceCents??accountBalanceCents??0,'Normales Guthaben'), freeAvailableCents:cents(input.freeAvailableCents??0,'Frei verfügbar'), minimumCashBufferCents:cents(input.minimumCashBufferCents??0,'Mindestpuffer',{allowNegative:false}), budgetAssetsCents:cents(input.budgetAssetsCents??budgets.reduce((s,b)=>s+b.availableCents,0),'Budgetvermögen'), savingsAssetsCents:cents(input.savingsAssetsCents??0,'Sparvermögen',{allowNegative:false}), totalAssetsCents:cents(input.totalAssetsCents??0,'Gesamtvermögen'), budgets, savingsGoals:goals,
     donuts:{ planned:normalizeDonut(input.donuts?.planned||{},'planned'), actual:normalizeDonut(input.donuts?.actual||{},'actual') },
-    acknowledgedTransactions:Array.isArray(input.acknowledgedTransactions)?input.acknowledgedTransactions.slice(0,5000).map(x=>({id:str(x?.id,'Bestätigte Transaktions-ID',{max:160}),recordRevision:int(x?.recordRevision??1,'Bestätigte Buchungsrevision',{min:1,max:1000000})})):[], acknowledgedTransactionIds:Array.isArray(input.acknowledgedTransactionIds)?[...new Set(input.acknowledgedTransactionIds.map(x=>String(x)).filter(Boolean))].slice(0,5000):[], acknowledgedExportIds:Array.isArray(input.acknowledgedExportIds)?[...new Set(input.acknowledgedExportIds.map(x=>String(x)).filter(Boolean))].slice(0,1000):[], lastSync:input.lastSync&&typeof input.lastSync==='object'?deepClone(input.lastSync):null, capy:normalizeCapyPlan(input.capy) };
+    acknowledgedTransactions:Array.isArray(input.acknowledgedTransactions)?input.acknowledgedTransactions.slice(0,5000).map(x=>({id:str(x?.id,'Bestätigte Transaktions-ID',{max:160}),recordRevision:int(x?.recordRevision??1,'Bestätigte Buchungsrevision',{min:1,max:1000000})})):[], acknowledgedTransactionIds:Array.isArray(input.acknowledgedTransactionIds)?[...new Set(input.acknowledgedTransactionIds.map(x=>String(x)).filter(Boolean))].slice(0,5000):[], acknowledgedExportIds:Array.isArray(input.acknowledgedExportIds)?[...new Set(input.acknowledgedExportIds.map(x=>String(x)).filter(Boolean))].slice(0,1000):[], transactionResults:normalizeTransactionResults(input.transactionResults), lastSync:input.lastSync&&typeof input.lastSync==='object'?deepClone(input.lastSync):null, capy:normalizeCapyPlan(input.capy) };
 }
 
 export function validateMobileTransaction(t,index=0) {

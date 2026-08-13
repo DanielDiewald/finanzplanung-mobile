@@ -10,7 +10,7 @@ function addSegment(donut,key,label,amountCents,color,detail,group='cost') {
 }
 
 export function currentPendingTransactions(transactions, plan) {
-  if(!plan) return []; return transactions.filter(t=>t.planId===plan.planId && t.month===plan.month && t.status!=='confirmed');
+  if(!plan) return []; return transactions.filter(t=>t.planId===plan.planId && t.month===plan.month && !['confirmed','rejected'].includes(t.status));
 }
 
 export function buildDisplayState(plan, transactions=[]) {
@@ -74,4 +74,4 @@ export function pendingSummary(transactions,plan) {
 export function groupTransactionsByDate(rows) {
   const map=new Map(); for(const t of rows){ if(!map.has(t.date)) map.set(t.date,[]); map.get(t.date).push(t); } return [...map.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
 }
-export function statusLabel(status) { return status==='confirmed'?'Bestätigt':status==='prepared'?'Vorbereitet':'Lokal'; }
+export function statusLabel(status) { return status==='confirmed'?'Gebucht':status==='rejected'?'Nicht übernommen':status==='prepared'?'Wartet auf PC':'Ausstehend'; }

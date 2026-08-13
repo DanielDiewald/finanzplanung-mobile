@@ -7,7 +7,7 @@
       content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <meta
       name="capyt-version"
-      content="2.2.1a" />
+      content="2.2.2a" />
     <meta
       name="theme-color"
       content="#F4F5FA" />
@@ -643,8 +643,12 @@
             </div>
             <span id="capyFeatureStatus" class="status-pill">Deaktiviert</span>
           </div>
-          <p class="help">Capy befindet sich in der Alpha-Phase. Die Funktion wird am PC unter <strong>Grundlagen</strong> aktiviert und mit dem nächsten FP1-Plan auf dieses Gerät übernommen.</p>
+          <p class="help">Capy · Alpha kann pausiert werden, ohne Fortschritt, Coins, Inventar, Vorrat oder Sperrfristen zu löschen. Aktivierungsänderungen werden über FP1/QR synchronisiert.</p>
           <div class="key-values"><div><span>Variable Budget</span><strong id="capyFeatureName">Am PC aktivieren</strong></div></div>
+          <div class="button-grid capy-setting-actions">
+            <button id="capyPauseButton" type="button" class="danger hidden">Capy pausieren</button>
+            <button id="capyResumeButton" type="button" class="hidden">Wieder aktivieren</button>
+          </div>
         </section>
 
         <section class="card compact-card">
@@ -712,7 +716,7 @@
       <span>Ausgabe</span>
     </button>
 
-    <a id="capyLauncher" class="capy-launcher hidden" href="./capy/" aria-label="Capy Alpha öffnen" title="Capy · Alpha">
+    <a id="capyLauncher" class="capy-launcher hidden" href="./capy/" aria-label="Capy · Alpha öffnen" title="Capy · Alpha">
       <img src="./capy/assets/ui/capy-brand.png" alt="" />
     </a>
 
@@ -1107,7 +1111,8 @@
 
     <script src="./assets/vendor/qrcode.min.js"></script>
     <script src="./assets/vendor/jsQR.js"></script>
-    <script src="./js/pwa-update.js?v=2.2.1a"></script>
+    <script src="./js/pwa-update.js?v=2.2.2a"></script>
+    <script src="./capy/js/naming.js"></script>
     <script
       type="module"
       src="./js/app.js"></script>

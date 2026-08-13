@@ -8,7 +8,7 @@ import { renderMonth } from './views/month.js';
 import { renderTransactions } from './views/transactions.js';
 import { renderSync } from './views/sync-view.js';
 import { applyTheme, renderSettings } from './views/settings.js';
-import { applyRemoteCapy, buildCapySyncPayload, capyHasPendingSync, loadCapyState, markCapyPrepared, saveCapyState } from '../capy/js/shared-state.js';
+import { applyRemoteCapy, buildCapySyncPayload, capyHasPendingSync, loadCapyState, markCapyPrepared, saveCapyState, setCapyEnabled } from '../capy/js/shared-state.js';
 
 const state={ plan:null,transactions:[],settings:null,capy:null,display:null,pendingPlan:null,monthVisualMode:'donut',donutMode:'planned',selectedSegment:'',transactionFilter:'all',transactionBudgetFilter:'',lastTransactionCode:'',deferredInstall:null };
 let router;
@@ -17,19 +17,19 @@ const $=id=>document.getElementById(id);
 function toast(message,{error=false,duration=3300}={}){ const el=document.createElement('div');el.className=`toast${error?' error':''}`;el.textContent=message;$('toastRegion').append(el);setTimeout(()=>el.remove(),duration); }
 function monthBounds(ym){ const [y,m]=ym.split('-').map(Number);const last=new Date(y,m,0).getDate();return {min:`${ym}-01`,max:`${ym}-${String(last).padStart(2,'0')}`}; }
 function activePlanRows(){ return state.plan?state.transactions.filter(t=>t.planId===state.plan.planId):[]; }
-function visibleRows(){ return activePlanRows().filter(t=>!t.deleted && t.kind!=='capy_stash_deposit'); }
+function visibleRows(){ return activePlanRows().filter(t=>!t.deleted); }
 
-async function reconcileCapyFromPlan(){ if(!state.plan)return;const remote=state.plan.capy||{enabled:false};state.capy=applyRemoteCapy(state.capy||await loadCapyState(),remote,state.plan.acknowledgedExportIds||[]);state.capy=await saveCapyState(state.capy); }
+async function reconcileCapyFromPlan(){ if(!state.plan)return;const remote=state.plan.capy||{enabled:false};state.capy=applyRemoteCapy(state.capy||await loadCapyState(),remote,state.plan.acknowledgedExportIds||[],state.plan.transactionResults||[]);state.capy=await saveCapyState(state.capy); }
 async function loadState(){ state.settings=await getSettings(); state.capy=await loadCapyState(); state.monthVisualMode=state.settings.selectedMonthVisualMode||'donut'; state.donutMode=state.settings.selectedDonutMode||'planned'; state.plan=await getCurrentPlan(); state.transactions=await listTransactions(); await reconcileCapyFromPlan(); state.display=buildDisplayState(state.plan,state.transactions); }
 async function refresh(){ state.plan=await getCurrentPlan(); state.transactions=await listTransactions(); await reconcileCapyFromPlan(); state.display=buildDisplayState(state.plan,state.transactions); renderAll(); }
 function renderAll(){
-  const rows=visibleRows();
-  renderMonth({display:state.display,visualMode:state.monthVisualMode,donutMode:state.donutMode,selectedSegment:state.selectedSegment,recentTransactions:rows,onSegment:key=>{state.selectedSegment=state.selectedSegment===key?'':key;renderAll();},onBudget:id=>openTransaction({kind:'budget_expense',budgetId:id}),onTransaction:id=>openTransaction({id})});
+  const rows=visibleRows(),monthRows=rows.filter(t=>t.kind!=='capy_stash_deposit');
+  renderMonth({display:state.display,visualMode:state.monthVisualMode,donutMode:state.donutMode,selectedSegment:state.selectedSegment,recentTransactions:monthRows,onSegment:key=>{state.selectedSegment=state.selectedSegment===key?'':key;renderAll();},onBudget:id=>openTransaction({kind:'budget_expense',budgetId:id}),onTransaction:id=>openTransaction({id})});
   renderTransactions({plan:state.plan,transactions:rows,filter:state.transactionFilter,budgetFilter:state.transactionBudgetFilter,onEdit:id=>openTransaction({id})});
   renderSync({plan:state.plan,transactions:state.transactions,pendingPlan:state.pendingPlan,onAcceptPlan:acceptPendingPlan,capyPending:capyHasPendingSync(state.capy)});
-  const capyEnabled=Boolean(state.capy?.enabled&&state.plan?.capy?.enabled);
-  renderSettings(state.settings,{capyEnabled,capyName:state.capy?.care?.name||''});
-  setHidden($('capyLauncher'),!capyEnabled);
+  const capyEnabled=Boolean(state.capy?.enabled),capyInitialized=Boolean(state.capy?.care?.initialized);
+  renderSettings(state.settings,{capyEnabled,capyInitialized,capyName:state.capy?.care?.name||'',capyBudgetName:state.plan?.capy?.budgetName||''});
+  setHidden($('capyLauncher'),!capyEnabled||!capyInitialized);
   const pending=state.plan?pendingSummary(state.transactions,state.plan):{count:0}; const pendingTotal=pending.count+(capyHasPendingSync(state.capy)?1:0);
   const badge=$('syncNavBadge');badge.textContent=String(pendingTotal);setHidden(badge,!pendingTotal);
   updateHeaderSyncStatus(pendingTotal);
@@ -80,7 +80,7 @@ async function acceptPendingPlan(){
   const plan=state.pendingPlan;if(!plan)return;
   if(state.plan&&plan.planId===state.plan.planId&&plan.revision<state.plan.revision&&!confirm(`Planrevision ${plan.revision} ist älter als die gespeicherte Revision ${state.plan.revision}. Trotzdem übernehmen?`))return;
   await savePlan(plan);const confirmed=await markAcknowledged(plan);
-  state.capy=applyRemoteCapy(state.capy,plan.capy||{enabled:false},plan.acknowledgedExportIds||[]);state.capy=await saveCapyState(state.capy);
+  state.capy=applyRemoteCapy(state.capy,plan.capy||{enabled:false},plan.acknowledgedExportIds||[],plan.transactionResults||[]);state.capy=await saveCapyState(state.capy);
   await addSyncHistory({planId:plan.planId,type:'plan-import',revision:plan.revision,createdAt:new Date().toISOString(),confirmedTransactions:confirmed});state.pendingPlan=null;await refresh();toast(`Plan übernommen${confirmed?` · ${confirmed} Buchung${confirmed===1?'':'en'} bestätigt`:''}.`);
 }
 
@@ -175,6 +175,17 @@ function setupSheetGestures(){
 async function startScannerAction(){ try{await startQrScanner({video:$('scannerVideo'),canvas:$('scannerCanvas'),onStatus:s=>$('scannerStatus').textContent=s,onResult:async code=>{try{await previewPlanCode(code);}catch(err){toast(err.message,{error:true});}}});}catch(err){$('scannerStatus').textContent=`${err.message} Du kannst alternativ ein QR-Foto auswählen oder den Code manuell einfügen.`;toast('Kamera-QR-Scan konnte nicht gestartet werden.',{error:true});} }
 async function scanQrPhoto(file){ if(!file)return; try{const code=await decodeQrImageFile(file,{canvas:$('scannerCanvas'),onStatus:s=>$('scannerStatus').textContent=s});await previewPlanCode(code);}catch(err){$('scannerStatus').textContent=err.message;toast(err.message,{error:true});}finally{$('scannerPhotoInput').value='';} }
 
+async function pauseCapyFromSettings(){
+  if(!state.capy?.care?.initialized)return;
+  const name=state.capy.care.name||'Capy';
+  if(!confirm(`Capy-Begleiter pausieren?\n\n${name} und dein Fortschritt bleiben gespeichert. Während der Pause verändern sich seine Bedürfnisse nicht.`))return;
+  setCapyEnabled(state.capy,false);state.capy=await saveCapyState(state.capy);renderAll();toast(`${name} pausiert · Status wartet auf FP1-Sync.`);
+}
+async function resumeCapyFromSettings(){
+  if(!state.capy?.care?.initialized)return;
+  setCapyEnabled(state.capy,true);state.capy=await saveCapyState(state.capy);renderAll();toast(`${state.capy.care.name||'Capy'} ist wieder da! Status wartet auf FP1-Sync.`);
+}
+
 async function exportLocalBackup(){const data=await exportAllData();downloadText(`capyt-mobile-backup-${todayLocal()}.json`,JSON.stringify(data,null,2));toast('Lokales Backup erstellt.');}
 async function resetData(){if(!confirm('Alle lokalen Pläne, Buchungen und Sync-Stände auf diesem Gerät löschen?'))return;await resetAllData();state.pendingPlan=null;state.lastTransactionCode='';await loadState();renderAll();toast('Lokale Daten gelöscht.');}
 
@@ -189,7 +200,7 @@ function setupEvents(){
   $('transactionForm').addEventListener('submit',e=>{e.preventDefault();saveTransactionFromForm().catch(err=>toast(err.message,{error:true}));}); $('deleteTransactionButton').addEventListener('click',deleteCurrentTransaction);
   $('scanPlanButton').addEventListener('click',openScanner);$('pastePlanButton').addEventListener('click',openCodeDialog);$('scannerPasteFallback').addEventListener('click',()=>{stopScanner();openCodeDialog();});$('closeScanner').addEventListener('click',stopScanner);$('startScanner').addEventListener('click',startScannerAction);$('scannerPhotoButton').addEventListener('click',()=>{stopQrScanner($('scannerVideo'));$('scannerStatus').textContent='Kamera-Foto aufnehmen. QR-Code möglichst groß, scharf und vollständig fotografieren.';$('scannerPhotoInput').click();});$('scannerPhotoInput').addEventListener('change',e=>scanQrPhoto(e.target.files?.[0]));
   $('codeForm').addEventListener('submit',e=>{e.preventDefault();previewPlanCode($('planCodeInput').value).catch(err=>toast(err.message,{error:true}));});$('generateTransactionCode').addEventListener('click',generateTransactionCode);$('copyTransactionCode').addEventListener('click',copyTransactionCode);$('shareTransactionCode').addEventListener('click',shareTransactionCode);
-  $('deviceName').addEventListener('change',async e=>{state.settings=await saveSettings({deviceName:e.target.value.trim()});toast('Gerätename gespeichert.');});$('themeSetting').addEventListener('change',async e=>{state.settings=await saveSettings({theme:e.target.value});applyTheme(e.target.value);});$('exportLocalData').addEventListener('click',exportLocalBackup);$('resetLocalData').addEventListener('click',resetData);
+  $('deviceName').addEventListener('change',async e=>{state.settings=await saveSettings({deviceName:e.target.value.trim()});toast('Gerätename gespeichert.');});$('themeSetting').addEventListener('change',async e=>{state.settings=await saveSettings({theme:e.target.value});applyTheme(e.target.value);});$('exportLocalData').addEventListener('click',exportLocalBackup);$('resetLocalData').addEventListener('click',resetData);$('capyPauseButton')?.addEventListener('click',pauseCapyFromSettings);$('capyResumeButton')?.addEventListener('click',resumeCapyFromSettings);
   window.addEventListener('online',updateNetworkState);window.addEventListener('offline',updateNetworkState);window.addEventListener('resize',debounce(()=>renderAll(),180));window.addEventListener('capyt-themechange',()=>renderAll());document.addEventListener('visibilitychange',()=>{if(document.hidden)stopQrScanner($('scannerVideo'));});
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();state.deferredInstall=e;setHidden($('installButton'),false);});$('installButton').addEventListener('click',async()=>{if(!state.deferredInstall)return;state.deferredInstall.prompt();await state.deferredInstall.userChoice;state.deferredInstall=null;setHidden($('installButton'),true);});
 }

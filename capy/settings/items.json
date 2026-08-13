@@ -1,77 +1,13 @@
 {
-  "version": 1,
+  "version": 2,
   "items": [
-    {
-      "id": "carrot",
-      "name": "Karotte",
-      "priceCoins": 1,
-      "hunger": 10,
-      "happiness": 3,
-      "bond": 1,
-      "energy": 0,
-      "asset": "./assets/items/carrot.png",
-      "description": "Kleiner Snack für zwischendurch.",
-      "enabled": true
-    },
-    {
-      "id": "apple",
-      "name": "Apfel",
-      "priceCoins": 2,
-      "hunger": 14,
-      "happiness": 5,
-      "bond": 1,
-      "energy": 0,
-      "asset": "./assets/items/apple.png",
-      "description": "Fruchtig und einfach.",
-      "enabled": true
-    },
-    {
-      "id": "cucumber",
-      "name": "Gurke",
-      "priceCoins": 3,
-      "hunger": 18,
-      "happiness": 6,
-      "bond": 2,
-      "energy": 0,
-      "asset": "./assets/items/cucumber.png",
-      "description": "Knackiger Capy-Klassiker.",
-      "enabled": true
-    },
-    {
-      "id": "melon",
-      "name": "Melone",
-      "priceCoins": 5,
-      "hunger": 24,
-      "happiness": 10,
-      "bond": 2,
-      "energy": 1,
-      "asset": "./assets/items/melon.png",
-      "description": "Großes Leckerli mit Extra-Freude.",
-      "enabled": true
-    },
-    {
-      "id": "pumpkin",
-      "name": "Kürbis",
-      "priceCoins": 8,
-      "hunger": 28,
-      "happiness": 11,
-      "bond": 3,
-      "energy": 2,
-      "asset": "./assets/items/pumpkin.png",
-      "description": "Sättigend und etwas Besonderes.",
-      "enabled": true
-    },
-    {
-      "id": "snack",
-      "name": "Lieblingssnack",
-      "priceCoins": 12,
-      "hunger": 32,
-      "happiness": 15,
-      "bond": 4,
-      "energy": 3,
-      "asset": "./assets/items/snack.png",
-      "description": "Der große Bonus für dein Capy.",
-      "enabled": true
-    }
+    {"id":"carrot","name":"Karotte","type":"food","price":10,"image":"./assets/items/carrot.png","stackable":true,"maxStack":99,"description":"Kleiner Snack für zwischendurch.","effects":{"hunger":15,"happiness":3},"interaction":{"target":"capy","animation":"eat"},"enabled":true},
+    {"id":"apple","name":"Apfel","type":"food","price":16,"image":"./assets/items/apple.png","stackable":true,"maxStack":99,"description":"Fruchtig und einfach.","effects":{"hunger":20,"happiness":4},"interaction":{"target":"capy","animation":"eat"},"enabled":true},
+    {"id":"cucumber","name":"Gurke","type":"food","price":20,"image":"./assets/items/cucumber.png","stackable":true,"maxStack":99,"description":"Knackiger Capy-Klassiker.","effects":{"hunger":24,"happiness":5},"interaction":{"target":"capy","animation":"eat"},"enabled":true},
+    {"id":"melon","name":"Melone","type":"food","price":32,"image":"./assets/items/melon.png","stackable":true,"maxStack":99,"description":"Großes Leckerli mit Extra-Freude.","effects":{"hunger":30,"happiness":8,"energy":1},"interaction":{"target":"capy","animation":"eat"},"enabled":true},
+    {"id":"pumpkin","name":"Kürbis","type":"food","price":44,"image":"./assets/items/pumpkin.png","stackable":true,"maxStack":99,"description":"Sättigend und etwas Besonderes.","effects":{"hunger":34,"happiness":9,"energy":2},"interaction":{"target":"capy","animation":"eat"},"enabled":true},
+    {"id":"snack","name":"Lieblingssnack","type":"food","price":60,"image":"./assets/items/snack.png","stackable":true,"maxStack":99,"description":"Der große Bonus für dein Capy.","effects":{"hunger":38,"happiness":12,"bond":2,"energy":3},"interaction":{"target":"capy","animation":"eat"},"enabled":true},
+    {"id":"ball","name":"Spielball","type":"toy","price":35,"image":"./assets/effects/sparkle.png","stackable":true,"maxStack":20,"description":"Ein kleines Spielzeug für gute Laune.","effects":{"happiness":12,"energy":-6,"bond":2},"interaction":{"target":"capy","animation":"play"},"enabled":true},
+    {"id":"brush","name":"Bürste","type":"care","price":28,"image":"./assets/effects/heart.png","stackable":true,"maxStack":20,"description":"Pflege für ein zufriedenes Capy.","effects":{"happiness":8,"bond":3},"interaction":{"target":"capy","animation":"care"},"enabled":true}
   ]
 }

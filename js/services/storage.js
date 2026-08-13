@@ -69,14 +69,22 @@ export async function listSyncHistory(planId='') { const {store:s}=await store('
 
 export async function markAcknowledged(plan) {
   const rows=await listTransactions({planId:plan.planId});
-  const txIds=new Set((plan.acknowledgedTransactionIds||[]).map(String)); const exact=new Set((plan.acknowledgedTransactions||[]).map(x=>`${String(x.id)}@${Number(x.recordRevision)||1}`)); const exportIds=new Set((plan.acknowledgedExportIds||[]).map(String));
-  let changed=0;
+  const txIds=new Set((plan.acknowledgedTransactionIds||[]).map(String));
+  const exact=new Set((plan.acknowledgedTransactions||[]).map(x=>`${String(x.id)}@${Number(x.recordRevision)||1}`));
+  const exportIds=new Set((plan.acknowledgedExportIds||[]).map(String));
+  const rejected=new Map((plan.transactionResults||[]).filter(x=>x?.status==='rejected').map(x=>[`${String(x.id)}@${Number(x.recordRevision)||1}`,x]));
+  let changed=0; const changedRows=[];
   for (const row of rows) {
+    const key=`${row.id}@${row.recordRevision||1}`;
+    const rejection=rejected.get(key);
+    if(rejection){
+      if(row.status!=='rejected'||row.rejectionReason!==String(rejection.reason||'')){row.status='rejected';row.rejectionReason=String(rejection.reason||'Nicht vom PC übernommen.');row.confirmedAt=null;row.preparedExportIds=[];changed++;changedRows.push(row);}continue;
+    }
     if (row.status==='confirmed') continue;
     const prepared=Array.isArray(row.preparedExportIds)?row.preparedExportIds:[];
-    if (exact.has(`${row.id}@${row.recordRevision||1}`) || ((row.recordRevision||1)===1 && txIds.has(row.id)) || prepared.some(id=>exportIds.has(id))) { row.status='confirmed'; row.confirmedAt=plan.createdAt||new Date().toISOString(); changed++; }
+    if (exact.has(key) || ((row.recordRevision||1)===1 && txIds.has(row.id)) || prepared.some(id=>exportIds.has(id))) { row.status='confirmed'; row.rejectionReason=''; row.confirmedAt=plan.createdAt||new Date().toISOString(); changed++;changedRows.push(row); }
   }
-  if (changed) await putManyTransactions(rows.filter(r=>r.status==='confirmed'));
+  if (changedRows.length) await putManyTransactions(changedRows);
   return changed;
 }
 
