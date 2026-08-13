@@ -104,9 +104,9 @@ test('Game Bridge Handshake validiert Session und liefert nur erlaubte Initialda
   try{
     const game=clone(carrot),session={gameId:game.id,game,sessionId:'game_session_bridge001',runId:'game_run_bridge001',status:'loading'};const posts=[];
     const loader={session:()=>session,isSource:value=>value===source,post:message=>posts.push(message),setStatus:status=>{session.status=status;},finish:result=>{session.status='finished';session.finishedResult=result;}};
-    const bridge=createGameBridge({loader,getCapySnapshot:()=>({name:'Momo',energy:80}),getAppInfo:()=>({version:'2.2.7a'}),getTheme:()=> 'dark',storage:{get:async()=>null,set:async()=>null,remove:async()=>true},getState:()=>({games:{}}),saveState:async()=>{},queueCoins:()=>{}});
+    const bridge=createGameBridge({loader,getCapySnapshot:()=>({name:'Momo',energy:80}),getAppInfo:()=>({version:'2.2.7b'}),getTheme:()=> 'dark',storage:{get:async()=>null,set:async()=>null,remove:async()=>true},getState:()=>({games:{}}),saveState:async()=>{},queueCoins:()=>{}});
     await bridge.handle({source,data:{type:'capyt.game.ready',requestId:'req_ready',gameId:game.id,sessionId:session.sessionId}});
-    assert.equal(session.status,'ready');assert.equal(posts.at(-1).type,'capyt.game.init');assert.equal(posts.at(-1).data.apiVersion,1);assert.equal(posts.at(-1).data.gameId,game.id);assert.equal(posts.at(-1).data.capy.name,'Momo');assert.equal(posts.at(-1).data.app.version,'2.2.7a');
+    assert.equal(session.status,'ready');assert.equal(posts.at(-1).type,'capyt.game.init');assert.equal(posts.at(-1).data.apiVersion,1);assert.equal(posts.at(-1).data.gameId,game.id);assert.equal(posts.at(-1).data.capy.name,'Momo');assert.equal(posts.at(-1).data.app.version,'2.2.7b');
     bridge.destroy();assert.equal(listeners.has('message'),false);
   }finally{globalThis.window=oldWindow;}
 });
@@ -131,7 +131,7 @@ test('Game Bridge vermittelt Theme, Storage, Score und Finish mit Host-Reward',a
     const game=clone(carrot),state={games:{}},posts=[],coins=[],saved=[],values=new Map();const session={gameId:game.id,game,sessionId:'game_session_bridge003',runId:'game_run_bridge003',status:'ready'};
     const loader={session:()=>session,isSource:value=>value===source,post:message=>posts.push(message),setStatus:status=>{session.status=status;},finish:result=>{session.status='finished';session.finishedResult=result;}};
     const storage={get:async(id,key)=>values.get(`${id}:${key}`)??null,set:async(id,key,value)=>{values.set(`${id}:${key}`,value);return value;},remove:async(id,key)=>values.delete(`${id}:${key}`)};
-    const bridge=createGameBridge({loader,getCapySnapshot:()=>({name:'Momo'}),getAppInfo:()=>({version:'2.2.7a'}),getTheme:()=> 'light',storage,getState:()=>state,saveState:async()=>{saved.push(true);},queueCoins:amount=>coins.push(amount)});
+    const bridge=createGameBridge({loader,getCapySnapshot:()=>({name:'Momo'}),getAppInfo:()=>({version:'2.2.7b'}),getTheme:()=> 'light',storage,getState:()=>state,saveState:async()=>{saved.push(true);},queueCoins:amount=>coins.push(amount)});
     const send=async(type,requestId,extra={})=>{await bridge.handle({source,data:{type,requestId,gameId:game.id,sessionId:session.sessionId,...extra}});return posts.at(-1);};
     let response=await send('capyt.game.getTheme','req_theme');assert.equal(response.data.theme,'light');
     response=await send('capyt.game.storage.set','req_set',{key:'difficulty',value:'normal'});assert.equal(response.data.value,'normal');response=await send('capyt.game.storage.get','req_get',{key:'difficulty'});assert.equal(response.data.value,'normal');

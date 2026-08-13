@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.2.7a';
+export const APP_VERSION = '2.2.7b';
 export const DB_NAME = 'finanzplanung-mobile';
 export const DB_VERSION = 1;
 export const INCOME_CATEGORIES = ['Bonus','Prämie','Provision','Rückerstattung','Nebenverdienst','Geldgeschenk','Sonstiges'];

@@ -32,7 +32,7 @@ test('Capyt-Alpha-Versionen werden fuer die Online-Update-Pruefung akzeptiert', 
   const match = updater.match(/const VERSION_PATTERN = (\/[^\n]+\/);/);
   assert.ok(match, 'VERSION_PATTERN fehlt');
   const pattern = Function(`return ${match[1]}`)();
-  for (const version of ['2.2.3a', '2.2.4a', '2.2.5a', '2.2.6a', '2.2.7a', '2.2.7', '2.2.7-alpha.1']) {
+  for (const version of ['2.2.3a', '2.2.4a', '2.2.5a', '2.2.6a', '2.2.7b', '2.2.7', '2.2.7-alpha.1']) {
     assert.equal(pattern.test(version), true, `${version} muss akzeptiert werden`);
   }
   for (const version of ['', '2.2', 'v2.2.4a', '2.2.x']) {

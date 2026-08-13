@@ -2,9 +2,9 @@
 
 **Capyt** verbindet die professionelle Desktop-Finanzplanung (**Capyt · Planung**) mit einer mobilen, offline-faehigen Begleit-PWA (**Capyt · Mobile**).
 
-## Version 2.2.7a · Capy · Alpha
+## Version 2.2.7b · Capy · Alpha
 
-**2.2.7a:** Der bisherige Spielen-Button öffnet jetzt einen registry-basierten Minigame-Hub. Games laufen als isolierte lokale Projekte über **Capyt Game API 1**; Capy-Daten, Game-Storage, Scores und Coin-Rewards werden über eine capability-geprüfte Message-Bridge vermittelt. Coin-Rewards sind zentral limitiert und dedupliziert und erzeugen keine Finanzbuchungen.
+**2.2.7b:** Der bisherige Spielen-Button öffnet jetzt einen registry-basierten Minigame-Hub. Games laufen als isolierte lokale Projekte über **Capyt Game API 1**; Capy-Daten, Game-Storage, Scores und Coin-Rewards werden über eine capability-geprüfte Message-Bridge vermittelt. Coin-Rewards sind zentral limitiert und dedupliziert und erzeugen keine Finanzbuchungen.
 
 Neu unter `capy/games/` sind `games.json`, Game Hub/Loader/Bridge/Reward/Storage/SDK, ein kopierbares `_template`, das kleine Referenzspiel `carrot-catch`, ein deaktiviertes `bridge-demo` sowie die Entwickleranleitung in Markdown und PDF. Der Service Worker cached das Game-Framework und zieht die Offline-Dateien aktivierter Games aus der Registry. Die vorhandene Finanzplanung, FP1-/QR-Synchronisation, Capy-Care-Logik, Vorrat/Sperren, PWA-Updatefunktion und bestehenden Bottom-Sheet-Gesten bleiben erhalten.
 

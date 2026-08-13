@@ -1,14 +1,14 @@
-Capyt 2.2.7a - Test Results
+Capyt 2.2.7b - Test Results
 ===========================
 
 Aktueller Auslieferungsstand
 ----------------------------
-Version: 2.2.7a
+Version: 2.2.7b
 Capy: Alpha
 Game API: Capyt Game API 1
 Service-Worker-Build: games1
 
-Neue 2.2.7a Regressionen
+Neue 2.2.7b Regressionen
 ------------------------
 - Spielen öffnet den Minigame-Hub als Capy-Bottom-Sheet.
 - games.json lädt und sortiert valide Games.
@@ -30,7 +30,7 @@ Neue 2.2.7a Regressionen
 - deaktiviertes Reward-System vergibt keine Coins.
 - Minigame-Resultate erzeugen keine Finanztransaktion.
 - PWA cached Game-Framework und lädt aktivierte Game-Assets aus games.json/offlineAssets.
-- App-/PWA-/Service-Worker-Version ist 2.2.7a.
+- App-/PWA-/Service-Worker-Version ist 2.2.7b.
 
 Regressionen
 ------------

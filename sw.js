@@ -1,4 +1,4 @@
-const VERSION='2.2.7a';
+const VERSION='2.2.7b';
 const BUILD='games1';
 const CACHE=`capyt-v${VERSION}-${BUILD}`;
 const VENDOR_CACHE='capyt-vendor-v1';
