@@ -1,6 +1,8 @@
-# Capyt 2.2.4a – Capy Alpha Update
+# Capyt 2.2.5a – Capy Alpha Update
 
-Dieses Update baut auf 2.2.3a auf und aendert gezielt die Mobile-Capy-Interaktion:
+Version **2.2.5a** baut auf dem vollstaendigen 2.2.4a-PWA-/Capy-Launcher-Hotfix auf. Funktional bleiben die zuletzt gelieferten Capy- und PWA-Fixes erhalten; dieser Stand hebt die App-Version und den Service-Worker-Cache sauber auf 2.2.5a an.
+
+Die enthaltenen Mobile-Capy-Interaktionen aus 2.2.4a bleiben erhalten:
 
 - Streichel-Feedback zeigt nur noch ein Herz ohne Zahl; echte Rubbel-Richtungswechsel koennen ueber die Vibration API einen kurzen Haptikimpuls ausloesen.
 - Unter 10 % Energie schlaeft Capy automatisch und regeneriert Energie; ab 25 % wacht er automatisch wieder auf. Der Zustand bleibt Teil des Capy-/FP1-State.
@@ -131,3 +133,20 @@ Gepruefte Token-Aufloesung: System-Dark und Dark verwenden `#05060B`, Light verw
 - Das aktive Web-App-Manifest verwendet relative Icon-Pfade fuer GitHub Pages.
 - GitHub-Pages-Deployment ist wieder freigegeben: `npm test` und `npm run check` sind gruen.
 - Bereits festhaengende Handy-PWA nach Deployment einmal vollstaendig schliessen und neu oeffnen.
+
+## 2.2.4a Capy-Launcher-Hotfix
+
+- Der mobile Capy-Launcher unten wird jetzt bei jedem aktiven Capy angezeigt, auch wenn der Character Creator auf diesem Gerät noch nicht abgeschlossen wurde.
+- Bei einer frischen Aktivierung öffnet der sichtbare Launcher die Capy-App und dort automatisch den Character Creator.
+- Die Mobile-Einstellung zeigt in diesem Zustand `Capy auf diesem Gerät einrichten` statt irreführend erneut auf die PC-Aktivierung zu verweisen.
+- Der Service-Worker verwendet fuer diesen Hotfix einen neuen internen Cache-Build, damit installierte PWAs die geaenderten App-Dateien sicher neu precachen.
+
+
+## 2.2.5a Versionsupdate
+
+- Vollstaendiger 2.2.4a-PWA-/Capy-Launcher-Hotfix als Basis beibehalten.
+- Sichtbare App-Version, `package.json`, `version.json`, `APP_VERSION` und Service-Worker-Version auf `2.2.5a` gesetzt.
+- Neuer Service-Worker-Cache durch Versionswechsel; `pwa-update.js` wird mit `2.2.5a-pwa1` geladen.
+- PWA-Regressionstest auf den neuen Versions-/Cache-Buster aktualisiert.
+- `npm test`: 88/88 erfolgreich.
+- `npm run check`: erfolgreich.

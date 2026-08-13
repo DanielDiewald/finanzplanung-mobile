@@ -25,14 +25,14 @@ test('Update-Popup und manuelle Update-Pruefung sind in der mobilen UI vorhanden
   for (const required of ['id="updateDialog"', 'id="updateNowButton"', 'id="updateLaterButton"', 'id="checkForUpdates"']) {
     assert.ok(html.includes(required), `index.html fehlt ${required}`);
   }
-  assert.match(html, /js\/pwa-update\.js\?v=2\.2\.4a(?:-[0-9A-Za-z.-]+)?/);
+  assert.match(html, /js\/pwa-update\.js\?v=2\.2\.5a(?:-[0-9A-Za-z.-]+)?/);
 });
 
 test('Capyt-Alpha-Versionen werden fuer die Online-Update-Pruefung akzeptiert', () => {
   const match = updater.match(/const VERSION_PATTERN = (\/[^\n]+\/);/);
   assert.ok(match, 'VERSION_PATTERN fehlt');
   const pattern = Function(`return ${match[1]}`)();
-  for (const version of ['2.2.3a', '2.2.4a', '2.2.5', '2.2.5-alpha.1']) {
+  for (const version of ['2.2.3a', '2.2.4a', '2.2.5a', '2.2.5', '2.2.5-alpha.1']) {
     assert.equal(pattern.test(version), true, `${version} muss akzeptiert werden`);
   }
   for (const version of ['', '2.2', 'v2.2.4a', '2.2.x']) {

@@ -29,7 +29,13 @@ function renderAll(){
   renderSync({plan:state.plan,transactions:state.transactions,pendingPlan:state.pendingPlan,onAcceptPlan:acceptPendingPlan,capyPending:capyHasPendingSync(state.capy)});
   const capyEnabled=Boolean(state.capy?.enabled),capyInitialized=Boolean(state.capy?.care?.initialized);
   renderSettings(state.settings,{capyEnabled,capyInitialized,capyName:state.capy?.care?.name||'',capyBudgetName:state.plan?.capy?.budgetName||''});
-  setHidden($('capyLauncher'),!capyEnabled||!capyInitialized);
+  const capyLauncher=$('capyLauncher');
+  setHidden(capyLauncher,!capyEnabled);
+  if(capyLauncher){
+    const launcherLabel=capyInitialized?'Capy · Alpha öffnen':'Capy · Alpha einrichten';
+    capyLauncher.setAttribute('aria-label',launcherLabel);
+    capyLauncher.title=launcherLabel;
+  }
   const pending=state.plan?pendingSummary(state.transactions,state.plan):{count:0}; const pendingTotal=pending.count+(capyHasPendingSync(state.capy)?1:0);
   const badge=$('syncNavBadge');badge.textContent=String(pendingTotal);setHidden(badge,!pendingTotal);
   updateHeaderSyncStatus(pendingTotal);

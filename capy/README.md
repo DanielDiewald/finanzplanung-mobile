@@ -1,6 +1,6 @@
 # Capyt · Capy · Alpha
 
-> **Status: Alpha.** Die Capy-Funktionen befinden sich in Version **2.2.4a** in einer Testphase. Die Finanzplanung und die bestehende FP1-/QR-Synchronisation bleiben die Grundlage.
+> **Status: Alpha.** Die Capy-Funktionen befinden sich in Version **2.2.5a** in einer Testphase. Die Finanzplanung und die bestehende FP1-/QR-Synchronisation bleiben die Grundlage.
 
 Der Capy-Begleiter ist weitgehend im Unterordner `capy/` gekapselt. Die Mobile-Ansicht ist als kleines Pet-Game ausgelegt; Desktop bleibt auf Finanz-, Vorrat- und Sync-Aufgaben fokussiert.
 
