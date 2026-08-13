@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
   <meta name="theme-color" content="#10111a">
   <title>Capyt · Capy · Alpha</title>
+  <script src="../js/theme.js"></script>
   <link rel="stylesheet" href="../css/capyt-tokens.css">
   <link rel="stylesheet" href="./css/capy.css">
+  <link rel="stylesheet" href="./games/css/games.css">
 </head>
 <body>
   <div class="desktop-block">
@@ -107,6 +109,38 @@
       <div class="more-grid"><div><span>Bindung</span><strong id="bondValue">0%</strong><i class="meter"><b id="bondBar"></b></i></div><button type="button" data-open-main="settings">⚙ Einstellungen</button></div>
       <div class="journal"><h3>Letzte Ereignisse</h3><div id="journalList"></div></div>
       <button id="pauseCapyButton" type="button" class="danger wide">Capy pausieren</button>
+    </section>
+  </dialog>
+
+  <dialog id="gameHubSheet" class="bottom-sheet game-hub-sheet" data-sheet>
+    <section class="sheet-card">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <header class="sheet-head"><div><span class="eyebrow">CAPYT GAME API 1</span><h2>Minispiele</h2><p>Kleine Spiele mit Capy.</p></div><button type="button" data-close-sheet aria-label="Minispiele schließen">×</button></header>
+      <p class="game-hub-intro">Games laufen isoliert und erhalten nur ausdrücklich freigegebene Capabilities. Coins werden von Capyt validiert.</p>
+      <div id="gameHubState" class="game-hub-state" hidden></div>
+      <div id="gameHubList" class="game-hub-list" aria-live="polite"></div>
+    </section>
+  </dialog>
+
+  <dialog id="gamePlayer" class="game-player">
+    <section class="game-player-shell">
+      <header class="game-player-head">
+        <button id="gamePlayerClose" type="button" aria-label="Spiel verlassen">←</button>
+        <div class="game-player-title"><strong id="gamePlayerTitle">Minigame</strong><small id="gamePlayerStatus">Lädt</small></div>
+        <span aria-hidden="true">🎮</span>
+      </header>
+      <div class="game-player-body">
+        <iframe id="gameFrame" class="game-frame" title="Capyt Minigame" sandbox="allow-scripts" referrerpolicy="same-origin"></iframe>
+        <div id="gameLoading" class="game-loading"><strong>Spiel wird geladen …</strong><span>Game Bridge wird vorbereitet.</span></div>
+        <div id="gameError" class="game-error" hidden><strong>Spiel konnte nicht gestartet werden.</strong><p id="gameErrorCopy"></p><button id="gameErrorBack" type="button">Zurück zum Game Hub</button></div>
+        <div id="gameResult" class="game-result" hidden>
+          <strong id="gameResultTitle">Geschafft!</strong>
+          <div id="gameResultScore" class="game-result-score">0</div>
+          <p id="gameResultHighscore"></p>
+          <div id="gameResultReward" class="game-result-reward"></div>
+          <div class="game-result-actions"><button id="gameResultAgain" type="button" class="primary">Nochmal</button><button id="gameResultHub" type="button">Game Hub</button></div>
+        </div>
+      </div>
     </section>
   </dialog>
 

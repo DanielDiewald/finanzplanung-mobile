@@ -1,8 +1,9 @@
 import { deepClone, uuid } from '../../js/utils.js';
 import { getMeta, setMeta } from '../../js/services/storage.js';
+import { normalizeGamesState } from '../games/js/game-storage.js';
 
 export const CAPY_META_KEY = 'capyState';
-export const CAPY_STATE_VERSION = 2;
+export const CAPY_STATE_VERSION = 3;
 
 function initialCare(initialNeeds={}) {
   return {
@@ -13,7 +14,7 @@ function initialCare(initialNeeds={}) {
 }
 
 export function defaultCapyState(initialNeeds={}) {
-  return {version:CAPY_STATE_VERSION,enabled:false,enabledDirty:false,budgetId:'',baseCoins:0,coinOps:[],care:initialCare(initialNeeds),careDirty:false,preparedExportIds:[],rejectedTransactionIds:[]};
+  return {version:CAPY_STATE_VERSION,enabled:false,enabledDirty:false,budgetId:'',baseCoins:0,coinOps:[],care:initialCare(initialNeeds),games:{},careDirty:false,preparedExportIds:[],rejectedTransactionIds:[]};
 }
 
 export function normalizeCapyState(value,initialNeeds={}) {
@@ -25,6 +26,7 @@ export function normalizeCapyState(value,initialNeeds={}) {
     version:CAPY_STATE_VERSION,enabled:Boolean(raw.enabled),enabledDirty:Boolean(raw.enabledDirty),budgetId:String(raw.budgetId||''),baseCoins:Math.max(0,Math.floor(Number(raw.baseCoins)||0)),
     coinOps:Array.isArray(raw.coinOps)?raw.coinOps.slice(0,1000).map(op=>({id:String(op?.id||uuid()),delta:Math.trunc(Number(op?.delta)||0),reason:String(op?.reason||''),relatedTransactionId:String(op?.relatedTransactionId||''),createdAt:String(op?.createdAt||new Date().toISOString())})).filter(op=>op.delta!==0):[],
     care:{...fallback.care,...deepClone(careRaw),initialized:Boolean(careRaw.initialized),name:String(careRaw.name||'').slice(0,20),gender:['weiblich','männlich'].includes(String(careRaw.gender||''))?String(careRaw.gender):'',hunger:clamp(careRaw.hunger??fallback.care.hunger),happiness:clamp(careRaw.happiness??fallback.care.happiness),energy:clamp(careRaw.energy??fallback.care.energy),bond:clamp(careRaw.bond??fallback.care.bond),autoSleeping:Boolean(careRaw.autoSleeping),inventory:Object.fromEntries(Object.entries(inventory).map(([id,count])=>[String(id),Math.max(0,Math.floor(Number(count)||0))])),journal,lastUpdate:Number(careRaw.lastUpdate)||Date.now(),updatedAt:String(careRaw.updatedAt||new Date().toISOString())},
+    games:normalizeGamesState(raw.games),
     careDirty:Boolean(raw.careDirty),preparedExportIds:Array.isArray(raw.preparedExportIds)?[...new Set(raw.preparedExportIds.map(String).filter(Boolean))].slice(-100):[],
     rejectedTransactionIds:Array.isArray(raw.rejectedTransactionIds)?[...new Set(raw.rejectedTransactionIds.map(String).filter(Boolean))].slice(-5000):[]
   };

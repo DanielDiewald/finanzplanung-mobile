@@ -1,29 +1,42 @@
-Capyt 2.2.6a – Test Results
+Capyt 2.2.7a - Test Results
 ===========================
 
 Aktueller Auslieferungsstand
 ----------------------------
-Version: 2.2.6a
+Version: 2.2.7a
 Capy: Alpha
-Service-Worker-Build: sheets1
+Game API: Capyt Game API 1
+Service-Worker-Build: games1
 
-Neue 2.2.6a Regressionen
+Neue 2.2.7a Regressionen
 ------------------------
-- Shop besitzt Pull-down-Handle.
-- Inventar besitzt Pull-down-Handle.
-- Vorrat besitzt Pull-down-Handle.
-- Mehr besitzt Pull-down-Handle.
-- Bottom-Sheet folgt dem Pointer ueber translate3d.
-- Schliessen erfolgt per Distanz- oder Geschwindigkeits-Schwelle wie in der normalen Mobile-App.
-- Zu kurze Geste federt zur Ausgangsposition zurueck.
-- pointercancel und dialog close setzen temporaeren Gesture-State zurueck.
-- Handle hat ein vergroessertes Touch-Ziel bei kompakter sichtbarer Linie.
-- App-/PWA-/Service-Worker-Version ist 2.2.6a.
+- Spielen öffnet den Minigame-Hub als Capy-Bottom-Sheet.
+- games.json lädt und sortiert valide Games.
+- enabled:false wird im Production-Hub ausgeblendet.
+- coming_soon ist nicht startbar.
+- doppelte Game-IDs und unbekannte Statuswerte werden abgelehnt.
+- externe URLs, absolute Entry-Pfade und ../ Path Traversal werden abgelehnt.
+- unbekannte bzw. nicht freigeschaltete Capabilities werden abgelehnt.
+- Game iframe läuft ohne allow-same-origin.
+- Game SDK/Bridge bietet Handshake, Capy-Read, App-Info, Theme, Storage, Score und Finish.
+- Bridge-Tests pruefen falsche Game-IDs, unbekannte Messages, fehlende Capabilities und fremde Message-Sources.
+- Game Loader prueft Session-/Run-IDs, Lifecycle und sauberes Schliessen.
+- Game Storage ist pro gameId namespaced.
+- Capy-State migriert rückwärtskompatibel auf Version 3.
+- Reward wird aus dem Score berechnet und maxCoinsPerRun begrenzt.
+- dailyRewardLimit wird respektiert.
+- manipulierte Coin-Felder im Game-Resultat werden ignoriert.
+- doppelte runId vergibt weder Coins noch Plays doppelt.
+- deaktiviertes Reward-System vergibt keine Coins.
+- Minigame-Resultate erzeugen keine Finanztransaktion.
+- PWA cached Game-Framework und lädt aktivierte Game-Assets aus games.json/offlineAssets.
+- App-/PWA-/Service-Worker-Version ist 2.2.7a.
 
 Regressionen
 ------------
-- Petting-Hotfix mit Herzstaffelung und spaeter Zuneigungssteigerung bleibt erhalten.
-- Vibrationsaufruf auf unterstuetzten Browsern bleibt erhalten.
+- Bestehende Capy Bottom-Sheet-Pull-down-Gesten bleiben erhalten.
+- Petting-Hotfix mit Herzstaffelung und Zuneigungssteigerung bleibt erhalten.
+- Vibrationsaufruf auf unterstützten Browsern bleibt erhalten.
 - Auto-Schlaf unter 10 % bis mindestens 25 % bleibt erhalten.
 - Food-Auswahl und Drag-and-Drop bleiben erhalten.
 - Capy-Launcher bei neuer Aktivierung bleibt erhalten.
@@ -32,6 +45,7 @@ Regressionen
 
 Teststatus
 ----------
-npm test: 96/96 bestanden.
+npm test: 111/111 bestanden.
 npm run check: bestanden.
-Static check: 79 precached assets, 2 Manifest-Icons, Safari-QR-Fallback vorhanden.
+Static check: 88 feste precached Assets, 2 Manifest-Icons, Safari-QR-Fallback vorhanden.
+Aktivierte Game-Entry-/offlineAssets werden zusätzlich dynamisch aus games.json gecacht.

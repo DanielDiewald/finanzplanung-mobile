@@ -47,7 +47,7 @@ test('Haptik wird bei gültiger Rubbelbewegung versucht und hat stärkeren Zunei
   assert.equal(behavior.petting.hapticCooldownMs,90);
 });
 
-test('Service Worker nutzt neuen Hotfix-Build für die installierte PWA',()=>{
-  assert.match(sw,/const VERSION='2\.2\.6a';/);
-  assert.match(sw,/const BUILD='sheets1';/);
+test('Service Worker behält Petting-Hotfix im aktuellen PWA-Build',()=>{
+  assert.match(sw,/const VERSION='2\.2\.7a';/);
+  assert.match(sw,/const BUILD='games1';/);
 });

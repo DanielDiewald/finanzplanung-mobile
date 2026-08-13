@@ -1,6 +1,34 @@
-# Capyt 2.2.6a – Capy Bottom-Sheet Gesture Update
+# Capyt 2.2.7a - Minigame Hub & Game SDK Foundation
 
-Version **2.2.6a** baut auf dem vollstaendigen 2.2.5a-Petting-/PWA-/Launcher-Stand auf. Neu ist die direkte Pull-down-Geste fuer die Capy-Menues **Shop, Inventar, Vorrat und Mehr**.
+Version **2.2.7a** erweitert den bestehenden Capy-Alpha-Stand um eine gekapselte Plattform für zukünftige Minigames, ohne die Finanz-, FP1-/QR-, Vorrat-, Care- oder PWA-Grundarchitektur neu aufzubauen.
+
+## Neu in 2.2.7a
+
+- **Spielen** öffnet einen Minigame-Hub als bestehendes Capy-Bottom-Sheet mit Drag-Handle, Backdrop-/X-Schließen und internem Scrollen.
+- `capy/games/games.json` ist die zentrale Registry für Name, Status, Entry, Reihenfolge, Rewards, Result-Validierung, Capabilities und Offline-Assets.
+- Startbare Games liegen als isolierte Projekte unter `capy/games/projects/` und werden nur aus lokalen, validierten Entry-Pfaden geladen.
+- **Capyt Game API 1** kapselt Handshake, Lifecycle, Capy-Read, App-Info, Theme, Game-Storage, Score und Finish über `postMessage`.
+- Das Game-iframe läuft mit `sandbox="allow-scripts"` und erhält keinen normalen Same-Origin-Zugriff auf die Host-Anwendung.
+- `game-rewards.js` berechnet Coin-Rewards im Host. Max Coins pro Run, Tageslimit, Cooldown, Plausibilitätsgrenzen und Run-ID-Deduplizierung werden zentral geprüft.
+- Minigame-Coins erzeugen **keine Finanzbuchung** und bleiben von `Capy-Vorrat = echtes Geld` getrennt.
+- Der bestehende Capy-State wurde rückwärtskompatibel auf State-Version 3 erweitert und enthält einen namespaceten `games`-Bereich für Highscores, Plays, Reward-Statistik und Game-Daten.
+- `projects/_template/` zeigt die tatsächlich implementierte API. `carrot-catch` ist ein kleines produktives Referenzspiel; `bridge-demo` bleibt `enabled: false`.
+- Der Service Worker cached Registry und Game-Framework fest und ergänzt Entry/`offlineAssets` aktivierter Games dynamisch aus `games.json`.
+- Entwicklerdokumentation: `capy/games/docs/NEW_GAME_GUIDE.md` und `capy/games/docs/Neue_Games_hinzufuegen.pdf`.
+- App-, PWA- und Service-Worker-Version wurden auf **2.2.7a** / Build **games1** angehoben.
+
+## Erhaltene Funktionen
+
+Finanzplanung, Mobile-Buchungen, Pending/Confirmed/Rejected, FP1, QR-Synchronisation, Capy-Aktivierung/Pause, Character Creator, Shop, Inventar, Drag & Drop, Petting, Bindung, Schlaf, Energie, Hunger, Happiness, Coins, Vorrat/Sperrfristen, Light/Dark Theme, PWA/Offline/Updates, bestehende Migrationen und Bottom-Sheet-Gesten bleiben erhalten.
+
+## Tests
+
+Die neue Suite ergänzt Registry-, Hub-, Security-, Reward-, Storage- und PWA-Prüfungen. Der aktuelle Stand ist in `TEST_RESULTS.txt` dokumentiert.
+
+## Vorheriger Release: 2.2.6a
+
+
+Version **2.2.6a** baute auf dem vollstaendigen 2.2.5a-Petting-/PWA-/Launcher-Stand auf. Neu ist die direkte Pull-down-Geste fuer die Capy-Menues **Shop, Inventar, Vorrat und Mehr**.
 
 - Alle vier Capy-Bottom-Sheets lassen sich am sichtbaren Griff per Pointer Events nach unten ziehen.
 - Das Sheet folgt dem Finger beziehungsweise Mauszeiger unmittelbar.

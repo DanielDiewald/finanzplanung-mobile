@@ -1,5 +1,5 @@
-const VERSION='2.2.6a';
-const BUILD='sheets1';
+const VERSION='2.2.7a';
+const BUILD='games1';
 const CACHE=`capyt-v${VERSION}-${BUILD}`;
 const VENDOR_CACHE='capyt-vendor-v1';
 const JSQR_CDN='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
@@ -12,13 +12,42 @@ const CORE=[
   './assets/favicons/web-app-manifest-192x192.png','./assets/favicons/web-app-manifest-512x512.png',
   './assets/vault/vault-0.webp','./assets/vault/vault-almost-empty.webp','./assets/vault/vault-10.webp','./assets/vault/vault-25.webp','./assets/vault/vault-50.webp','./assets/vault/vault-75.webp','./assets/vault/vault-100.webp',
   './capy/','./capy/index.html','./capy/desktop.html','./capy/css/capy.css','./capy/css/desktop.css','./capy/css/desktop-host.css','./capy/js/app.js','./capy/js/config.js','./capy/js/engine.js','./capy/js/interactions.js','./capy/js/naming.js','./capy/js/finance-adapter.js','./capy/js/shared-state.js','./capy/js/desktop-page.js','./capy/js/desktop-bridge.js','./capy/settings/behavior.json','./capy/settings/economy.json','./capy/settings/items.json','./capy/assets/capy/capy-celebrate.png','./capy/assets/capy/capy-eating.png','./capy/assets/capy/capy-happy.png','./capy/assets/capy/capy-hungry.png','./capy/assets/capy/capy-neutral.png','./capy/assets/capy/capy-sleeping.png','./capy/assets/capy/capy-sleepy.png','./capy/assets/effects/coin.png','./capy/assets/effects/confetti.png','./capy/assets/effects/heart.png','./capy/assets/effects/sparkle.png','./capy/assets/effects/zzz.png','./capy/assets/items/apple.png','./capy/assets/items/carrot.png','./capy/assets/items/cucumber.png','./capy/assets/items/melon.png','./capy/assets/items/pumpkin.png','./capy/assets/items/snack.png','./capy/assets/ui/capy-brand.png','./capy/assets/ui/safe-closed.png',
+  './capy/games/games.json','./capy/games/css/games.css','./capy/games/js/game-hub.js','./capy/games/js/game-loader.js','./capy/games/js/game-bridge.js','./capy/games/js/game-rewards.js','./capy/games/js/game-storage.js','./capy/games/js/game-sdk.js',
   './desktop-integration/Finanzplanung_v10_mobile-sync.html','./desktop-integration/mobile-sync-addon.js','./desktop-integration/qrcode.min.js'
 ];
+
+const GAME_REGISTRY_URL='./capy/games/games.json';
+const GAME_ROOT='./capy/games/';
+
+function safeGameAssetPath(value,gameId){
+  const path=String(value||'').trim();
+  const id=String(gameId||'').trim();
+  if(!/^[a-z0-9][a-z0-9-]*$/.test(id)||!path||path.includes('..')||path.startsWith('/')||/^[a-z][a-z0-9+.-]*:/i.test(path))return '';
+  const prefix=`./projects/${id}/`;
+  return path.startsWith(prefix)?`${GAME_ROOT}${path.slice(2)}`:'';
+}
+
+async function precacheEnabledGames(cache){
+  try{
+    const registryRequest=new Request(new URL(GAME_REGISTRY_URL,self.location.href));
+    const response=await cache.match(registryRequest);if(!response)return;
+    const registry=await response.clone().json(),assets=[];
+    for(const game of Array.isArray(registry?.games)?registry.games:[]){
+      const gameId=String(game?.id||'');
+      if(!game?.enabled||!['available','experimental'].includes(String(game.status||'')))continue;
+      const entry=safeGameAssetPath(game.entry,gameId);if(entry)assets.push(entry);
+      for(const asset of Array.isArray(game.offlineAssets)?game.offlineAssets:[]){const path=safeGameAssetPath(asset,gameId);if(path)assets.push(path);}
+    }
+    const unique=[...new Set(assets)];
+    if(unique.length)await cache.addAll(unique.map(url=>new Request(new URL(url,self.location.href),{cache:'reload'})));
+  }catch(error){console.warn('Minigame-Precache fehlgeschlagen.',error);}
+}
 
 async function precacheCore(){
   const cache=await caches.open(CACHE);
   const requests=CORE.map(url=>new Request(new URL(url,self.location.href),{cache:'reload'}));
   await cache.addAll(requests);
+  await precacheEnabledGames(cache);
 }
 
 async function networkFirst(request){

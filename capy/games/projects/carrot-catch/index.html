@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="color-scheme" content="light dark">
+  <title>Karotten-Fang</title>
+  <link rel="stylesheet" href="./game.css">
+</head>
+<body>
+  <main class="game" id="game">
+    <header><div><span>Score</span><strong id="score">0</strong></div><div><span>Zeit</span><strong id="time">20</strong></div></header>
+    <section class="field" id="field" aria-label="Spielfeld">
+      <button id="carrot" class="carrot" type="button" aria-label="Karotte fangen" hidden>🥕</button>
+      <div id="intro" class="intro"><span class="hero">🥕</span><h1>Karotten-Fang</h1><p id="capyCopy">Fang so viele Karotten wie möglich.</p><button id="start" type="button">Starten</button></div>
+      <div id="message" class="message" hidden></div>
+    </section>
+  </main>
+  <script src="../../js/game-sdk.js"></script>
+  <script src="./game.js"></script>
+</body>
+</html>

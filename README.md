@@ -2,12 +2,13 @@
 
 **Capyt** verbindet die professionelle Desktop-Finanzplanung (**Capyt · Planung**) mit einer mobilen, offline-faehigen Begleit-PWA (**Capyt · Mobile**).
 
-## Version 2.2.6a · Capy · Alpha
+## Version 2.2.7a · Capy · Alpha
 
-**2.2.6a:** Shop, Inventar, Vorrat und Mehr lassen sich im Capy-Spiel jetzt am oberen Griff wie die Bottom-Sheets der normalen Mobile-App nach unten ziehen und schliessen. Der bestehende Launcher-, PWA- und Petting-Hotfix bleibt enthalten.
+**2.2.7a:** Der bisherige Spielen-Button öffnet jetzt einen registry-basierten Minigame-Hub. Games laufen als isolierte lokale Projekte über **Capyt Game API 1**; Capy-Daten, Game-Storage, Scores und Coin-Rewards werden über eine capability-geprüfte Message-Bridge vermittelt. Coin-Rewards sind zentral limitiert und dedupliziert und erzeugen keine Finanzbuchungen.
 
-Der optionale **Capy-Begleiter** befindet sich in dieser Version im **Alpha-Status**. Die Aktivierung wird ueber FP1 vom Desktop auf Mobile synchronisiert. Das verwaltete Budget **`{Capyname}'s Vorrat`** arbeitet als interne Vermoegensverschiebung; jede neue Einzahlung ist standardmaessig einen Kalendermonat gesperrt und kann danach am Desktop wieder ausgezahlt werden. Mobile nutzt in 2.2.6a eine viewport-fuellende Game-Ansicht mit Rubbel-Streichelmechanik mit reinem Herz-Feedback und Vibrationsimpuls, einem unteren Food-Slot fuer zu ziehendes Futter, automatischem Energieschlaf unter 10% bis zur Erholung auf 25% und einer einmalig zentrierten Drag-and-Drop-Hilfe. Text-/Bildauswahl und native Browser-Drags werden im Game-Bereich unterdrueckt, waehrend Formfelder normal bedienbar bleiben. Mobile Capy-Aufladungen erscheinen als normale, leicht transparente Buchungszeilen ohne Schloss-Emoji und werden ueber FP1 bestaetigt oder abgelehnt. Details und konfigurierbare Werte stehen in `capy/README.md` und `capy/settings/`.
+Neu unter `capy/games/` sind `games.json`, Game Hub/Loader/Bridge/Reward/Storage/SDK, ein kopierbares `_template`, das kleine Referenzspiel `carrot-catch`, ein deaktiviertes `bridge-demo` sowie die Entwickleranleitung in Markdown und PDF. Der Service Worker cached das Game-Framework und zieht die Offline-Dateien aktivierter Games aus der Registry. Die vorhandene Finanzplanung, FP1-/QR-Synchronisation, Capy-Care-Logik, Vorrat/Sperren, PWA-Updatefunktion und bestehenden Bottom-Sheet-Gesten bleiben erhalten.
 
+Der optionale **Capy-Begleiter** bleibt im **Alpha-Status**. Der persistente Capy-State wurde rückwärtskompatibel um einen namespaceten `games`-Bereich erweitert; laufende Minigame-Sessions werden nicht über FP1 synchronisiert. Details stehen in `capy/README.md` und `capy/games/docs/NEW_GAME_GUIDE.md`.
 
 ## Grundprinzip
 
@@ -79,6 +80,13 @@ finanzplanung-mobile/
     Finanzplanung_v10_mobile-sync.html
     mobile-sync-addon.js
     qrcode.min.js
+  capy/
+    games/
+      games.json
+      css/
+      js/
+      projects/
+      docs/
   docs/
   fixtures/
   tests/

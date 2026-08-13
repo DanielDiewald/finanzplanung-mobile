@@ -1,9 +1,13 @@
-import { formatCents, parseEuroToCents } from '../../js/utils.js';
+import { APP_VERSION, formatCents, parseEuroToCents } from '../../js/utils.js';
 import { loadCapyConfig } from './config.js';
 import { addJournal, applyRemoteCapy, availableCoins, loadCapyState, queueCoinOp, saveCapyState, setCapyEnabled, touchCare } from './shared-state.js';
 import { applyElapsedDecay, applyItem, applyPet, applyPlay, autoSleepThresholds, canPlay, chooseVisual, currentPhase, genderCopy, isCapySleeping, updateAutoSleepState } from './engine.js';
 import { createStashDeposit, loadFinanceContext, stashBalanceCents } from './finance-adapter.js';
 import { consumePetAffectionProgress, consumePetHeartProgress, createPetSession, itemEffectLabel, movePetSession, petAffectionRewardForSession, petHeartBurstForSession, pointInExpandedRect, pointInRect } from './interactions.js';
+import { canLaunchGame, loadGameRegistry, renderGameHub, visibleGames } from '../games/js/game-hub.js';
+import { createGameLoader, resolveGameEntry } from '../games/js/game-loader.js';
+import { createGameBridge } from '../games/js/game-bridge.js';
+import { createGameStorage } from '../games/js/game-storage.js';
 
 const $=id=>document.getElementById(id);
 const els={
@@ -14,10 +18,13 @@ const els={
   selectedFeedBar:$('selectedFeedBar'),selectedFeedItem:$('selectedFeedItem'),selectedFeedImage:$('selectedFeedImage'),selectedFeedName:$('selectedFeedName'),selectedFeedEffect:$('selectedFeedEffect'),selectedFeedCount:$('selectedFeedCount'),clearSelectedFeed:$('clearSelectedFeed'),
   vorratName:$('vorratName'),stashValue:$('stashValue'),stashLocked:$('stashLocked'),stashWithdrawable:$('stashWithdrawable'),stashUnlockHint:$('stashUnlockHint'),topUpAmount:$('topUpAmount'),coinRewardHint:$('coinRewardHint'),topUpButton:$('topUpButton'),capyTransactions:$('capyTransactions'),pauseCapyButton:$('pauseCapyButton'),
   setupModal:$('setupModal'),nameInput:$('nameInput'),genderInfo:$('genderInfo'),finishSetupButton:$('finishSetupButton'),creatorPreview:$('creatorPreview'),genderButtons:[...document.querySelectorAll('[data-gender]')],
+  gameHubSheet:$('gameHubSheet'),gameHubList:$('gameHubList'),gameHubState:$('gameHubState'),gamePlayer:$('gamePlayer'),gameFrame:$('gameFrame'),gamePlayerClose:$('gamePlayerClose'),gamePlayerTitle:$('gamePlayerTitle'),gamePlayerStatus:$('gamePlayerStatus'),gameLoading:$('gameLoading'),gameError:$('gameError'),gameErrorCopy:$('gameErrorCopy'),gameErrorBack:$('gameErrorBack'),gameResult:$('gameResult'),gameResultTitle:$('gameResultTitle'),gameResultScore:$('gameResultScore'),gameResultHighscore:$('gameResultHighscore'),gameResultReward:$('gameResultReward'),gameResultAgain:$('gameResultAgain'),gameResultHub:$('gameResultHub'),
   sheets:[...document.querySelectorAll('[data-sheet]')],dragGhost:$('dragGhost'),feedDragTutorial:$('feedDragTutorial'),toast:$('toast')
 };
 
 let config,capy,plan=null,transactions=[];
+let gameRegistry=null,gameList=[],gameLoader=null,gameBridge=null,gameStorage=null,lastGame=null;
+const offlineGameIds=new Set();
 let runtimeVisual='',runtimeTimer=0,actionClass='',idleTimer=0,idleMotionTimer=0,idleMotionClass='',toastTimer=0,petPulseTimer=0,feedTutorialTimer=0,lastPetHapticAt=0;
 let setupGender='männlich';
 let petSession=null;
@@ -36,6 +43,7 @@ async function boot(){
   await refreshFinance(true);
   configureVisualAssets();
   bindEvents();
+  await initializeGames();
   if(capy.enabled&&capy.care.initialized){applyElapsedDecay(capy.care,config.behavior);touchCare(capy);capy=await saveCapyState(capy);}
   renderAll();
   scheduleIdleMotion();
@@ -43,7 +51,8 @@ async function boot(){
 
   setInterval(async()=>{if(!capy.enabled||!capy.care.initialized)return;applyElapsedDecay(capy.care,config.behavior);touchCare(capy);capy=await saveCapyState(capy);renderAll();},Math.max(15000,Number(config.behavior.decayTickMs)||60000));
   document.addEventListener('visibilitychange',async()=>{
-    if(document.visibilityState!=='visible')return;
+    if(document.visibilityState!=='visible'){gameLoader?.pause();return;}
+    gameLoader?.resume();
     await refreshFinance(true);
     if(capy.enabled&&capy.care.initialized){applyElapsedDecay(capy.care,config.behavior);touchCare(capy);capy=await saveCapyState(capy);}
     renderAll();
@@ -74,13 +83,21 @@ function bindEvents(){
   document.querySelectorAll('[data-close-sheet]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
   els.sheets.forEach(sheet=>sheet.addEventListener('pointerdown',event=>{if(event.target===sheet)sheet.close();}));
   document.querySelector('[data-open-main="settings"]')?.addEventListener('click',()=>{location.href='../#/settings';});
-  els.playButton.addEventListener('click',()=>void playCapy());
+  els.playButton.addEventListener('click',()=>void openGameHub());
   els.topUpButton.addEventListener('click',()=>void topUpVorrat());
   els.pauseCapyButton.addEventListener('click',()=>void pauseCapy());
   els.genderButtons.forEach(button=>button.addEventListener('click',()=>selectSetupGender(button.dataset.gender)));
   els.finishSetupButton.addEventListener('click',()=>void finishSetup());
   els.nameInput.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();void finishSetup();}});
   els.setupModal.addEventListener('cancel',event=>event.preventDefault());
+  els.gamePlayerClose.addEventListener('click',()=>void requestCloseGame());
+  els.gameErrorBack.addEventListener('click',()=>void returnToGameHub());
+  els.gameResultHub.addEventListener('click',()=>void returnToGameHub());
+  els.gameResultAgain.addEventListener('click',()=>void restartLastGame());
+  els.gamePlayer.addEventListener('cancel',event=>{event.preventDefault();void requestCloseGame();});
+  window.addEventListener('online',()=>void refreshGameHubAvailability());
+  window.addEventListener('offline',()=>void refreshGameHubAvailability());
+  window.addEventListener('capyt-themechange',()=>gameLoader?.themeChanged(currentTheme()));
 
   els.capyHitbox.addEventListener('pointerdown',onPetDown);
   els.capyHitbox.addEventListener('pointermove',onPetMove);
@@ -183,8 +200,67 @@ function openSheet(id){
   const target=$(id);if(!target)return;
   els.sheets.forEach(sheet=>{if(sheet!==target&&sheet.open)sheet.close();});
   if(!target.open)target.showModal();
-  if(id==='inventorySheet')renderInventory();if(id==='shopSheet')renderShop();if(id==='stashSheet')renderWallet();if(id==='moreSheet')renderJournal();
+  if(id==='inventorySheet')renderInventory();if(id==='shopSheet')renderShop();if(id==='stashSheet')renderWallet();if(id==='moreSheet')renderJournal();if(id==='gameHubSheet')renderGames();
 }
+
+async function initializeGames(){
+  gameStorage=createGameStorage({getState:()=>capy,saveState:async()=>{capy=await saveCapyState(capy);}});
+  gameLoader=createGameLoader({frame:els.gameFrame,statusElement:els.gamePlayerStatus,onStatusChange:status=>{
+    els.gameLoading.hidden=status!=='loading';
+    if(status==='ready'||status==='playing'||status==='paused')els.gameLoading.hidden=true;
+    if(status==='error'){els.gameLoading.hidden=true;showGameError(gameLoader.session()?.error||'Das Spiel konnte nicht geladen werden.');}
+  }});
+  gameBridge=createGameBridge({
+    loader:gameLoader,getCapySnapshot:gameCapySnapshot,getAppInfo:gameAppInfo,getTheme:currentTheme,storage:gameStorage,getState:()=>capy,
+    saveState:async()=>{capy=await saveCapyState(capy);renderWallet();},
+    queueCoins:(amount,reason)=>queueCoinOp(capy,amount,reason),
+    onFinished:result=>showGameResult(result),onError:error=>console.warn('Capyt Game Bridge:',error)
+  });
+  try{
+    gameRegistry=await loadGameRegistry('./games/games.json');gameList=visibleGames(gameRegistry);await refreshOfflineAvailability();renderGames();
+  }catch(error){
+    console.error('Game Registry:',error);gameRegistry=null;gameList=[];showHubState(`Minispiele konnten nicht geladen werden: ${error.message}`);renderGames();
+  }
+}
+
+async function refreshOfflineAvailability(){
+  offlineGameIds.clear();if(!('caches' in window))return;
+  await Promise.all(gameList.filter(canLaunchGame).map(async game=>{
+    try{
+      const urls=[resolveGameEntry(game.entry).href,...(game.offlineAssets||[]).map(asset=>new URL(`./games/${String(asset).replace(/^\.\//,'')}`,location.href).href)];
+      const matches=await Promise.all(urls.map(url=>caches.match(url)));if(matches.every(Boolean))offlineGameIds.add(game.id);
+    }catch{}
+  }));
+}
+async function refreshGameHubAvailability(){await refreshOfflineAvailability();renderGames();if(!navigator.onLine)showHubState('Offline-Modus: gecachte Games bleiben spielbar.');else if(gameRegistry)hideHubState();}
+function offlineReady(game){return navigator.onLine||offlineGameIds.has(game.id);}
+function renderGames(){renderGameHub(els.gameHubList,gameList,{getStats:id=>capy.games?.[id]||null,onPlay:game=>void startMinigame(game),offlineReady});}
+function showHubState(text){els.gameHubState.hidden=false;els.gameHubState.textContent=text;}
+function hideHubState(){els.gameHubState.hidden=true;els.gameHubState.textContent='';}
+async function openGameHub(){
+  if(!capy.enabled||!capy.care.initialized)return;
+  await refreshOfflineAvailability();renderGames();if(!navigator.onLine)showHubState('Offline-Modus: gecachte Games bleiben spielbar.');else if(gameRegistry)hideHubState();openSheet('gameHubSheet');
+}
+function currentTheme(){return ['light','dark'].includes(document.documentElement.dataset.theme)?document.documentElement.dataset.theme:(globalThis.matchMedia?.('(prefers-color-scheme: dark)')?.matches?'dark':'light');}
+function gameCapySnapshot(){return {name:String(capy.care.name||'Capy'),gender:String(capy.care.gender||''),hunger:Math.round(Number(capy.care.hunger)||0),happiness:Math.round(Number(capy.care.happiness)||0),energy:Math.round(Number(capy.care.energy)||0),affection:Math.round(Number(capy.care.bond)||0),sleeping:isCapySleeping(capy.care,config.behavior,currentPhase(config.behavior))};}
+function gameAppInfo(){return {version:APP_VERSION,platform:String(navigator.userAgentData?.platform||navigator.platform||''),locale:String(navigator.language||'de-AT'),online:Boolean(navigator.onLine),pwa:Boolean(globalThis.matchMedia?.('(display-mode: standalone)')?.matches||navigator.standalone)};}
+async function startMinigame(game){
+  if(!canLaunchGame(game)){showToast('Dieses Spiel ist noch nicht verfügbar.');return;}
+  if(!offlineReady(game)){showToast('Dieses Spiel ist offline noch nicht verfügbar.');return;}
+  lastGame=game;els.gameHubSheet.open&&els.gameHubSheet.close();els.gamePlayerTitle.textContent=game.name;els.gameResult.hidden=true;els.gameError.hidden=true;els.gameLoading.hidden=false;
+  try{gameLoader.open(game);if(!els.gamePlayer.open)els.gamePlayer.showModal();gameLoader.themeChanged(currentTheme());}
+  catch(error){if(!els.gamePlayer.open)els.gamePlayer.showModal();showGameError(error.message);}
+}
+function showGameError(message){els.gameLoading.hidden=true;els.gameResult.hidden=true;els.gameError.hidden=false;els.gameErrorCopy.textContent=message||'Unbekannter Fehler.';}
+function showGameResult(result){
+  els.gameLoading.hidden=true;els.gameError.hidden=true;els.gameResult.hidden=false;els.gameResultTitle.textContent=result.newHighScore?'Neuer Highscore!':'Geschafft!';els.gameResultScore.textContent=new Intl.NumberFormat('de-AT').format(Number(result.score)||0);els.gameResultHighscore.textContent=`Bester Score: ${new Intl.NumberFormat('de-AT').format(Number(result.bestScore)||0)}`;els.gameResultReward.textContent=result.coinsAwarded>0?`+${result.coinsAwarded} 🪙`:result.duplicate?'Run bereits verarbeitet':'Keine Coins für diesen Run';renderGames();renderWallet();
+}
+async function requestCloseGame(){
+  const status=gameLoader?.session()?.status;if(status==='playing'&&!confirm('Spiel verlassen?\n\nDer aktuelle Lauf wird beendet.'))return;closeGamePlayer();await openGameHub();
+}
+function closeGamePlayer(){gameLoader?.close();if(els.gamePlayer.open)els.gamePlayer.close();els.gameResult.hidden=true;els.gameError.hidden=true;els.gameLoading.hidden=false;}
+async function returnToGameHub(){closeGamePlayer();await openGameHub();}
+async function restartLastGame(){const game=lastGame;closeGamePlayer();if(game)await startMinigame(game);}
 
 function petBlocked(){return isCapySleeping(capy.care,config.behavior,currentPhase(config.behavior))&&config.behavior.sleep?.blocksPet!==false;}
 function onPetDown(event){

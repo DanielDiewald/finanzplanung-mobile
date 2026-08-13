@@ -194,7 +194,7 @@ Zusätzlich kann der Desktop einzelne fehlgeschlagene Mobile-Buchungen im PLAN-C
 
 ### 5.5 Capy Alpha (optional)
 
-Das optionale `capy`-Objekt uebertraegt den Desktop-Stand an Mobile. Die Capy-Funktion befindet sich in Version 2.2.6a im Alpha-Status.
+Das optionale `capy`-Objekt uebertraegt den Desktop-Stand an Mobile. Die Capy-Funktion befindet sich in Version 2.2.7a im Alpha-Status.
 
 | Feld | Typ | Pflicht | Bedeutung |
 |---|---|---:|---|

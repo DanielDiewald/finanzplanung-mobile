@@ -1,6 +1,6 @@
 # Capyt · Capy · Alpha
 
-> **Status: Alpha.** Die Capy-Funktionen befinden sich in Version **2.2.6a** in einer Testphase. Die Finanzplanung und die bestehende FP1-/QR-Synchronisation bleiben die Grundlage.
+> **Status: Alpha.** Die Capy-Funktionen befinden sich in Version **2.2.7a** in einer Testphase. Die Finanzplanung und die bestehende FP1-/QR-Synchronisation bleiben die Grundlage.
 
 Der Capy-Begleiter ist weitgehend im Unterordner `capy/` gekapselt. Die Mobile-Ansicht ist als kleines Pet-Game ausgelegt; Desktop bleibt auf Finanz-, Vorrat- und Sync-Aufgaben fokussiert.
 
@@ -24,6 +24,16 @@ Der Capy wird direkt mit Pointer Events gestreichelt. In 2.2.4a arbeitet die Int
 Food kann im Inventar angetippt werden. Danach schließt sich das Bottom-Sheet und das ausgewählte Food erscheint in einem eigenen Slot direkt oberhalb der Game-Navigation. Von dort wird es per Pointer-Capture und `position: fixed` Drag-Ghost auf den Capy gezogen. Bewegungsschwelle oder Hold-Delay können den Drag starten; ein Drop außerhalb beziehungsweise `pointercancel` verbraucht kein Item. Direkter Inventar-Drag bleibt für die generische Item-Interaktion erhalten.
 
 Der Game-Bereich unterdrückt Textselektion, Long-Press-Kontextmenüs und native Bild-Drags, ohne Formfelder zu blockieren. Mehrere zufällige Idle-, Happy-, Hungry- und Drowsy-Bewegungen lassen den Capy lebendiger wirken; `prefers-reduced-motion` bleibt berücksichtigt.
+
+## Minigame Hub und Capyt Game API 1
+
+Der Navigationspunkt **Spielen** öffnet in 2.2.7a den Minigame-Hub als bestehendes Capy-Bottom-Sheet. Die Spiele werden zentral aus `games/games.json` geladen. `available` und `experimental` Games können gestartet werden, `coming_soon` wird nur angekündigt und `enabled: false` bleibt im normalen Hub verborgen.
+
+Startbare Games liegen isoliert unter `games/projects/` und laufen in einem sandboxed iframe. Sie kommunizieren ausschließlich über `games/js/game-sdk.js` und die Host-Bridge. Die aktive API-Version ist **Capyt Game API 1**. Freigeschaltet sind `capy.read`, `game.storage`, `game.score`, `coins.reward`, `theme.read` und `app.read`. Unbekannte oder noch nicht aktivierte Capabilities werden abgelehnt.
+
+Game-Coins werden nie vom Minigame gesetzt. Das Game sendet Score und Dauer; `game-rewards.js` prüft Plausibilität, Run-ID, Maximalreward, Tageslimit und optionalen Cooldown. Die resultierende Coin-Operation bleibt Teil der Capy-Game-Economy und erzeugt keine Finanzbuchung. Game-Storage wird pro `gameId` im bestehenden Capy-State namespaced.
+
+Der Service Worker cached Registry und Game-Framework. Für aktivierte `available`/`experimental` Games werden Entry-Point und `offlineAssets` aus `games.json` beim Installieren automatisch ergänzt. Die vollständige Anleitung für neue Games liegt unter `games/docs/NEW_GAME_GUIDE.md` und `games/docs/Neue_Games_hinzufuegen.pdf`.
 
 ## Character Creator
 

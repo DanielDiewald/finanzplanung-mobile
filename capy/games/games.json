@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "games": [
+    {
+      "id": "carrot-catch",
+      "name": "Karotten-Fang",
+      "description": "Fang in 20 Sekunden so viele Karotten wie möglich.",
+      "status": "available",
+      "enabled": true,
+      "version": "1.0.0",
+      "entry": "./projects/carrot-catch/index.html",
+      "icon": "🥕",
+      "image": "",
+      "orientation": "portrait",
+      "order": 10,
+      "tags": ["arcade", "quick"],
+      "rewards": {
+        "enabled": true,
+        "currency": "coins",
+        "maxCoinsPerRun": 15,
+        "dailyRewardLimit": 75,
+        "cooldownMs": 0,
+        "strategy": {
+          "type": "score",
+          "scorePerCoin": 2
+        }
+      },
+      "resultValidation": {
+        "minScore": 0,
+        "maxScore": 250,
+        "minDurationMs": 1000,
+        "maxDurationMs": 120000
+      },
+      "capabilities": [
+        "capy.read",
+        "game.storage",
+        "game.score",
+        "coins.reward",
+        "theme.read",
+        "app.read"
+      ],
+      "offlineAssets": [
+        "./projects/carrot-catch/game.js",
+        "./projects/carrot-catch/game.css"
+      ]
+    },
+    {
+      "id": "river-ride",
+      "name": "River Ride",
+      "description": "Eine kleine Flussfahrt mit Capy.",
+      "status": "coming_soon",
+      "enabled": true,
+      "version": "0.1.0",
+      "entry": "",
+      "icon": "🌊",
+      "image": "",
+      "orientation": "portrait",
+      "order": 20,
+      "tags": ["arcade"],
+      "rewards": { "enabled": false, "currency": "coins", "maxCoinsPerRun": 0, "dailyRewardLimit": 0, "cooldownMs": 0 },
+      "capabilities": []
+    },
+    {
+      "id": "snack-toss",
+      "name": "Snack Toss",
+      "description": "Triff das Ziel und sammle Punkte.",
+      "status": "coming_soon",
+      "enabled": true,
+      "version": "0.1.0",
+      "entry": "",
+      "icon": "🎯",
+      "image": "",
+      "orientation": "portrait",
+      "order": 30,
+      "tags": ["skill"],
+      "rewards": { "enabled": false, "currency": "coins", "maxCoinsPerRun": 0, "dailyRewardLimit": 0, "cooldownMs": 0 },
+      "capabilities": []
+    },
+    {
+      "id": "bridge-demo",
+      "name": "Bridge Demo",
+      "description": "Interne Referenz zum Testen der Game API.",
+      "status": "experimental",
+      "enabled": false,
+      "version": "1.0.0",
+      "entry": "./projects/bridge-demo/index.html",
+      "icon": "🧪",
+      "image": "",
+      "orientation": "portrait",
+      "order": 900,
+      "tags": ["internal", "test"],
+      "rewards": {
+        "enabled": true,
+        "currency": "coins",
+        "maxCoinsPerRun": 3,
+        "dailyRewardLimit": 9,
+        "cooldownMs": 0,
+        "strategy": { "type": "score", "scorePerCoin": 10 }
+      },
+      "resultValidation": { "minScore": 0, "maxScore": 1000, "minDurationMs": 0, "maxDurationMs": 3600000 },
+      "capabilities": ["capy.read", "game.storage", "game.score", "coins.reward", "theme.read", "app.read"],
+      "offlineAssets": ["./projects/bridge-demo/game.js", "./projects/bridge-demo/game.css"]
+    }
+  ]
+}
