@@ -1,6 +1,6 @@
 # Capyt · Capy · Alpha
 
-> **Status: Alpha.** Die Capy-Funktionen befinden sich in Version **2.2.5a** in einer Testphase. Die Finanzplanung und die bestehende FP1-/QR-Synchronisation bleiben die Grundlage.
+> **Status: Alpha.** Die Capy-Funktionen befinden sich in Version **2.2.6a** in einer Testphase. Die Finanzplanung und die bestehende FP1-/QR-Synchronisation bleiben die Grundlage.
 
 Der Capy-Begleiter ist weitgehend im Unterordner `capy/` gekapselt. Die Mobile-Ansicht ist als kleines Pet-Game ausgelegt; Desktop bleibt auf Finanz-, Vorrat- und Sync-Aufgaben fokussiert.
 
@@ -17,7 +17,7 @@ Die normale Spielansicht verwendet `100dvh`, Safe-Areas und keinen Body-Scroll. 
 - kompaktem HUD mit Name, Coins, Hunger, Stimmung und Energie
 - zentraler Raum-/Capy-Szene
 - fester Game-Bottom-Bar für Shop, Inventar, Spielen, Vorrat und Mehr
-- Bottom-Sheets für Shop, Inventar, Vorrat und weitere Aktionen
+- Bottom-Sheets für Shop, Inventar, Vorrat und weitere Aktionen; sie lassen sich am oberen Griff direkt nach unten ziehen und schließen
 
 Der Capy wird direkt mit Pointer Events gestreichelt. In 2.2.4a arbeitet die Interaktion als echte **Rubbelmechanik**: kleine Jitter-Bewegungen werden ignoriert, Richtungswechsel innerhalb einer stabilen Capy-Hitbox werden erkannt und Rewards unterliegen Distanz-, Cooldown- und Session-Limits. Beim erfolgreichen Rubbeln erscheint ausschließlich ein `❤️` ohne Zahl; unterstützte Mobilgeräte geben bei echter Rubbelbewegung zusätzlich einen kurzen Vibrationsimpuls.
 

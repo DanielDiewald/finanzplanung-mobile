@@ -2,11 +2,11 @@
 
 **Capyt** verbindet die professionelle Desktop-Finanzplanung (**Capyt · Planung**) mit einer mobilen, offline-faehigen Begleit-PWA (**Capyt · Mobile**).
 
-## Version 2.2.5a · Capy · Alpha
+## Version 2.2.6a · Capy · Alpha
 
-**Hotfix:** Ein aktivierter Capy wird in der mobilen Bottom-Navigation jetzt auch vor der ersten lokalen Character-Erstellung angezeigt. Der Launcher fuehrt dann direkt in den Character Creator.
+**2.2.6a:** Shop, Inventar, Vorrat und Mehr lassen sich im Capy-Spiel jetzt am oberen Griff wie die Bottom-Sheets der normalen Mobile-App nach unten ziehen und schliessen. Der bestehende Launcher-, PWA- und Petting-Hotfix bleibt enthalten.
 
-Der optionale **Capy-Begleiter** befindet sich in dieser Version im **Alpha-Status**. Die Aktivierung wird ueber FP1 vom Desktop auf Mobile synchronisiert. Das verwaltete Budget **`{Capyname}'s Vorrat`** arbeitet als interne Vermoegensverschiebung; jede neue Einzahlung ist standardmaessig einen Kalendermonat gesperrt und kann danach am Desktop wieder ausgezahlt werden. Mobile nutzt in 2.2.5a eine viewport-fuellende Game-Ansicht mit Rubbel-Streichelmechanik mit reinem Herz-Feedback und Vibrationsimpuls, einem unteren Food-Slot fuer zu ziehendes Futter, automatischem Energieschlaf unter 10% bis zur Erholung auf 25% und einer einmalig zentrierten Drag-and-Drop-Hilfe. Text-/Bildauswahl und native Browser-Drags werden im Game-Bereich unterdrueckt, waehrend Formfelder normal bedienbar bleiben. Mobile Capy-Aufladungen erscheinen als normale, leicht transparente Buchungszeilen ohne Schloss-Emoji und werden ueber FP1 bestaetigt oder abgelehnt. Details und konfigurierbare Werte stehen in `capy/README.md` und `capy/settings/`.
+Der optionale **Capy-Begleiter** befindet sich in dieser Version im **Alpha-Status**. Die Aktivierung wird ueber FP1 vom Desktop auf Mobile synchronisiert. Das verwaltete Budget **`{Capyname}'s Vorrat`** arbeitet als interne Vermoegensverschiebung; jede neue Einzahlung ist standardmaessig einen Kalendermonat gesperrt und kann danach am Desktop wieder ausgezahlt werden. Mobile nutzt in 2.2.6a eine viewport-fuellende Game-Ansicht mit Rubbel-Streichelmechanik mit reinem Herz-Feedback und Vibrationsimpuls, einem unteren Food-Slot fuer zu ziehendes Futter, automatischem Energieschlaf unter 10% bis zur Erholung auf 25% und einer einmalig zentrierten Drag-and-Drop-Hilfe. Text-/Bildauswahl und native Browser-Drags werden im Game-Bereich unterdrueckt, waehrend Formfelder normal bedienbar bleiben. Mobile Capy-Aufladungen erscheinen als normale, leicht transparente Buchungszeilen ohne Schloss-Emoji und werden ueber FP1 bestaetigt oder abgelehnt. Details und konfigurierbare Werte stehen in `capy/README.md` und `capy/settings/`.
 
 
 ## Grundprinzip

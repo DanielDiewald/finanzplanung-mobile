@@ -1,5 +1,5 @@
-const VERSION='2.2.5a';
-const BUILD='release1';
+const VERSION='2.2.6a';
+const BUILD='sheets1';
 const CACHE=`capyt-v${VERSION}-${BUILD}`;
 const VENDOR_CACHE='capyt-vendor-v1';
 const JSQR_CDN='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';

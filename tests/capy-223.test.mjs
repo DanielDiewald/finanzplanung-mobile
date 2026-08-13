@@ -53,7 +53,7 @@ test('Streichel-UI nutzt stabile Pointer-Hitbox und delegiert das sichtbare Rewa
   assert.match(html,/id="capyHitbox"/);
   assert.match(app,/createPetSession\([^)]*\{rubMode:true\}\)/);
   assert.match(app,/pointInExpandedRect/);
-  assert.match(app,/function awardPet\(reward\)/);
+  assert.match(app,/function awardPetAffection\(reward\)/);
   assert.doesNotMatch(app,/awardPet[\s\S]*?spawnEffect\('heart'/);
   assert.match(app,/setPointerCapture/);
   assert.match(app,/releasePointerCapture/);

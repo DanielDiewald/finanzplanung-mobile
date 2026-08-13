@@ -1,32 +1,37 @@
-Capyt 2.2.5a – Test Results
+Capyt 2.2.6a – Test Results
 ===========================
 
-Versionsupdate
---------------
-Der vollstaendige 2.2.4a-PWA-/Capy-Launcher-Hotfix wurde auf 2.2.5a angehoben.
-Aktualisiert wurden insbesondere sichtbare App-Version, package.json,
-version.json, APP_VERSION, Service-Worker-Version/Cache und der PWA-Update-
-Cache-Buster.
+Aktueller Auslieferungsstand
+----------------------------
+Version: 2.2.6a
+Capy: Alpha
+Service-Worker-Build: sheets1
+
+Neue 2.2.6a Regressionen
+------------------------
+- Shop besitzt Pull-down-Handle.
+- Inventar besitzt Pull-down-Handle.
+- Vorrat besitzt Pull-down-Handle.
+- Mehr besitzt Pull-down-Handle.
+- Bottom-Sheet folgt dem Pointer ueber translate3d.
+- Schliessen erfolgt per Distanz- oder Geschwindigkeits-Schwelle wie in der normalen Mobile-App.
+- Zu kurze Geste federt zur Ausgangsposition zurueck.
+- pointercancel und dialog close setzen temporaeren Gesture-State zurueck.
+- Handle hat ein vergroessertes Touch-Ziel bei kompakter sichtbarer Linie.
+- App-/PWA-/Service-Worker-Version ist 2.2.6a.
 
 Regressionen
 ------------
-- Capy-Launcher bei frischer Aktivierung: bestanden
-- Character Creator bei frischer Aktivierung erreichbar: bestanden
-- Rubbel-Streicheln / Herzfeedback / Vibration: bestanden
-- Auto-Schlaf unter 10 % bis 25 % Energie: bestanden
-- einmaliger Food-Drag-Tutorial-Hinweis: bestanden
-- PWA-Update-Parser akzeptiert 2.2.5a: bestanden
-- PWA-Update-UI verwendet den 2.2.5a Cache-Buster: bestanden
+- Petting-Hotfix mit Herzstaffelung und spaeter Zuneigungssteigerung bleibt erhalten.
+- Vibrationsaufruf auf unterstuetzten Browsern bleibt erhalten.
+- Auto-Schlaf unter 10 % bis mindestens 25 % bleibt erhalten.
+- Food-Auswahl und Drag-and-Drop bleiben erhalten.
+- Capy-Launcher bei neuer Aktivierung bleibt erhalten.
+- PWA-Update-Flow und Alpha-Versionsschema bleiben erhalten.
+- FP1/QR, Finanzlogik, Vorrat, Sperren und Deduplizierung bleiben erhalten.
 
-Gesamttests
------------
-88/88 bestanden.
-
-Static Check
-------------
-`npm run check`: bestanden.
-79 precached assets, 2 Manifest-Icons, Safari-QR-Fallback vorhanden.
-
-Version
--------
-Aktueller Auslieferungsstand: 2.2.5a.
+Teststatus
+----------
+npm test: 96/96 bestanden.
+npm run check: bestanden.
+Static check: 79 precached assets, 2 Manifest-Icons, Safari-QR-Fallback vorhanden.

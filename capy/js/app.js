@@ -3,7 +3,7 @@ import { loadCapyConfig } from './config.js';
 import { addJournal, applyRemoteCapy, availableCoins, loadCapyState, queueCoinOp, saveCapyState, setCapyEnabled, touchCare } from './shared-state.js';
 import { applyElapsedDecay, applyItem, applyPet, applyPlay, autoSleepThresholds, canPlay, chooseVisual, currentPhase, genderCopy, isCapySleeping, updateAutoSleepState } from './engine.js';
 import { createStashDeposit, loadFinanceContext, stashBalanceCents } from './finance-adapter.js';
-import { consumePetRewardProgress, createPetSession, itemEffectLabel, movePetSession, petRewardForSession, pointInExpandedRect, pointInRect } from './interactions.js';
+import { consumePetAffectionProgress, consumePetHeartProgress, createPetSession, itemEffectLabel, movePetSession, petAffectionRewardForSession, petHeartBurstForSession, pointInExpandedRect, pointInRect } from './interactions.js';
 
 const $=id=>document.getElementById(id);
 const els={
@@ -20,7 +20,7 @@ const els={
 let config,capy,plan=null,transactions=[];
 let runtimeVisual='',runtimeTimer=0,actionClass='',idleTimer=0,idleMotionTimer=0,idleMotionClass='',toastTimer=0,petPulseTimer=0,feedTutorialTimer=0,lastPetHapticAt=0;
 let setupGender='männlich';
-let petSession=null,lastPetRewardAt=0;
+let petSession=null;
 let drag=null,selectedFeedItemId='';
 const FEED_DRAG_TUTORIAL_KEY='capyt.capy.feedDragTutorialSeen.v1';
 let feedTutorialSeenThisSession=false;
@@ -93,6 +93,71 @@ function bindEvents(){
   document.addEventListener('selectstart',event=>{if(isGameInteractionTarget(event.target)&&!isTextInput(event.target))event.preventDefault();});
   document.addEventListener('contextmenu',event=>{if(isGameInteractionTarget(event.target)&&!isTextInput(event.target))event.preventDefault();});
   window.addEventListener('blur',cancelActivePointerState);
+  setupSheetGestures();
+}
+
+function setupSheetGestures(){
+  els.sheets.forEach(dialog=>{
+    const sheet=dialog.querySelector('.sheet-card');
+    const handle=sheet?.querySelector('.sheet-handle');
+    if(!sheet||!handle)return;
+
+    let pointerId=null,startY=0,dragY=0,startTime=0,dismissing=false;
+    const reset=()=>{
+      pointerId=null;dragY=0;dismissing=false;
+      sheet.classList.remove('is-dragging','is-dismissing');
+      sheet.style.removeProperty('--sheet-drag-y');
+    };
+    const finishClose=()=>{if(dialog.open)dialog.close();reset();};
+    const dismiss=()=>{
+      if(dismissing)return;
+      dismissing=true;
+      sheet.classList.remove('is-dragging');
+      sheet.classList.add('is-dismissing');
+      sheet.style.setProperty('--sheet-drag-y',`${Math.max(48,dragY)}px`);
+      requestAnimationFrame(()=>sheet.style.setProperty('--sheet-drag-y','110dvh'));
+      let closed=false;
+      const complete=()=>{if(closed)return;closed=true;finishClose();};
+      sheet.addEventListener('transitionend',complete,{once:true});
+      setTimeout(complete,280);
+    };
+    const snapBack=()=>{
+      sheet.classList.remove('is-dragging');
+      sheet.style.setProperty('--sheet-drag-y','0px');
+      setTimeout(()=>{if(!dismissing)sheet.style.removeProperty('--sheet-drag-y');},230);
+    };
+
+    handle.addEventListener('pointerdown',event=>{
+      if(event.pointerType==='mouse'&&event.button!==0)return;
+      if(!dialog.open||dismissing)return;
+      pointerId=event.pointerId;startY=event.clientY;dragY=0;startTime=performance.now();
+      sheet.classList.add('is-dragging');
+      handle.setPointerCapture?.(pointerId);
+      event.preventDefault();
+    });
+    handle.addEventListener('pointermove',event=>{
+      if(pointerId===null||event.pointerId!==pointerId)return;
+      dragY=Math.max(0,event.clientY-startY);
+      sheet.style.setProperty('--sheet-drag-y',`${dragY}px`);
+      event.preventDefault();
+    });
+    handle.addEventListener('pointerup',event=>{
+      if(pointerId===null||event.pointerId!==pointerId)return;
+      const elapsed=Math.max(1,performance.now()-startTime);
+      const velocity=dragY/elapsed;
+      const threshold=Math.min(140,Math.max(86,sheet.getBoundingClientRect().height*.16));
+      try{handle.releasePointerCapture?.(pointerId);}catch{}
+      pointerId=null;
+      if(dragY>=threshold||(dragY>=42&&velocity>.55))dismiss();else snapBack();
+      event.preventDefault();
+    });
+    handle.addEventListener('pointercancel',event=>{
+      if(pointerId===null||event.pointerId!==pointerId)return;
+      try{handle.releasePointerCapture?.(pointerId);}catch{}
+      pointerId=null;snapBack();event.preventDefault();
+    });
+    dialog.addEventListener('close',reset);
+  });
 }
 
 function isTextInput(target){return Boolean(target?.closest?.('input,textarea,select,[contenteditable="true"]'));}
@@ -133,24 +198,38 @@ function onPetDown(event){
 }
 function onPetMove(event){
   if(!petSession||event.pointerId!==petSession.pointerId)return;
-  const rect=els.capyHitbox.getBoundingClientRect(),inside=pointInExpandedRect(event.clientX,event.clientY,rect,config.behavior.petting?.hitPaddingPx||24),directionChangesBefore=petSession.directionChanges;
+  const rect=els.capyHitbox.getBoundingClientRect(),inside=pointInExpandedRect(event.clientX,event.clientY,rect,config.behavior.petting?.hitPaddingPx||24);
   movePetSession(petSession,event.clientX,event.clientY,{inside,movementThreshold:config.behavior.petting?.movementThreshold||8});
-  if(inside&&petSession.lastDelta)updatePetReaction(petSession.lastDelta);else clearPetReaction(false);
-  if(inside&&petSession.directionChanges>directionChangesBefore)triggerPetHaptic();
-  const now=Date.now(),reward=petRewardForSession(petSession,config.behavior.petting,capy.care.happiness,lastPetRewardAt,now);
-  if(reward>0){petSession.awarded+=reward;consumePetRewardProgress(petSession,config.behavior.petting);lastPetRewardAt=now;awardPet(reward);}
+  if(inside&&petSession.lastDelta){updatePetReaction(petSession.lastDelta);triggerPetHaptic('rub');}else clearPetReaction(false);
+  const now=Date.now(),heartCount=petHeartBurstForSession(petSession,config.behavior.petting,now);
+  if(heartCount>0){consumePetHeartProgress(petSession,config.behavior.petting,now);showPetHearts(heartCount);}
+  const affection=petAffectionRewardForSession(petSession,config.behavior.petting,capy.care.bond,capy.care.happiness,now);
+  if(affection.bond>0||affection.happiness>0){consumePetAffectionProgress(petSession,config.behavior.petting,now);awardPetAffection(affection);}
   event.preventDefault();
 }
-function awardPet(reward){
-  applyPet(capy.care,config.behavior,reward);touchCare(capy);renderNeeds();
+function awardPetAffection(reward){
+  const applied=applyPet(capy.care,config.behavior,reward.happiness,reward.bond);
+  petSession.happinessAwarded+=Math.max(0,Number(applied.happiness)||0);petSession.bondAwarded+=Math.max(0,Number(applied.bond)||0);petSession.awarded+=Math.max(0,Number(applied.happiness)||0);
+  touchCare(capy);renderNeeds();
   clearTimeout(petPulseTimer);els.capyImage.classList.add('is-pet-reward');
-  petPulseTimer=setTimeout(()=>els.capyImage.classList.remove('is-pet-reward'),180);
-  const jitter=(Math.random()-.5)*12;showFloating('❤️',58+jitter,34+(Math.random()-.5)*5);
+  petPulseTimer=setTimeout(()=>els.capyImage.classList.remove('is-pet-reward'),220);
+  showPetHearts(Math.max(3,Number(config.behavior.petting?.maxHeartBurst)||5),true);
+  triggerPetHaptic('affection');
 }
-function triggerPetHaptic(){
-  const ms=Math.max(0,Number(config.behavior.petting?.hapticMs)||0),cooldown=Math.max(0,Number(config.behavior.petting?.hapticCooldownMs)||120),now=Date.now();
-  if(!ms||now-lastPetHapticAt<cooldown||typeof globalThis.navigator?.vibrate!=='function')return;
-  lastPetHapticAt=now;try{globalThis.navigator.vibrate(ms);}catch{}
+function showPetHearts(count=1,strong=false){
+  const total=Math.max(1,Math.min(7,Math.floor(Number(count)||1)));
+  for(let index=0;index<total;index+=1){
+    const heart=document.createElement('span');heart.className=`pet-heart${strong?' is-strong':''}`;heart.textContent='❤️';
+    heart.style.left=`${50+(index-(total-1)/2)*5+(Math.random()-.5)*4}%`;heart.style.top=`${37+(Math.random()-.5)*5}%`;heart.style.setProperty('--heart-delay',`${index*28}ms`);heart.style.setProperty('--heart-drift',`${(index-(total-1)/2)*7}px`);
+    els.floatingLayer.appendChild(heart);setTimeout(()=>heart.remove(),1050+index*28);
+  }
+}
+function triggerPetHaptic(kind='rub'){
+  const cfg=config.behavior.petting||{},ms=Math.max(0,Number(cfg.hapticMs)||0),cooldown=Math.max(0,Number(cfg.hapticCooldownMs)||90),now=Date.now(),navigatorRef=globalThis.navigator;
+  if(!ms||now-lastPetHapticAt<cooldown||typeof navigatorRef?.vibrate!=='function')return false;
+  const rewardPattern=Array.isArray(cfg.hapticRewardPattern)?cfg.hapticRewardPattern.map(value=>Math.max(0,Math.round(Number(value)||0))).filter((value,index)=>value>0||index%2===1):[24,32,34];
+  const pattern=kind==='affection'&&rewardPattern.length?rewardPattern:ms;
+  lastPetHapticAt=now;try{return navigatorRef.vibrate(pattern)!==false;}catch{return false;}
 }
 function onPetEnd(event){if(!petSession||event.pointerId!==petSession.pointerId)return;void finishPetSession(event.pointerId,false);event.preventDefault();}
 function onPetCancel(event){if(!petSession||event.pointerId!==petSession.pointerId)return;void finishPetSession(event.pointerId,true);}
@@ -159,8 +238,8 @@ async function finishPetSession(pointerId,cancelled){
   finished.active=false;petSession=null;clearPetReaction(true);
   els.capyHitbox.classList.remove('is-petting');els.capyImage.classList.remove('is-petting');
   try{els.capyHitbox.releasePointerCapture?.(pointerId);}catch{}
-  if(finished.awarded>0){addJournal(capy,'heart',`${capy.care.name||'Capy'} wurde gestreichelt.`,config.behavior.maxJournalEntries);touchCare(capy);capy=await saveCapyState(capy);renderNeeds();}
-  if(!cancelled&&finished.awarded>0)animateCapy('capy--happy-bounce',animationMs('pet',520));
+  if(finished.affectionAwards>0||finished.bondAwarded>0||finished.happinessAwarded>0){addJournal(capy,'heart',`${capy.care.name||'Capy'} wurde ausgiebig gestreichelt.`,config.behavior.maxJournalEntries);touchCare(capy);capy=await saveCapyState(capy);renderNeeds();}
+  if(!cancelled&&finished.affectionAwards>0)animateCapy('capy--happy-bounce',animationMs('pet',520));
   scheduleIdleMotion();
 }
 function updatePetReaction(delta){

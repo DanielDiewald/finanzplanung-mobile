@@ -52,8 +52,23 @@
     "requiredDistance": 120,
     "cooldownMs": 2500,
     "happinessGain": 4,
-    "hapticMs": 12,
-    "hapticCooldownMs": 120
+    "hapticMs": 18,
+    "hapticCooldownMs": 90,
+    "visualHeartDistance": 55,
+    "heartCooldownMs": 170,
+    "heartEscalationDistance": 145,
+    "heartEscalationMs": 650,
+    "maxHeartBurst": 5,
+    "affectionRequiredDistance": 360,
+    "affectionRequiredDirectionChanges": 4,
+    "affectionMinimumMs": 1300,
+    "affectionHappinessGain": 2,
+    "maxSessionBondGain": 3,
+    "hapticRewardPattern": [
+      24,
+      32,
+      34
+    ]
   },
   "inventoryDrag": {
     "holdDelayMs": 80,

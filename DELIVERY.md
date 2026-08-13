@@ -1,17 +1,19 @@
-# Capyt 2.2.5a – Capy Alpha Update
+# Capyt 2.2.6a – Capy Bottom-Sheet Gesture Update
 
-Version **2.2.5a** baut auf dem vollstaendigen 2.2.4a-PWA-/Capy-Launcher-Hotfix auf. Funktional bleiben die zuletzt gelieferten Capy- und PWA-Fixes erhalten; dieser Stand hebt die App-Version und den Service-Worker-Cache sauber auf 2.2.5a an.
+Version **2.2.6a** baut auf dem vollstaendigen 2.2.5a-Petting-/PWA-/Launcher-Stand auf. Neu ist die direkte Pull-down-Geste fuer die Capy-Menues **Shop, Inventar, Vorrat und Mehr**.
 
-Die enthaltenen Mobile-Capy-Interaktionen aus 2.2.4a bleiben erhalten:
-
-- Streichel-Feedback zeigt nur noch ein Herz ohne Zahl; echte Rubbel-Richtungswechsel koennen ueber die Vibration API einen kurzen Haptikimpuls ausloesen.
-- Unter 10 % Energie schlaeft Capy automatisch und regeneriert Energie; ab 25 % wacht er automatisch wieder auf. Der Zustand bleibt Teil des Capy-/FP1-State.
-- Die Food-Drag-and-Drop-Erklaerung erscheint pro Geraet nur einmal, zentriert im Screen. Danach bleibt der normale Food-Bottom-Slot ohne wiederholte Tutorial-Meldung erhalten.
-- Finanzlogik, FP1/QR, Vorrat, Sperrfristen, Deduplizierung, PWA-Struktur und bestehende Capy-Daten bleiben erhalten.
+- Alle vier Capy-Bottom-Sheets lassen sich am sichtbaren Griff per Pointer Events nach unten ziehen.
+- Das Sheet folgt dem Finger beziehungsweise Mauszeiger unmittelbar.
+- Ab derselben Distanz-/Geschwindigkeitslogik wie in der normalen Mobile-App wird es nach unten geschlossen; bei einer zu kurzen Geste federt es zur Ausgangsposition zurueck.
+- `pointercancel`, X-Schliessen und Backdrop-Schliessen raeumen den temporaeren Drag-State auf.
+- Der Griff besitzt ein groesseres unsichtbares Touch-Ziel, waehrend die sichtbare Handle-Linie kompakt bleibt.
+- Petting-, Futter-, PWA-, FP1-/QR-, Finanz- und Launcher-Fixes aus 2.2.5a bleiben erhalten.
+- App-, PWA- und Service-Worker-Version wurden auf **2.2.6a** angehoben.
 
 Siehe `TEST_RESULTS.txt` fuer den aktuellen Teststatus.
 
 ---
+
 
 # Capyt 2.0 – Abschlussbericht
 

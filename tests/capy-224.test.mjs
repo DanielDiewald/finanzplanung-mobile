@@ -12,11 +12,11 @@ const behavior=JSON.parse(fs.readFileSync(new URL('../capy/settings/behavior.jso
 function care(energy,autoSleeping=false){return {hunger:60,happiness:70,energy,bond:20,autoSleeping,lastUpdate:Date.now()};}
 
 test('2.2.4a Streichelfeedback zeigt nur ein Herz ohne Zahl und nutzt Vibrationsfeedback',()=>{
-  assert.match(app,/showFloating\('❤️'/);
+  assert.match(app,/function showPetHearts\(count=1,strong=false\)/);
   assert.doesNotMatch(app,/showFloating\(`\+\$\{reward\} ❤️`/);
-  assert.match(app,/function triggerPetHaptic\(\)/);
-  assert.match(app,/navigator\.vibrate\(ms\)/);
-  assert.equal(behavior.petting.hapticMs,12);
+  assert.match(app,/function triggerPetHaptic\(kind='rub'\)/);
+  assert.match(app,/navigatorRef\.vibrate\(pattern\)/);
+  assert.equal(behavior.petting.hapticMs,18);
 });
 
 test('Auto-Schlaf startet erst unter 10 Prozent und wacht ab 25 Prozent auf',()=>{
